@@ -1,44 +1,200 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { buildConfig } from './config.js';
+import { type AppConfig } from './config.js';
 import { createA360Client } from './a360/client.js';
+import {
+  type PackageFilterRequest,
+  getPackageVersionDetails,
+  getPackageVersionUsage,
+  listPackages,
+} from './a360/packages.js';
+import { type JsonObject } from './types.js';
 import {
   getExecutionDetails,
   listActivity,
   deployAutomation,
 } from './a360/operations.js';
 import {
+  createBot,
+  deleteFile,
   getFileContent,
   getFileDependencies,
+  listFolderChildren,
   listFolderItems,
+  updateFileContent,
   updateFileDependencies,
 } from './a360/repository.js';
-import { registerOperationsTools, registerRepositoryTools } from './tools/index.js';
+import { registerOperationsTools, registerRepositoryTools, registerWorkflowTools } from './tools/index.js';
+import {
+  buildBotJsonFromPrompt,
+  createBotFromPrompt,
+  planBotFromPrompt,
+} from './workflows/ai-bot-generation.js';
+import { exportAssets, exportBots } from './workflows/export.js';
+import {
+  getPackageCommandSchemaForWorkflow,
+  getPackageVersionsForWorkflow,
+  listAvailablePackagesForWorkflow,
+  resolvePackageMetadataForWorkflow,
+} from './workflows/package-intelligence.js';
+import { applyPackageVersionUpdate, planPackageVersionUpdate, scanPackageUsage } from './workflows/package-governance.js';
+import { silentSaveBot } from './workflows/silent-save.js';
+import { applyLogToFileFix, scanLogToFileIssues } from './workflows/transformations.js';
+import { fixBotJson, previewBotJson, validateBotJson } from './workflows/validation.js';
 
-export function createServer() {
-  const config = buildConfig({});
+export type AppDependencies = ReturnType<typeof buildDependenciesFromConfig>;
+
+export function buildDependenciesFromConfig(config: AppConfig) {
   const client = createA360Client(config.baseUrl, config.accessToken ?? '');
+
+  return {
+    repositoryApi: {
+      createBot: (parentFolderId: string, name: string, description?: string) =>
+        createBot(client, parentFolderId, name, description),
+      listFolderItems: (folderId: string) => listFolderItems(client, folderId),
+      listFolderChildren: (folderId: string) => listFolderChildren(client, folderId),
+      getFileContent: (fileId: string) => getFileContent(client, fileId),
+      updateFileContent: (
+        fileId: string,
+        content: Record<string, unknown>,
+        hasErrors?: boolean,
+      ) => updateFileContent(client, fileId, content, hasErrors),
+      getFileDependencies: (fileId: string) => getFileDependencies(client, fileId),
+      updateFileDependencies: (fileId: string, childFileIds: string[]) =>
+        updateFileDependencies(client, fileId, childFileIds),
+      deleteFile: (fileId: string) => deleteFile(client, fileId),
+    },
+    operationsApi: {
+      deployAutomation: (payload: Record<string, unknown>) => deployAutomation(client, payload),
+      listActivity: (payload: Record<string, unknown>) => listActivity(client, payload),
+      getExecutionDetails: (executionId: string) => getExecutionDetails(client, executionId),
+    },
+    packageApi: {
+      listPackages: (options?: {
+        filterRequest?: PackageFilterRequest;
+        includeDownloadUrls?: boolean;
+      }) => listPackages(client, options),
+      getPackageVersionDetails: (packages: Array<{ name: string; version?: string }>) =>
+        getPackageVersionDetails(client, packages),
+      getPackageVersionUsage: (
+        packageName: string,
+        filterRequest?: PackageFilterRequest,
+      ) => getPackageVersionUsage(client, packageName, filterRequest),
+    },
+    workflowApi: {
+      planBotFromPrompt: (input: {
+        prompt: string;
+        botName?: string;
+        folderId?: string;
+        preferredPackages?: string[];
+        wrapInTry?: boolean;
+      }) => planBotFromPrompt(client, input),
+      buildBotJsonFromPrompt: (input: {
+        prompt: string;
+        botName?: string;
+        folderId?: string;
+        preferredPackages?: string[];
+        wrapInTry?: boolean;
+      }) => buildBotJsonFromPrompt(client, input),
+      createBotFromPrompt: (input: {
+        prompt: string;
+        botName?: string;
+        folderId?: string;
+        preferredPackages?: string[];
+        wrapInTry?: boolean;
+        description?: string;
+        dryRun?: boolean;
+      }) =>
+        createBotFromPrompt(
+          client,
+          {
+            createBot: (parentFolderId: string, name: string, description?: string) =>
+              createBot(client, parentFolderId, name, description),
+            updateFileContent: (
+              fileId: string,
+              content: Record<string, unknown>,
+              hasErrors?: boolean,
+            ) => updateFileContent(client, fileId, content, hasErrors),
+            updateFileDependencies: (fileId: string, childFileIds: string[]) =>
+              updateFileDependencies(client, fileId, childFileIds),
+          },
+          input,
+          {
+            defaultFolderId: config.defaultFolderId,
+          },
+        ),
+      validateBotJson: (botJson: Record<string, unknown>) =>
+        validateBotJson(client, botJson),
+      previewBotJson: (botJson: Record<string, unknown>) =>
+        previewBotJson(client, botJson),
+      fixBotJson: (botJson: Record<string, unknown>) =>
+        fixBotJson(client, botJson),
+      exportBots: (folderId: string, recursive?: boolean) => exportBots(client, folderId, recursive),
+      exportAssets: (folderId: string, recursive?: boolean) => exportAssets(client, folderId, recursive),
+      listAvailablePackages: (options?: {
+        filterRequest?: PackageFilterRequest;
+        includeDownloadUrls?: boolean;
+        search?: string;
+      }) => listAvailablePackagesForWorkflow(client, options),
+      getPackageVersions: (packageName: string) =>
+        getPackageVersionsForWorkflow(client, packageName),
+      getPackageCommandSchema: (input: {
+        packageName: string;
+        packageVersion?: string;
+        commandName: string;
+      }) => getPackageCommandSchemaForWorkflow(client, input),
+      resolvePackageMetadata: (packages: Array<{ name: string; version?: string }>) =>
+        resolvePackageMetadataForWorkflow(client, packages),
+      scanPackageUsage: (folderId: string, recursive?: boolean) => scanPackageUsage(client, folderId, recursive),
+      planPackageVersionUpdate: (
+        folderId: string,
+        targets: Record<string, string>,
+        recursive?: boolean,
+      ) => planPackageVersionUpdate(client, folderId, targets, recursive),
+      applyPackageVersionUpdate: (
+        folderId: string,
+        targets: Record<string, string>,
+        options?: { recursive?: boolean; dryRun?: boolean; selectedBotIds?: string[] },
+      ) => applyPackageVersionUpdate(client, folderId, targets, options),
+      scanLogToFileIssues: (
+        folderId: string,
+        recursive?: boolean,
+        logStructure?: string,
+      ) => scanLogToFileIssues(client, folderId, recursive, logStructure),
+      applyLogToFileFix: (
+        folderId: string,
+        recursive?: boolean,
+        logStructure?: string,
+        dryRun?: boolean,
+      ) => applyLogToFileFix(client, folderId, recursive, logStructure, dryRun),
+      silentSaveBot: (input: {
+        fileId: string;
+        content: Record<string, unknown>;
+        dependencies: string[] | Record<string, unknown>;
+        hasErrors?: boolean;
+      }) =>
+        silentSaveBot({
+          fileId: input.fileId,
+          baseUrl: config.baseUrl,
+          token: config.accessToken ?? '',
+          hasErrors: input.hasErrors,
+          content: input.content as JsonObject,
+          dependencies: Array.isArray(input.dependencies)
+            ? input.dependencies
+            : (input.dependencies as JsonObject),
+        }),
+    },
+  };
+}
+
+export function createServer(deps: AppDependencies) {
   const server = new McpServer({
     name: 'automation-anywhere-a360',
     version: '0.1.0',
   });
 
-  registerRepositoryTools(server, {
-    repositoryApi: {
-      listFolderItems: (folderId) => listFolderItems(client, folderId),
-      getFileContent: (fileId) => getFileContent(client, fileId),
-      getFileDependencies: (fileId) => getFileDependencies(client, fileId),
-      updateFileDependencies: (fileId, childFileIds) =>
-        updateFileDependencies(client, fileId, childFileIds),
-    },
-  });
-
-  registerOperationsTools(server, {
-    operationsApi: {
-      deployAutomation: (payload) => deployAutomation(client, payload),
-      listActivity: (payload) => listActivity(client, payload),
-      getExecutionDetails: (executionId) => getExecutionDetails(client, executionId),
-    },
-  });
+  registerRepositoryTools(server, deps);
+  registerOperationsTools(server, deps);
+  registerWorkflowTools(server, deps);
 
   return server;
 }

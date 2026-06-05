@@ -7,7 +7,7 @@ import { buildConfig } from './config.js';
 import { readPersistedConfig, writePersistedConfig } from './setup/config-file.js';
 import { formatDoctorReport } from './setup/doctor.js';
 import { createSecureStorage } from './setup/secure-storage.js';
-import { createServer } from './server.js';
+import { buildDependenciesFromConfig, createServer } from './server.js';
 
 type PromptFn = (question: string, defaultValue?: string) => Promise<string>;
 
@@ -135,7 +135,14 @@ export async function runDoctorCommand(options?: { configPath?: string }) {
 }
 
 export async function runServeCommand() {
-  const server = createServer();
+  const bootstrap = buildConfig({});
+  const persisted = await readPersistedConfig(bootstrap.configPath);
+  const config = buildConfig(persisted);
+  if (!config.accessToken) {
+    throw new Error('No access token found. Run `npm run login` first.');
+  }
+
+  const server = createServer(buildDependenciesFromConfig(config));
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
