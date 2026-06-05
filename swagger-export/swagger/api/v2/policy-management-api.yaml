@@ -1,0 +1,191 @@
+swagger: "2.0"
+info:
+  version: 2.0.0
+  title: "Policy Management API"
+  description:  |-
+    Use the Policy Management APIs to perform specific tasks on objects (code analysis, policies and rules) that you have permission to access in the Control Room. Policy management module consists of policy creation section and the policy assignment section at admin level, and the code analysis of automations section for control room user with the corresponding permissions.
+
+    > **Note:** <li>Code analysis should be enabled in control room settings, and rules availability may change based on your license</li>
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+
+basePath: "/v2/policy/bot"
+schemes:
+  - "http"
+  - "https"
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /analysis/details :
+    post:
+      summary: "Runs code analysis over an specific bot automation"
+      description: "Runs code analysis over an specific bot automation, getting a plenty detail violations report"
+      tags:
+        - "Code Analysis"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CodeAnalysisRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BotCodeAnalysisDetailResponse'
+        '400':
+          $ref: '#/definitions/Error'
+        '500':
+          $ref: '#/definitions/Error'
+
+  /analysis :
+    post:
+      summary: "Runs code analysis over an specific bot automation"
+      description: "Runs code analysis over an specific bot automation, getting a violations summary"
+      tags:
+        - "Code Analysis"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CodeAnalysisRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BotCodeAnalysisSummaryResponse'
+        '400':
+          $ref: '#/definitions/Error'
+        '500':
+          $ref: '#/definitions/Error'
+
+definitions:
+
+  CodeAnalysisRequest:
+    type: object
+    properties:
+      fileId:
+        type: string
+      excludeChildBots:
+        type: boolean
+        format: boolean
+
+  BotCodeAnalysisDetailResponse:
+    $ref: '#/definitions/ruleViolationReport'
+
+  ruleViolationReport:
+    type: array
+    items:
+      $ref: '#/definitions/RuleViolation'
+
+  RuleViolationEntry:
+    type: object
+    properties:
+      oneOf:
+        - $ref: '#/definitions/variable'
+        - $ref: '#/definitions/package'
+        - $ref: '#/definitions/trigger'
+        - $ref: '#/definitions/command'
+      ruleViolations:
+        type: array
+        items:
+          $ref: '#/definitions/RuleViolation'
+
+  variable:
+    $ref: '#/definitions/LocationWithName'
+
+  package:
+    $ref: '#/definitions/LocationWithName'
+
+  trigger:
+    $ref: '#/definitions/LocationWithUid'
+
+  command:
+    $ref: '#/definitions/LocationWithUid'
+
+  bot:
+    $ref: '#/definitions/Location'
+
+  Location:
+    type: object
+
+  LocationWithName:
+    type: object
+    properties:
+      name:
+        type: string
+
+  LocationWithUid:
+    type: object
+    properties:
+      uid:
+        type: string
+
+  RuleViolation:
+    type: object
+    properties:
+      ruleName:
+        type: string
+      ruleLabel:
+        type: string
+      ruleSeverity:
+        type: string
+        enum:
+          - LOW
+          - HIGH
+          - CRITICAL
+      ruleErrorMessage:
+        type: string
+
+  BotCodeAnalysisSummaryResponse:
+    type: object
+    properties:
+      downloadFileName:
+        type: string
+      errorMessage:
+        type: string
+      ruleViolationSummary:
+        $ref: '#/definitions/ruleViolationSummary'
+
+
+  ruleViolationSummary:
+    type: object
+    properties:
+      highSeverityCount:
+        type: integer
+      lowSeverityCount:
+        type: integer
+      criticalSeverityCount:
+        type: integer
+
+  ErrorMessage:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Error Message
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Error Message

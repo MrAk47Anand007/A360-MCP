@@ -1,0 +1,470 @@
+swagger: "2.0"
+info:
+  description: "Use the migration APIs to migrate TaskBots and MetaBots that were created in Enterprise client versions Enterprise 11 and Enterprise 10 to Automation 360. 
+    Review the prerequisites before migrating bots to Automation 360. For more details, see [Prerequisite tasks for migrating bots](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/migration/prerquisites.html).
+
+      
+      All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+      
+    
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`"
+  version: "2.0.0"
+  title: "Migration API"
+basePath: "/v4/migration"
+schemes:
+  - "http"
+  - "https"
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /list:
+    post:
+      summary: "List the results of migration"
+      description: "Use this API to list the overall migration results for each migration you run. You can send an API request with or without filter parameters. An API request without any filter parameters specified, retrieves details of all the migration. You can use the filter parameters to retrieve specific migration details. For more information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html)."
+      tags:
+        - "Migration"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      responses:
+        '200':
+          description: "Returns model for given id"
+          schema:
+            $ref: '#/definitions/MigrationFilterResponse'
+        '404':
+          $ref: '#/responses/404'
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+  /{migrationid}/results/list:
+    post:
+      summary: "List the migration status of individual bot"
+      description: "Use this API to retrieve migration status for a specific migration ID."
+      tags:
+        - "Migration"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: "migrationid"
+          in: "path"
+          description: "ID of the Migration"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      responses:
+        '200':
+          description: "Returns model for given id"
+          schema:
+            $ref: '#/definitions/BotResultsResponse'
+        '404':
+          $ref: '#/responses/404'
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+  /{migrationid}/journal/{journalid}/actionmappings/list:
+    post:
+      summary: "List the action mapping result of individual bot migration."
+      description: "Use this API to list action mapping results for bots by unique numeric identifiers for the migration ID and the journal ID, and then filter the results by selected fields.
+        For more information about finding the journal ID, see [How to find a migration journalid](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-how-to-find-journalid.html)."
+      tags:
+        - "Migration"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: "migrationid"
+          in: "path"
+          description: "ID of the Migration"
+          required: true
+          type: "integer"
+          format: "int64"
+
+        - name: "journalid"
+          in: "path"
+          description: "Journal ID of the migrated bot"
+          required: true
+          type: "integer"
+          format: "int64"
+
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      responses:
+        '200':
+          description: "Returns model for given id"
+          schema:
+            $ref: '#/definitions/ActionMappingsResponse'
+        '404':
+          $ref: '#/responses/404'
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+definitions:
+  ActionMapping:
+    type : "object"
+    properties:
+      targetLineNumber:
+        type: integer
+        description: The target line number in the migrated bot.
+        example: "1"
+      targetAction:
+        type: string
+        description: The target action in the migrated bot.
+        example: TerminalEmulator-connectV2
+      isReviewRequired:
+        type: boolean
+        description: Specifies whether the action migrated requires your review.
+      reason:
+        type: string
+        description: Describes the reason for the review required.
+        example: "Terminal Emulator - Connect' action has been migrated. The connection type is configured as 'SSH2' since 'SSH1' is not supported in A360. No further action required. Message Code: R114"
+      remarks:
+        type: string
+        description: Provides more information on this migrated action.
+        example: None
+      id:
+        type: integer
+        description: ID of the migration action mapping result.
+        example: "1309"
+      sourceLineNumber:
+        type: "integer"
+        description: Source line number in source bot.
+        example: 1
+      sourceAction:
+        type: string
+        description: Source action in source bot
+        example: TE-Connect
+      targetNodeUid:
+        type: string
+        description: Target node UID
+        example: "ba97973a-e231-44b3-b208-1056dc2520d8"
+      targetPackageName:
+        type: string
+        description: Target action package name
+        example: TerminalEmulator
+      targetPackageVersion:
+        type: string
+        description: Target action package version
+        example: "4.3.0-20211016-070439"
+      isActionRequired:
+        type: boolean
+        description: Specifies whether the action migrated requires your action
+      actionRequiredReason:
+        type: string
+        description: Describes what action is required
+        example: "Referenced variables are missing in the V10/11 bot. For the migrated bot to run, update the String-UpperCase action in the migrated bot by providing missing required variables. Message code: A136"
+      reviewRequiredReasonMarkdown:
+        type: string
+        description: Review required reason with support help link for the message code
+        example: "Terminal Emulator - Connect' action has been migrated. The connection type is configured as 'SSH2' since 'SSH1' is not supported in A360. No further action required. Message Code: [R114](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/migration/migration-messages.html#tpc-migration-messages__ar-R114)"
+      actionRequiredReasonMarkdown:
+        type: string
+        description: Action required reason with support help link for the message code
+        example: "Referenced variables are missing in the V10/11 bot. For the migrated bot to run, update the String-UpperCase action in the migrated bot by providing missing required variables. Message code: [A136](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/migration/migration-messages.html#tpc-migration-messages__ar-A136)."
+  MigratedBotDetails:
+    type : "object"
+    properties:
+      targetBotId:
+        type: integer
+      name:
+        type: string
+      status:
+        type: string
+      reason:
+        type: string
+      actions:
+        type: array
+        items:
+          $ref: '#/definitions/ActionMapping'
+  ActionMappingsResponse:
+    type: "object"
+    properties:
+      page:
+        type: "object"
+        properties:
+          offset:
+            type: integer
+          total:
+            type: integer
+            example: 1
+          totalFilter:
+            type: integer
+            example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ActionMapping'
+  MigrationBots:
+    type: "object"
+    properties:
+      sourceId:
+        type: integer
+        description: Unique ID of the migration
+        example: "1333"
+      sourceName:
+        type: string
+        description: Name of the file migrated
+        example: Calc.atmx
+      sourcePath:
+        type: string
+        description: Migrated file path
+        example: "Automation Anywhere\\Bots\\Calc.atmx"
+      sourceType:
+        type: string
+        description: Type of file migrated
+        example: "application/vnd.aa.atmx"
+      targetId:
+        type: integer
+        description: Unique target ID of the migrated bot
+        example: "1337"
+      status:
+        type: string
+        description: Status of migration. Possible values are success, failed, skipped.
+        example: SUCCESS
+      reason:
+        type: string
+        description: Reason why the bot failed
+        example: Failure reason text here in case the bot migration failed
+      selectedByUser:
+        type: boolean
+      userId:
+        type: integer
+        description: Unique ID of the user
+        example: "133"
+      id:
+        type: integer
+        description: Migration ID
+        example: 1
+      targetName:
+        type: string
+        description: Migrated bot target name
+        example: Calc
+      targetPath:
+        type: string
+        description: Target path
+        example: "Automation Anywhere\\Bots\\Calc"
+      targetType:
+        type: string
+        description: Migrated bot target type
+        example: "application/vnd.aa.taskbot"
+  BotResultsResponse:
+    type: "object"
+    properties:
+      page:
+        type: "object"
+        properties:
+          offset:
+            type: integer
+          total:
+            type: integer
+            example: 1
+          totalFilter:
+            type: integer
+            example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/MigrationBots'
+  MigrationFilterResponse:
+    type: "object"
+    properties:
+      page:
+        type: "object"
+        properties:
+          offset:
+            type: integer
+          total:
+            type: integer
+            example: 2
+          totalFilter:
+            type: integer
+            example: 2
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/MigrationStatistics'
+  MigrationStatistics:
+    type: "object"
+    properties:
+      id:
+        type: integer
+        description: Migration ID
+        example: "2"
+      name:
+        type: string
+        description: Name specified for the migration
+        example: Migration.mig_admin.22.11.24.14.13.55
+      startTime:
+        type: string
+        example: "2022-11-25T06:43:51.933Z"
+      endTime:
+        type: string
+        example: "2022-11-25T06:44:10.053Z"
+      createdBy:
+        type: integer
+        description: User ID who created the migration
+        example: "32"
+      duration:
+        type: string
+        description: Total duration the migration ran
+        example: "18s"
+      numSuccess:
+        type: integer
+        description: Number of successful migrations
+        example: 1
+      numFailed:
+        type: integer
+        description: Number of failed migrations
+        example: 0
+      numSkipped:
+        type: integer
+        description: Number of skipped migrations
+        example: 0
+      numTotal:
+        type: integer
+        description: Total number of migrations
+        example: 1
+      status:
+        type: string
+        description: Status of the migration. Possible values are successful, skipped, failed.
+        example: SUCCESSFUL
+      updatedOn:
+        type: string
+        example: "2022-11-25T06:44:10.053Z"
+      updatedBy:
+        type: integer
+        example: "32"
+      durationMillis:
+        type: integer
+        description: Duration the migration ran in milliseconds
+        example: "18120"
+      migrationType:
+        type: object
+        description: Type of migration performed. Possible values are BOT, ROLE, or AUDIT_DATA.
+        example: BOT
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Error Message
+      details:
+        type: string
+        description: More details of the error message
+  Sort:
+    type: object
+    description: Sorting rules
+    properties:
+      field:
+        type: string
+        description: Field name to sort by
+        example: name
+      direction:
+        type: string
+        description: Sorting direction
+        enum:
+          - asc
+          - desc
+  PageRequest:
+    type: object
+    description: Pagination rules
+    properties:
+      offset:
+        type: integer
+        description: Page starting index
+      length:
+        type: integer
+        description: Page length
+        example: 100
+  Filter:
+    type: object
+    description: Filter rules
+    properties:
+      operator:
+        type: string
+        description: Operator
+        enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        example: and
+      operands:
+        type: array
+        items:
+          $ref: '#/definitions/Filter'
+          example:
+            operator: substring
+            field: name
+            value: Migration
+  FilterRequest:
+    type: object
+    description: 'Filter request, which includes filtering, sorting and pagination rules'
+    properties:
+      filter:
+        $ref: '#/definitions/Filter'
+      sort:
+        type: array
+        description: Sort directions
+        items:
+          $ref: '#/definitions/Sort'
+      page:
+        $ref: '#/definitions/PageRequest'
+responses:
+  '400':
+    description: Bad Request
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  '409':
+    description: Conflict
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

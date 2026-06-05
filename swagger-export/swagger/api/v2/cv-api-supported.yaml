@@ -1,0 +1,1553 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Credential Vault API
+  description: The Credential Vault securely stores sensitive information such as passwords, account numbers, and social security numbers in credentials and lockers for use in automation tasks. It facilitates role-based access for users of a Control Room and ensures that sensitive values are not stored in bots or on devices. The Credential Vault consists of two main features, credentials and lockers. The Automation Anywhere platform provides a centralized Credential Vault to securely store all credentials and provision them to bots on an on-demand basis.<br>
+
+    <b>Prerequisites</b> <br>
+    <ul><li>Control Room user with **Manage my credentials and lockers** feature permissions, you have the option to use the Credential Vault API to manage your attributes, credentials, and lockers in the Control Room.</li></ul>
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+
+schemes:
+  - http
+  - https
+basePath: /v2/credentialvault
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /credentials:
+    post:
+      summary: Create credential
+      description: Create new instance of credential
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CredentialPost'
+      tags:
+        - Credentials
+      responses:
+        201:
+          description: Credential created
+          schema:
+            $ref: '#/definitions/Credential'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /credentials/list:
+    post:
+      summary: Search for credentials
+      description: Search for credentials where a user is an owner or has access through a locker. If the user is locker admin returns all credentials in the system. Additional filtering, ordering and pagination rules can be requested.
+      consumes:
+        - application/json
+      parameters:
+        - name: consumed
+          in: query
+          type: boolean
+          description: Filter credentials by fact if credential is userProvided and consumed by current user
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      tags:
+        - Credentials
+      responses:
+        200:
+          description: Found credentials
+          schema:
+            $ref: '#/definitions/CredentialFilterResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /credentials/{id}:
+    get:
+      summary: Get credential by id
+      description: Return specific credential
+      tags:
+        - Credentials
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+      responses:
+        200:
+          description: Credential
+          schema:
+            $ref: '#/definitions/Credential'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    put:
+      summary: Update credential
+      description: Update existing credential
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Credential'
+      tags:
+        - Credentials
+      responses:
+        200:
+          description: Crednetial updated
+          schema:
+            $ref: '#/definitions/Credential'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      summary: Delete credential
+      description: Delete credential and all related (standard and user-provided) attributes
+      tags:
+        - Credentials
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+      responses:
+        204:
+          description: Successful delete
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /credentials/{id}/owner/{credentialOwnerId}:
+    put:
+      summary: Update ownership of the credential
+      description: Update ownership of the credential
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - $ref: '#/parameters/PathOwnerId'
+      tags:
+        - Credentials
+      responses:
+        204:
+          description: Successful update of credential ownership
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /credentials/{id}/attributevalues:
+    get:
+      summary: All credential attribute values of specific credential
+      description: Return all credential attribute values (standard and user-provided) of specific credential, query parameters can be used only if user has special permission (View and edit ALL credentials attributes value) <br>
+        <b>Note:</b> <p>In order to get the credentialAttributeValue for any user-provided credential, a query parameter UserId must be provided in the request with GET method and the UserId should belong to the user who has provided the credentials. For example </p>
+        <code>GET https://{{ControlRoomURL}}/v2/credentialvault/credentials/25/attributevalues?credentialAttributeId=90&userId=452</code>
+      tags:
+        - AttributeValues
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - name: credentialAttributeId
+          in: query
+          type: string
+          description: credential attribute id to which the value belongs too
+        - name: userId
+          in: query
+          type: string
+          description: id of the user, should be skipped for standard attribute
+        - name: encryptionKey
+          in: query
+          type: string
+          description: RSA public key. Used to encrypt values.
+      responses:
+        200:
+          description: Credential attribute values found
+          schema:
+            $ref: '#/definitions/CredentialAttributeValueList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    post:
+      summary: Create credential attribute values of specific credential
+      description: Create credential attribute values for user-provided or standard attribute if user is allowed to create it
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CredentialAttributeValuePostList'
+        - name: encryptionKey
+          in: query
+          type: string
+          description: RSA public key used to encrypt the value. The key has to be encoded in Base64. Has to be retrieved from CV API ({{Control Room url}}/v2/credentialvault/keys/transport/public).
+      tags:
+        - AttributeValues
+      responses:
+        201:
+          description: Credential attribute values created
+          schema:
+            $ref: '#/definitions/CredentialAttributeValueList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /credentials/{id}/attributevalues/{attributeValueId}:
+    put:
+      summary: Update credential attribute value of specific credential
+      description: Update existing instances of attribute value for specific credential. User can change his user-provided attribute value or common value if he is allowed to do it.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - $ref: '#/parameters/PathAttributeValueId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CredentialAttributeValuePut'
+        - name: encryptionKey
+          in: query
+          type: string
+          description: RSA public key used to encrypt the value. The key has to be encoded in Base64. Has to be retrieved from CV API ({{Control Room url}}/v2/credentialvault/keys/transport/public).
+      tags:
+        - AttributeValues
+      responses:
+        200:
+          description: Credential attribute value updated
+          schema:
+            $ref: '#/definitions/CredentialAttributeValue'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      summary: Delete credential attribute value of specific credential
+      description: Delete credential attribute value of specific credential
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathCredentialId'
+        - $ref: '#/parameters/PathAttributeValueId'
+      tags:
+        - AttributeValues
+      responses:
+        204:
+          description: Successful delete
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers:
+    post:
+      summary: Create a locker
+      description: Create a new instance of a locker
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LockerPost'
+      tags:
+        - Lockers
+      responses:
+        201:
+          description: Locker created
+          schema:
+            $ref: '#/definitions/Locker'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /lockers/list:
+    post:
+      summary: Search for lockers
+      description: Search for lockers where the current user is a member (owner, manager or participant) or has usage permission. If the user is locker admin returns all lockers in the system. Additional filtering, ordering and pagination rules can be requested. The result includes locker members and count of credentials inside each locker.
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      tags:
+        - Lockers
+      responses:
+        200:
+          description: Found lockers
+          schema:
+            $ref: '#/definitions/LockerFilterResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}:
+    get:
+      summary: Get locker by id
+      description: Return specific locker
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+      responses:
+        200:
+          description: Locker
+          schema:
+            $ref: '#/definitions/Locker'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    put:
+      summary: Update locker
+      description: Update existing locker
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Locker'
+      tags:
+        - Lockers
+      responses:
+        200:
+          description: Locker updated
+          schema:
+            $ref: '#/definitions/Locker'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      summary: Delete locker
+      description: Delete locker and all related user-provided attributes
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+      responses:
+        204:
+          description: Successful delete
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/consumers:
+    get:
+      summary: All locker's consumers
+      description: Return all roles that can use credentials inside the locker
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+      responses:
+        200:
+          description: Locker consumers
+          schema:
+            $ref: '#/definitions/LockerConsumerList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    post:
+      summary: Add locker consumer
+      description: Make the role able to use credentials inside the locker
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LockerConsumer'
+      tags:
+        - Lockers
+      responses:
+        204:
+          description: Successful creation of locker consumer
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/consumers/{roleId}:
+    delete:
+      summary: Remove locker consumer
+      description: Make the role no longer able to use credentials inside the locker
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - $ref: '#/parameters/PathRoleId'
+      responses:
+        204:
+          description: Successful removal of locker consumer
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/members:
+    get:
+      summary: All locker's members
+      description: Return all users that can add/remove credentials to the locker or edit the locker settings
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+      responses:
+        200:
+          description: Locker members
+          schema:
+            $ref: '#/definitions/LockerMemberList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/members/{userId}:
+    put:
+      summary: Add or update a locker member
+      description: Make the user able to add/remove credentials to the locker or edit the locker settings
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - $ref: '#/parameters/PathUserId'
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              permissions:
+                $ref: '#/definitions/LockerMemberPermissions'
+      tags:
+        - Lockers
+      responses:
+        204:
+          description: Successful creation/update of locker member
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      summary: Remove locker member
+      description: Make the user no longer able to add/remove credentials to the locker or edit the locker settings
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - $ref: '#/parameters/PathUserId'
+      responses:
+        204:
+          description: Successful removal of locker member
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/credentials:
+    get:
+      summary: All locker's credentials
+      description: Return all credentials that belong to the locker filtered by permissions of current user
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+      responses:
+        200:
+          description: Locker credentials
+          schema:
+            $ref: '#/definitions/CredentialAdvancedList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /lockers/{id}/credentials/{credentialId}:
+    put:
+      summary: Add credential to the locker
+      description: Add your own credential to a locker where you're owner, manager or participant
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - $ref: '#/parameters/PathCredentialIdInLocker'
+      responses:
+        204:
+          description: Credential has been added to the locker
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      summary: Remove credential from the locker
+      description: Remove credential from the locker where you're owner or manager
+      tags:
+        - Lockers
+      parameters:
+        - $ref: '#/parameters/PathLockerId'
+        - $ref: '#/parameters/PathCredentialIdInLocker'
+      responses:
+        204:
+          description: Credential has been removed from the locker
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /mode:
+    get:
+      summary: Get current CredentialVault mode
+      description: CredentialVault can be in Express or Manual modes. Requires Admin rights to execute this API.
+      tags:
+        - Mode
+      responses:
+        200:
+          description: CV Mode has been successfully received
+          schema:
+            $ref: '#/definitions/Mode'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    put:
+      summary: Update CredentialVault mode to Express or Manual
+      description: In Manual mode the system will require input of Private (Master) key after CR restart, it's required to unlock CredentialVault
+      tags:
+        - Mode
+      consumes:
+        - application/json
+      parameters:
+        - name: mode
+          in: body
+          description: New mode to set CredentialVault to
+          required: true
+          schema:
+            $ref: '#/definitions/ModePut'
+      responses:
+        204:
+          description: Mode has been successfully set
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /keys:
+    post:
+      summary: Generates Public/Private key pair
+      description: Generate Public/Private key pair after a fresh CR installation. The generated keys are saved automatically, it needs to be done with a different endpoint. Once a key pair is saved no more keys can be generated.
+      tags:
+        - Keys
+      responses:
+        200:
+          description: Keys are generated, body contains both Private and Public keys
+          schema:
+            $ref: '#/definitions/Keys'
+        400:
+          description: Bad Request, another key pair has already been generated and saved
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    put:
+      summary: Saves Public/Private key pair and Mode
+      description: Save Public/Private key pair and Mode after a fresh CR installation once the CR Admin user is created. The key pair to be saved needs to be generated with a different endpoint. Unpon saving the keys a Data key is generated and saved as well and CredentialVault is opened automatically.
+      tags:
+        - Keys
+      consumes:
+        - application/json
+      parameters:
+        - name: keys
+          in: body
+          description: Public/Private key pair with Mode
+          required: true
+          schema:
+            $ref: '#/definitions/KeysWithMode'
+      responses:
+        204:
+          description: Keys are saved
+        400:
+          description: Bad Request, invalid input parameters or another key pair has already been saved
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /keys/private:
+    get:
+      summary: Check the private key status
+      description: Check to see if the private has been applied or not, should be used to check CredentialVault status. If Private key has been applied it means that CredentialVault is in Opened status.
+      tags:
+        - Keys
+      responses:
+        200:
+          description: Private key status
+          schema:
+            $ref: '#/definitions/PrivateKeyStatus'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        500:
+          $ref: '#/responses/500'
+    put:
+      summary: Use Private (Master) key to unlock CredentialVault
+      description: Use Private (Master) key to unlock CredentialVault after the Control Room restarts in Manual mode. Available Private key means that CredentialVault is open (connected) and the system is ready.
+      tags:
+        - Keys
+      consumes:
+        - application/json
+      parameters:
+        - name: privateKey
+          in: body
+          description: Private (Master) key is required to unlock CredentialVault in Manual mode
+          required: true
+          schema:
+            $ref: '#/definitions/PrivateKey'
+      responses:
+        204:
+          description: Private key has been successfully applied
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /keys/transport/public:
+    get:
+      summary: Get RSA public key encoded with Base64.
+      description: Use this API to get RSA public key encoded with Base64. The key should be used by a client of CV API to entrypt credential values. It can be used only for create/update operations.
+      tags:
+        - Keys
+      responses:
+        200:
+          description: Base64 encoded RSA public key
+          schema:
+            $ref: '#/definitions/PublicKey'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        500:
+          $ref: '#/responses/500'
+  /loginsetting:
+    put:
+      summary: Create or update device login setting
+      description: Use this API to set login credentials for a user to acquire session on the device when a bot is deployed.
+      tags:
+        - Login setting
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Credentials to acquire user session on the device
+          required: true
+          schema:
+            $ref: '#/definitions/LoginSettingPut'
+      responses:
+        200:
+          description: Credentials updated for 'user'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        500:
+          $ref: '#/responses/500'
+definitions:
+  CredentialPost:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of credential
+      description:
+        type: string
+        description: Description of credential
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAttributePost'
+  Credential:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        description: ID of credential
+        example: 308
+      name:
+        type: string
+        description: Name of credential
+        example: Sample-Credential
+      description:
+        type: string
+        description: Description of credential
+        example: Test Credential created from an API request
+      lockerId:
+        type: string
+        description: Id of the locker which has this credential, can be null if the credential is not assigned to any locker
+        example: 15
+      ownerId:
+        type: string
+        description: Id of Credential owner User
+        example: 21
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAttribute'
+      createdBy:
+        type: string
+        description: Id of the user who created the object
+        example: 21
+      createdOn:
+        type: string
+        description: Creation date of the object
+        example: '2022-10-28T00:15:09.319997Z'
+      updatedBy:
+        type: string
+        description: Id of the user who made a latest update on the object
+        example: 21
+      updatedOn:
+        type: string
+        description: Date when it was the latest update of the object
+        example: "2022-10-28T00:15:09.319999Z"
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 0
+  CredentialAdvanced:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        description: Id of credential
+        example: 307
+      name:
+        type: string
+        description: Name of credential
+        example: Sample-Credential
+      description:
+        type: string
+        description: Description of credential
+        example: Test credential Created from API request
+      completed:
+        type: boolean
+        description: A flag to indicate if consumer(s) needs to provide a value for user-provided attribute or not
+      lockerId:
+        type: string
+        description: Id of the locker which has this credential, can be null if the credential is not assigned to any locker
+        example: 15
+      ownerId:
+        type: string
+        description: Id of Credential owner User
+        example: 21
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAttribute'
+      createdBy:
+        type: string
+        description: Id of the user who created the object
+        example: 21
+      createdOn:
+        type: string
+        description: Creation date of the object
+        example: "2022-10-12T20:42:32.896315Z"
+      updatedBy:
+        type: string
+        description: Id of the user who made a latest update on the object
+        example: 21
+      updatedOn:
+        type: string
+        description: Latest updated date of the object
+        example: "2022-10-12T20:42:32.896317Z"
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 6
+  CredentialAttributePost:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of credential attribute
+        example: Username
+      description:
+        type: string
+        description: Description of credential attribute
+        example: Username for a sample
+      userProvided:
+        type: boolean
+        description: A flag to configure whether the attribute requires a user's input (true) or is standard for all users (false).
+        example: false
+      masked:
+        type: boolean
+        description: A flag to configure whether the attribute value is masked with asterisks (true) or is visible to users (false)
+        example: true
+      passwordFlag:
+        type: boolean
+        description: A flag to indicate if the credential attribute used for password are masked input fields
+        example: true
+  CredentialAttribute:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        description: Id of credential attribute
+        example: 885
+      name:
+        type: string
+        description: Name of credential attribute
+        example: Attribute1
+      description:
+        type: string
+        description: Description of credential attribute
+        example: Example attribute 1
+      userProvided:
+        type: boolean
+        description: A flag to indicate if the credential attribute is user-provided or common
+        example: false
+      masked:
+        type: boolean
+        description: A flag to indicate if the credential attribute value is masked
+        example: true
+      passwordFlag:
+        type: boolean
+        description: A flag to indicate if the credential attribute used for password is a masked input fields
+        example: false
+      createdBy:
+        type: string
+        description: Id of the user who created the object
+        example: 21
+      createdOn:
+        type: string
+        description: Creation date of the object
+        example: "2022-10-28T00:15:09.319987Z"
+      updatedBy:
+        type: string
+        description: Id of the user who made a latest update on the object
+        example: 21
+      updatedOn:
+        type: string
+        description: Latest updated date of the object
+        example: "2022-10-28T00:15:09.319988Z"
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 0
+  CredentialAttributeValuePost:
+    type: object
+    required:
+      - credentialAttributeId
+      - value
+    properties:
+      credentialAttributeId:
+        type: string
+        description: Id of credential attribute
+        example: 890
+      value:
+        type: string
+        description: Value of credential attribute
+        example: aVerySecurePassword
+  CredentialAttributeValuePut:
+    type: object
+    required:
+      - value
+      - version
+    properties:
+      value:
+        type: string
+        description: Value of credential attribute
+        example: aVerySecurePassword
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 0
+  CredentialAttributeValue:
+    type: object
+    required:
+      - credentialAttributeId
+      - value
+    properties:
+      id:
+        type: string
+        description: Id of credential attribute value
+        example: 131
+      credentialAttributeId:
+        type: string
+        description: Id of credential attribute
+        example: 890
+      value:
+        type: string
+        description: Value of credential attribute
+        example: 0Ol72qLH9JgAHUB21vCGj4ZheVokDL6unV1HIX8rWUw=
+      userId:
+        type: string
+        description: Id of user to which the value belongs to
+        example: 38
+      createdBy:
+        type: string
+        description: Id of the user who created the object
+        example: 38
+      createdOn:
+        type: string
+        description: Date when the object got created
+        example: "2022-09-22T14:42:02.876540Z"
+      updatedBy:
+        type: string
+        description: Id of the user who made a latest update on the object
+        example: 38
+      updatedOn:
+        type: string
+        description: Latest updated date of the object
+        example: "2022-09-22T14:42:02.876544Z"
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 0
+      password:
+        type: boolean
+        description: Flag to indicate if there is a password set to the Credential
+        example: false
+  LockerPost:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of locker
+        example: Locker Created via API
+      description:
+        type: string
+        description: Description of locker
+        example: Sample Locker Created via API request
+  Locker:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        description: Id of the locker
+        example: 27
+      name:
+        type: string
+        description: Name of locker
+        example: Locker Created via API
+      description:
+        type: string
+        description: Description of locker
+        example: Sample Locker Created via API request
+      createdBy:
+        type: string
+        description: Id of the user who created the object
+        example: 21
+      createdOn:
+        type: string
+        description: Creation date of the object
+        example: "2022-10-31T21:45:51.693647Z"
+      updatedBy:
+        type: string
+        description: Id of the user who made a latest update on the object
+        example: 21
+      updatedOn:
+        type: string
+        description: Latest updated date of the object
+        example: "2022-10-31T21:45:51.693652Z"
+      version:
+        type: string
+        description: Version of the object, has to be provided by the client to track simultaneous updates
+        example: 0
+  LockerAdvanced:
+    allOf:
+      - $ref: '#/definitions/Locker'
+      - properties:
+          members:
+            type: array
+            description: All members of locker
+            items:
+              $ref: '#/definitions/LockerMember'
+          countOfCredentials:
+            type: number
+            description: Count of credentials inside locker
+  LockerConsumer:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of role
+  LockerMember:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of user
+        example: 21
+      permissions:
+        $ref: '#/definitions/LockerMemberPermissions'
+  LockerMemberPermissions:
+    type: array
+    description: Locker specific actions a given user is allowed to perform
+    items:
+      type: string
+      description: Locker specific action
+      enum: [participate, manage, own]
+    example: [participate, manage, own]
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+      details:
+        type: string
+        description: More details of the error message
+      correctiveAction:
+        type: string
+        description: Corrective action to be taken to get rid of this error.
+  PublicKey:
+    type: object
+    required:
+      - publicKey
+    properties:
+      privateKey:
+        type: string
+        description: Base64 encoded RSA public key
+        example: mVudD48L1JTQUtleVZhbHVlPg==
+  PrivateKey:
+    type: object
+    required:
+      - privateKey
+    properties:
+      privateKey:
+        type: string
+        description: Encrypted Private key
+        example: mVudD48L1JTQUtleVZhbHVlPg==
+  Keys:
+    type: object
+    required:
+      - privateKey
+      - publicKey
+    properties:
+      privateKey:
+        type: string
+        description: Encrypted Private key
+        example: mVudD48L1JTQUtleVZhbHVlPg==
+      publicKey:
+        type: string
+        description: Encrypted Public key
+        example: PD94bWwgdmVyc2lvbj0iMS4wI
+  KeysWithMode:
+    type: object
+    required:
+      - privateKey
+      - publicKey
+      - mode
+    properties:
+      privateKey:
+        type: string
+        description: Encrypted Private key
+        example: mVudD48L1JTQUtleVZhbHVlPg==
+      publicKey:
+        type: string
+        description: Encrypted Public key
+        example: PD94bWwgdmVyc2lvbj0iMS4wI
+      mode:
+        $ref: '#/definitions/ModeName'
+  PrivateKeyStatus:
+    type: object
+    required:
+      - applied
+    properties:
+      applied:
+        type: boolean
+        description: Flag to indicate whether the Private key has been applied or not
+  Mode:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        $ref: '#/definitions/ModeName'
+  ModePut:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        $ref: '#/definitions/ModeName'
+      privateKey:
+        type: string
+        description: Encrypted Private key
+        example: mVudD48L1JTQUtleVZhbHVlPg==
+  ModeName:
+    type: string
+    description: Express mode does not require Private (Master) key input from Admin, but Manual does
+    enum:
+      - Express
+      - Manual
+    example: Manual
+  CredentialAdvancedList:
+    type: object
+    description: A wrapper on array of credentials
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAdvanced'
+  CredentialAttributeValueList:
+    type: object
+    description: A wrapper on array of credential attribute values
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAttributeValue'
+  CredentialAttributeValuePostList:
+    type: object
+    description: A wrapper on array of credential attribute values
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAttributeValuePost'
+  CredentialFilterResponse:
+    type: object
+    properties:
+      page:
+        $ref: '#/definitions/PageResponse'
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/CredentialAdvanced'
+  LockerConsumerList:
+    type: object
+    description: A wrapper on array of locker consumers
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/LockerConsumer'
+  LockerMemberList:
+    type: object
+    description: A wrapper on array of locker members
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/LockerMember'
+  LockerFilterResponse:
+    type: object
+    properties:
+      page:
+        $ref: '#/definitions/PageResponse'
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/LockerAdvanced'
+  FilterRequest:
+    type: object
+    description: Filter request, which includes filtering, sorting and pagination rules
+    properties:
+      filter:
+        $ref: '#/definitions/Filter'
+      sort:
+        type: array
+        description: Sort directions
+        items:
+          $ref: '#/definitions/Sort'
+      page:
+        $ref: '#/definitions/PageRequest'
+  Sort:
+    type: object
+    description: Sorting rules
+    properties:
+      field:
+        type: string
+        description: Field name to sort by
+      direction:
+        type: string
+        description: Sorting direction
+        enum:
+          - asc
+          - desc
+  Ops:
+     type: object
+     description: Operands rules
+     properties:
+      operator:
+        type: string
+        description: Operator
+        enum:
+          - gt
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - and
+          - substring
+          - NONE
+          - or
+          - not
+  PageRequest:
+    type: object
+    description: Pagingation rules
+    properties:
+      offset:
+        type: integer
+        description: Page starting index
+        example: 0
+      length:
+        type: integer
+        description: Page length
+        example: 200
+  PageResponse:
+    type: object
+    description: Pagingation response
+    properties:
+      offset:
+        type: integer
+        description: Page starting index
+        example: 0
+      total:
+        type: integer
+        description: Total number of items
+        example: 4
+      totalFilter:
+        type: integer
+        description: Total number of items matching filter
+        example: 1
+  Filter:
+    type: object
+    description: Filter rules
+    properties:
+      operator:
+        type: string
+        description: Operator
+        enum:
+          - and
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - NONE
+          - or
+          - not
+      operands:
+        type: array
+        items: 
+          $ref: '#/definitions/Ops'
+        example:
+          - operator: gt
+            field: createdOn
+            value: "2022-10-12T00:00:00.123Z"
+          - operator: lt
+            field: createdOn
+            value: "2022-10-12T23:00:00.123Z"
+  LoginSettingPut:
+    type: object
+    required:
+      - loginUsername
+      - loginPassword
+    properties:
+      loginUsername:
+        type: string
+        description: Login username (username or domain\username). To enter details for AD Control Rooms, use the domain\username format. When using an API client that does not support the domain\username format, you can add an additional backslash character to the username. This will escape the backslash character and prevent it from being interpreted as a special character by the API client. For example, domain\\\username.
+        example: johndoe
+      loginPassword:
+        type: string
+        description: Login password
+        example: QT3dpaHlhc1YyQ3NoSG95UEpC
+      username:
+        type: string
+        description: The Control Room username for the user whose device credential are being updated. If this is used then userid cannot be used.
+        example: joedoe
+      userid:
+        type: integer
+        description: The Control Room user id for the user whose device credential are being updated. If this is used then username cannot be used.
+        example: 38
+parameters:
+  PathCredentialId:
+    name: id
+    in: path
+    type: string
+    required: true
+    description: Id of the credential
+  PathOwnerId:
+    name: credentialOwnerId
+    in: path
+    type: string
+    required: true
+    description: Id of the new owner
+  PathCredentialIdInLocker:
+    name: credentialId
+    in: path
+    type: string
+    required: true
+    description: Id of the credential
+  PathAttributeValueId:
+    name: attributeValueId
+    in: path
+    type: string
+    required: true
+    description: Id of the credential attribute value
+  PathLockerId:
+    name: id
+    in: path
+    type: string
+    required: true
+    description: Id of the locker
+  PathUserId:
+    name: userId
+    in: path
+    type: string
+    required: true
+    description: Id of the user
+  PathRoleId:
+    name: roleId
+    in: path
+    type: string
+    required: true
+    description: Id of the role
+responses:
+  400:
+    description: Bad Request
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  403:
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Conflict
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

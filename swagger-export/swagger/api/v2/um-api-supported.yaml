@@ -1,0 +1,1688 @@
+openapi: 3.0.1
+info:
+  title: User Management API
+  description: |-
+    Use the User Management APIs to view and delete roles and users in your Control Room. You need the following permissions to manage users and roles. <ul><li><b>View users</b><br> Users with this permission can view users to which they have access. <li><b>Create users</b><br> Create new users in the Control Room. <li><b>Edit users</b><br> Edit all users in the Control Room, including users created by other administrators. <li><b>Delete users</b><br> Delete any user in the Control Room. <li><b>View roles</b><br> Users with this permission can view roles to which they have access. <li><b>Manage roles</b><br> Users can create, edit and delete roles to which they have access.
+    For more information about roles and permissions, see [Roles and permissions](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-features-api-id-to-ui-map.html).
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v2/usermanagement
+security:
+- AccessToken: []
+paths:
+  /roles/list:
+    post:
+      tags:
+      - Role
+      summary: List roles
+      description: "Use the List Roles API to retrieve a list of roles in the Control\
+        \ Room. This endpoint supports pagination, sorting, and filtering. For more\
+        \ information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html)."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: Found roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleFilterResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /roles:
+    post:
+      tags:
+      - Role
+      summary: Create role
+      description: Use Create role API to create a new role with permissions in the
+        Control Room.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleV2Request'
+        required: true
+      responses:
+        "201":
+          description: Return created role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRoleV2Response'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /roles/{id}:
+    get:
+      tags:
+      - Role
+      summary: Retrieve role by ID
+      description: Use the Get role by ID API to retrieve a specific role by specifying
+        the role ID.
+      parameters:
+      - name: id
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRoleByIdV2Response'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - Role
+      summary: Update role
+      description: Use Update role API to update an existing role with permissions
+        in the Control Room.
+      parameters:
+      - name: id
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleV2Request'
+        required: true
+      responses:
+        "201":
+          description: Return created role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateRoleV2Response'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Role
+      summary: Delete role
+      description: Use the Delete role API to delete an existing role in the Control
+        Room. You must specify the role ID.
+      parameters:
+      - name: id
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Successful delete.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/list:
+    post:
+      tags:
+      - User
+      summary: List users
+      description: Use the List users API to search and list users in the Control
+        Room.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: Found users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFilterResponseV2'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /users:
+    post:
+      tags:
+      - User
+      summary: Create user
+      description: Use the Create user API to create a new user in the Control Room.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        required: true
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /users/{uid}:
+    get:
+      tags:
+      - User
+      summary: Get user details
+      description: Use the Get user details API to retrieve a specific user details
+        by specifying the user ID.
+      parameters:
+      - name: uid
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: "null"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindUserByIdResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - User
+      summary: Update user details
+      description: Use the Update user details API to update an existing user information
+        in the Control Room. You must specify the user ID.
+      parameters:
+      - name: uid
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+        required: true
+      responses:
+        "200":
+          description: updated user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - User
+      summary: Delete user
+      description: Use the Delete user API to delete an existing user in the Control
+        Room. You must specify the user ID.
+      parameters:
+      - name: uid
+        in: path
+        description: Unique object id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Successful delete.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CreateRoleV2Response:
+      required:
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role
+          example: 264.0
+        name:
+          type: string
+          description: Name of the role
+          example: Trigger Manager
+        description:
+          type: string
+          description: Description of the role
+          example: View and Manage the triggers
+        createdBy:
+          type: string
+          description: Id of the user who created the role.
+          example: 10.0
+        createdOn:
+          type: string
+          description: The creation timestamp of the role.
+          example: 2025-03-21T16:16:57.403579Z
+        updatedBy:
+          type: string
+          description: Id of the user who last updated the role.
+          example: 10.0
+        updatedOn:
+          type: string
+          description: Timestamp when the role was last updated.
+          example: 2025-03-21T16:16:57.403584Z
+        permissions:
+          type: array
+          description: Collection of unique permissions that have been assigned to
+            the role.
+          items:
+            $ref: '#/components/schemas/PermissionV2Response'
+        userIds:
+          type: array
+          description: An array of unique users that have been assigned to the role.
+          items:
+            type: string
+            example: 21
+    UpdateRoleV2Response:
+      required:
+      - name
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific role
+          example: 264.0
+        name:
+          type: string
+          description: Name of the role
+          example: Trigger Manager
+        description:
+          type: string
+          description: Description of the role
+          example: View and Manage the triggers
+        createdBy:
+          type: string
+          description: Id of the user who created the role.
+          example: 10.0
+        createdOn:
+          type: string
+          description: The creation timestamp of the role.
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who last updated the role.
+          example: 10.0
+        updatedOn:
+          type: string
+          description: Timestamp when the role was last updated.
+          example: 2025-03-21T12:52:41.107697Z
+        permissions:
+          type: array
+          description: Collection of unique permissions that have been assigned to
+            the role.
+          items:
+            $ref: '#/components/schemas/PermissionV2Response'
+        userIds:
+          type: array
+          description: An array of unique users that have been assigned to the role.
+          items:
+            type: string
+            example: 21
+    GetRoleByIdV2Response:
+      required:
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role
+          example: 264.0
+        name:
+          type: string
+          description: Name of the role
+          example: Finance role
+        description:
+          type: string
+          description: Description of the role
+          example: Finance role to manage the org finances
+        createdBy:
+          type: string
+          description: Id of the user who created the role.
+          example: 10.0
+        createdOn:
+          type: string
+          description: The creation timestamp of the role.
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who last updated the role.
+          example: 10.0
+        updatedOn:
+          type: string
+          description: Timestamp when the role was last updated.
+          example: 2025-03-21T12:52:41.107697Z
+        permissions:
+          type: array
+          description: Collection of unique permissions that have been assigned to
+            the role.
+          items:
+            $ref: '#/components/schemas/PermissionV2Response'
+        userIds:
+          type: array
+          description: An array of unique users that have been assigned to the role.
+          items:
+            type: string
+            example: 21
+    CreateRoleV2Request:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the role
+          example: Trigger Manager
+        description:
+          type: string
+          description: Description of the role
+          example: View and Manage the triggers
+        permissions:
+          type: array
+          description: An array of permissions that will be granted for the role.
+            Each permission requires the mandatory parameters.
+          items:
+            $ref: '#/components/schemas/PermissionV2'
+        userIds:
+          type: array
+          description: An array/collection of user IDs who will be granted access
+            with the role.
+          items:
+            type: string
+            example: 21
+    UpdateRoleV2Request:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the role
+          example: Trigger Manager
+        description:
+          type: string
+          description: Description of the role
+          example: View and Manage the triggers
+        permissions:
+          type: array
+          description: An array of permissions that will be granted for the role.
+            Each permission requires the mandatory parameters.
+          items:
+            $ref: '#/components/schemas/PermissionV2'
+        userIds:
+          type: array
+          description: An array/collection of user IDs who will be granted access
+            with the role.
+          items:
+            type: string
+            example: 21
+    PermissionV2:
+      type: object
+      properties:
+        action:
+          type: string
+          description: The action the permission enables.
+          example: managecredentials
+        resourceType:
+          type: string
+          description: The resource group to which the action belongs. Typically a
+            user is given the role permission in conjunction with user management
+            permission.
+          example: credentials
+    PermissionV2Response:
+        type: object
+        properties:
+         id:
+          type: string
+          description: The numeric value that uniquely identifies the permission.
+          example: 1345.0
+         action:
+          type: string
+          description: The action the permission enables.
+          example: managecredentials
+         resourceId:
+          type: string
+          description: The resource id to which the action belongs.
+          example: "" 
+         resourceType:
+          type: string
+          description: The resource group to which the action belongs. Typically a
+            user is given the role permission in conjunction with user management
+            permission.
+          example: credentials
+    LicenseFeature:
+      type: string
+      description: License feature
+      example:
+          - ANALYTICSCLIENT
+          - DEVELOPMENT
+      enum:
+      - DEVELOPMENT
+      - RUNTIME
+      - ANALYTICSCLIENT
+      - ATTENDEDRUNTIME
+      - DISCOVERYBOTANALYZER
+      - DISCOVERYBOTRECORDER
+      - AARIUSER
+      - CITIZENDEVELOPER
+      - CLOUDBOTRUNNER
+    UserV2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific permission
+          example: 110.0
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          example: Mike
+        lastName:
+          type: string
+          example: Bots
+        description:
+          type: string
+          example: User to manage bots
+        disabled:
+          type: boolean
+          description: user enable/disable flag
+        clientRegistered:
+          type: boolean
+          description: client/device is registered flag
+        createdBy:
+          type: string
+          description: Id of the user who created the role
+          example: 27.0
+        createdOn:
+          type: string
+          description: Date when the role was created
+          example: 2025-03-21T12:52:41.107693Z
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update to the role
+          example: 29.0
+        updatedOn:
+          type: string
+          description: Date when it was the latest update made to the role
+          example: 2025-03-21T12:52:41.107697Z
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionV2'
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        version:
+           type: number
+           description: Version of the user instance
+           example: 1.0
+        principalId:
+          type: string
+          example: 266
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: "null"
+        email:
+          type: string
+          example: xyz@automationanywhere.com
+        emailVerified:
+          type: boolean
+        passwordSet:
+          type: boolean
+          description: this flag indicate that user set his password
+        questionsSet:
+          type: boolean
+          description: this flag indicate that user set questions and answer
+        enableAutoLogin:
+          type: boolean
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting, and pagination\
+        \ rules."
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: name
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in descending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        length:
+          type: integer
+          description: Total number of items to display
+          example: 100
+      description: "Pagination rules, allows you to filter based on desired page"
+    PageResponse:
+        type: object
+        properties:
+          offset:
+            type: integer
+            description: Page starting index
+          total:
+            type: integer
+            description: Total number of items to display
+            example: 100
+          totalFilter:
+            type: integer
+            description: Total number of items matching filter
+            example: 100
+        description: "Pagination rules, allows you to filter based on desired page"
+    Filter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          example: and
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        field:
+          type: string
+          description: "Filtering field can be either name, lastModified, path, or\
+            \ folder."
+          example: name
+        value:
+          type: string
+          description: Filter value
+          example: device
+      description: "Filters the result based on operator, field, or value."
+    UserFilterResponseV2:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserV2'
+      description: Filtered user list
+    RoleFilterResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            title: Role
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier representing a specific role
+                example: 644
+              name:
+                type: string
+                description: Name of role
+                example: Trigger Manager
+              description:
+                type: string
+                description: Description of role
+                example: View and Manage the triggers
+              countPrincipals:
+                type: number
+                description: Count of Principals (users) who are granted with this
+                  role
+                example: 1.0
+              version:
+                type: number
+                description: Version of the role instance
+                example: 0.0
+              createdBy:
+                type: string
+                description: Id of the user who created the role
+                example: 27.0
+              createdOn:
+                type: string
+                description: Date when the role was created
+                example: 2025-03-21T16:16:57.403Z
+              updatedBy:
+                type: string
+                description: Id of the user who made a latest update to the role
+                example: 29.0
+              updatedOn:
+                type: string
+                description: Date when it was the latest update made to the role
+                example: 2025-03-21T16:16:57.403Z
+              systemRole:
+                type: boolean
+                description: Flag to indicate if this role is system role or not
+                example: false
+              enabled:
+                type: boolean
+                description: Flag to indicate if this role is enabled or not
+                example: true
+      description: Filtered role list
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+        details:
+          type: string
+          description: More details of the error message
+    FindUserByIdResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: true
+        password:
+          type: string
+          description: only for create\update
+        emailVerified:
+          type: boolean
+        passwordSet:
+          type: boolean
+          description: this flag indicate that user set his password
+        questionsSet:
+          type: boolean
+          description: this flag indicate that user set questions and answer
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        clientRegistered:
+          type: boolean
+          description: client/device is registered flag
+        createdBy:
+          type: string
+          description: Id of the user who created the object
+          example: 21
+        createdOn:
+          type: string
+          description: Creation date of the object
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update on the object
+          example: 21
+        updatedOn:
+          type: string
+          description: Date when it was the latest update of the object
+          example: 2025-03-21T12:52:41.107697Z
+        version:
+          type: string
+          description: "Version of the object, has to be provided by the client to\
+            \ track simultaneous updates"
+          example: 0
+        deleted:
+          type: boolean
+        lastLoginTime:
+          type: string
+          description: The timestamp of the user when last logged in
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyCreatedOn:
+          type: string
+          description: The timestamp when API key was created
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyExpirationTime:
+          type: string
+          description: The timestamp when API key will be expired
+          example: 2026-11-21T12:52:41.107697Z
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        sysAssignedRoles:
+          type: array
+          description: Specify all the system assigned role ids
+          items:
+            type: string
+        groupNames:
+          type: array
+          description: Name of the group to which user is tagged to
+          example:
+          - adDirectory_Admin
+          items:
+            type: string
+        routingName:
+          type: string
+        publicKey:
+          type: string
+        appType:
+          type: string
+    RoleBasicV2:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of role
+          example: 196
+        name:
+          type: string
+          description: Name of role
+          example: AAE_Bot Developer
+    GlobalPermission:
+      type: object
+      properties:
+        action:
+          type: string
+          description: The action that the user is allowed to perform
+          example: View
+        resourceType:
+          type: string
+          description: The resource on which the action is allowed
+          example: repositorymanager
+    DeleteUserByIdResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: true
+        password:
+          type: string
+          description: only for create\update
+        emailVerified:
+          type: boolean
+        passwordSet:
+          type: boolean
+          description: this flag indicate that user set his password
+        questionsSet:
+          type: boolean
+          description: this flag indicate that user set questions and answer
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        clientRegistered:
+          type: boolean
+          description: client/device is registered flag
+        createdBy:
+          type: string
+          description: Id of the user who created the object
+          example: 21
+        createdOn:
+          type: string
+          description: Creation date of the object
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update on the object
+          example: 21
+        updatedOn:
+          type: string
+          description: Date when it was the latest update of the object
+          example: 2025-03-21T12:52:41.107697Z
+        version:
+          type: string
+          description: "Version of the object, has to be provided by the client to\
+            \ track simultaneous updates"
+          example: 1
+        deleted:
+          type: boolean
+        lastLoginTime:
+          type: string
+          description: The timestamp of the user when last logged in
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyCreatedOn:
+          type: string
+          description: The timestamp when API key was created
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyExpirationTime:
+          type: string
+          description: The timestamp when API key will be expired
+          example: 2021-11-07T20:21:39.586090Z
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        sysAssignedRoles:
+          type: array
+          description: Specify all the system assigned role ids
+          items:
+            type: string
+        groupNames:
+          type: array
+          description: Name of the group to which user is tagged to
+          example:
+          - adDirectory_Admin
+          items:
+            type: string
+        routingName:
+          type: string
+        publicKey:
+          type: string
+        appType:
+          type: string
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        password:
+          type: string
+          description: only for create\update
+          example: 64w5@SU23$
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: false
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        roleIds:
+          type: array
+          description: Specify all the allocated role ids
+          items:
+            type: number
+    CreateUserResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: true
+        password:
+          type: string
+          description: only for create\update
+        emailVerified:
+          type: boolean
+        passwordSet:
+          type: boolean
+          description: this flag indicate that user set his password
+        questionsSet:
+          type: boolean
+          description: this flag indicate that user set questions and answer
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        clientRegistered:
+          type: boolean
+          description: client/device is registered flag
+        createdBy:
+          type: string
+          description: Id of the user who created the object
+          example: 21
+        createdOn:
+          type: string
+          description: Creation date of the object
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update on the object
+          example: 21
+        updatedOn:
+          type: string
+          description: Date when it was the latest update of the object
+          example: 2025-03-21T12:52:41.107697Z
+        version:
+          type: string
+          description: "Version of the object, has to be provided by the client to\
+            \ track simultaneous updates"
+          example: 0
+        deleted:
+          type: boolean
+        lastLoginTime:
+          type: string
+          description: The timestamp of the user when last logged in
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyCreatedOn:
+          type: string
+          description: The timestamp when API key was created
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyExpirationTime:
+          type: string
+          description: The timestamp when API key will be expired
+          example: 2026-11-21T12:52:41.107697Z
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        sysAssignedRoles:
+          type: array
+          description: Specify all the system assigned role ids
+          items:
+            type: string
+            example: 133
+        groupNames:
+          type: array
+          description: Name of the group to which user is tagged to
+          example:
+          - adDirectory_Admin
+          items:
+            type: string
+        routingName:
+          type: string
+        publicKey:
+          type: string
+        appType:
+          type: string
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: false
+        password:
+          type: string
+          description: only for create\update
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        roleIds:
+          type: array
+          description: Specify all the allocated role ids
+          items:
+            type: string
+            format: int64
+    UpdateUserResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+          example: AD-DOMAIN
+        email:
+          type: string
+          description: Email ID of the user
+          example: xyz@automationanywhere.com
+        enableAutoLogin:
+          type: boolean
+          description: enable the user to login automatically. Set True or False.
+        username:
+          type: string
+          description: User login
+          example: bot_creator
+        firstName:
+          type: string
+          description: first name of the user
+          example: Mike
+        lastName:
+          type: string
+          description: last name of the user
+          example: Bot
+        description:
+          type: string
+          description: add a description associated with the user
+          example: User to run bots
+        disabled:
+          type: boolean
+          description: Enable or disable the user with True or False
+          example: true
+        password:
+          type: string
+          description: only for create\update
+        emailVerified:
+          type: boolean
+        passwordSet:
+          type: boolean
+          description: this flag indicate that user set his password
+        questionsSet:
+          type: boolean
+          description: this flag indicate that user set questions and answer
+        licenseFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        deviceCredentialAttested:
+          type: boolean
+          description: any device credentials that are associated with the user
+          example: false
+        multipleLoginAllowed:
+          type: boolean
+          description: allow multiple login for this user
+          example: true
+        clientRegistered:
+          type: boolean
+          description: client/device is registered flag
+        createdBy:
+          type: string
+          description: Id of the user who created the object
+          example: 21
+        createdOn:
+          type: string
+          description: Creation date of the object
+          example: 2025-03-21T12:52:41.107697Z
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update on the object
+          example: 21
+        updatedOn:
+          type: string
+          description: Date when it was the latest update of the object
+          example: 2025-03-21T12:52:41.107697Z
+        version:
+          type: string
+          description: "Version of the object, has to be provided by the client to\
+            \ track simultaneous updates"
+          example: 0
+        deleted:
+          type: boolean
+        lastLoginTime:
+          type: string
+          description: The timestamp of the user when last logged in
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyCreatedOn:
+          type: string
+          description: The timestamp when API key was created
+          example: 2025-03-21T12:52:41.107697Z
+        apiKeyExpirationTime:
+          type: string
+          description: The timestamp when API key will be expired
+          example: 2026-11-21T12:52:41.107697Z
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        sysAssignedRoles:
+          type: array
+          description: Specify all the system assigned role ids
+          items:
+            type: integer
+            format: int64
+        groupNames:
+          type: array
+          description: Name of the group to which user is tagged to
+          example:
+          - adDirectory_Admin
+          items:
+            type: string
+        routingName:
+          type: string
+        publicKey:
+          type: string
+        appType:
+          type: string
+  responses:
+    "204":
+      description: Successful delete.
+      content: {}
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "409":
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    id:
+      name: id
+      in: path
+      description: Unique object id
+      required: true
+      schema:
+        type: integer
+        format: int64
+    uid:
+      name: uid
+      in: path
+      description: Unique object id
+      required: true
+      schema:
+        type: integer
+        format: int64
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

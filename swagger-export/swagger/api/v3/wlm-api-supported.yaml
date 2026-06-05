@@ -1,0 +1,3114 @@
+openapi: 3.0.1
+info:
+  title: Work Load Management (WLM) API
+  description: |-
+    Use the Workload Management (WLM) API to programmatically manage and create work item models, queues, work items, and automations in your Control Room. To create a Workload Management automation process, ensure that you are allocated the following roles and permissions: <li>AAE_Pool Admin role and View all devices permission</li> <li>AAE_Queue Admin role</li> <li>Run bot permission</li> <li>Run or schedule permission on the bots folder</li> <li>Device pool consumer permission</li>
+    Mapping of UI to API status for workload management work item processing:<br> UI -  API<br> New  - NEW<br> Ready to Run - READY_TO_RUN<br> Active -  ACTIVE<br> Completed  - COMPLETED<br> Failed  - FAILED<br> On Hold  - ON_HOLD<br> Data error  - DATA_ERROR<br>
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v3/wlm
+security:
+- AccessToken: []
+paths:
+  /workitemmodels/list:
+    post:
+      tags:
+      - WorkItemModels
+      summary: Get all work item models
+      description: |-
+        Use this API to get a list of the work item models (also known as work item template or work item structure). Work item models can be associated with one or more queues.
+        You can send an API request with or without filter parameters. An API request without any filter parameters specified, retrieves details of all the work items in the Control Room. You can use the filter parameters to retrieve specific work items. For more information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html).
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: Returns work item model array
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemModelList'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /workitemmodels:
+    post:
+      tags:
+      - WorkItemModels
+      summary: Create a work item model
+      description: "Use this API to define a work item model for processing in a queue.\
+        \ Work item model is the structure of a work item, it defines all the fields\
+        \ along with their data types (string, numbers, and date etc)."
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/WorkItemModelWithoutId'
+        required: true
+      responses:
+        "200":
+          description: Return created work item model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemModel'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+      x-codegen-request-body-name: body
+  /workitemmodels/{id}:
+    get:
+      tags:
+      - WorkItemModels
+      summary: Get specific work item model by ID
+      description: Use this API to retrieve a specific work item model. You must specify
+        the ID of the work item model.
+      parameters:
+      - name: id
+        in: path
+        description: model id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns model for given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemModel'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+    delete:
+      tags:
+      - WorkItemModels
+      summary: Delete a work item model by ID
+      description: Use this API to delete a specific work item model. You must specify
+        the ID of the work item model.
+      parameters:
+      - name: id
+        in: path
+        description: model id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Return 'nocontent'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: OK
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues:
+    post:
+      tags:
+      - Queues
+      summary: Create a queue
+      description: Use this API to create a queue which is a container of work items.
+        Ensure that you have the Create queues or AAE_Queue Admin permission.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQueue'
+        required: true
+      responses:
+        "201":
+          description: Return created queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/delete:
+    post:
+      tags:
+      - Queues
+      summary: Delete multiple queues
+      description: Use this API to delete multiple queues.You must specify the ID
+        of the queues in an array.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+        required: true
+      responses:
+        "204":
+          description: Return 'nocontent'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: OK
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/export:
+    post:
+      tags:
+      - Queues
+      summary: Export queues to archive file
+      description: Use this API to export queues to compressed file.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportQueueRequest'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportQueueResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/import:
+    post:
+      tags:
+      - Queues
+      summary: Import queues
+      description: "Use this API to import queues to the Control Room from a compressed\
+        \ file. Choose a file location and a password if needed. If a file already\
+        \ exists with the same name, you must specify if the file import must be skipped\
+        \ or a copy must be imported."
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - actionIfExists
+              - upload
+              type: object
+              properties:
+                upload:
+                  type: string
+                  description: The file to upload
+                  format: binary
+                encryptedPassword:
+                  type: string
+                  description: Encrypted archive password
+                actionIfExists:
+                  type: string
+                  description: Option to skip or overwrite existing queues
+                  enum:
+                  - SKIP
+                  - COPY
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportQueueResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/export/download/status/{requestId}:
+    get:
+      tags:
+      - Queues
+      summary: Get Import/Export status by request ID
+      description: Use this API to retrieve import or export status by specifying
+        a request ID.
+      parameters:
+      - name: requestId
+        in: path
+        description: Specify the request ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status of import or export queue retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/export/download/{downloadFileId}:
+    get:
+      tags:
+      - Queues
+      summary: Download exported queues
+      description: Use this API to download the exported queues by specifying the
+        file ID.
+      parameters:
+      - name: downloadFileId
+        in: path
+        description: Use the Download file ID from the status API
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/zip:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}:
+    get:
+      tags:
+      - Queues
+      summary: Get queue by ID
+      description: Use this API to retrieve a specific queue by specifying the queue
+        ID.
+      parameters:
+      - name: id
+        in: path
+        description: Returns queue by given ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns queue details by given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+    put:
+      tags:
+      - Queues
+      summary: Update queue
+      description: Use this API to update an existing queue by specifying the queue
+        ID.
+      parameters:
+      - name: id
+        in: path
+        description: Specify the queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Queue'
+        required: true
+      responses:
+        "200":
+          description: Return OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Queues
+      summary: Delete a queue by ID
+      description: Use this API to delete a queue by specifying the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: Specify the queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: no content available
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/list:
+    post:
+      tags:
+      - Queues
+      summary: List all queues
+      description: |-
+        Use this API to retrieve a list of all the queues.
+        You can send an API request with or without filter parameters. An API request without any filter parameters specified, retrieves details of all the objects in the Control Room. You can use the filter parameters to retrieve specific set of file or folder objects, instead of fetching all objects in the Control Room. For more information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html).
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: A list of queues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueFilterResponse'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/consumers:
+    get:
+      tags:
+      - Queues
+      summary: Get queue consumers
+      description: Use this API to retrieve roles that have access to view this queue
+        and all the work items in the queue. You must specify the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: An array of user roles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+      - Queues
+      summary: Add queue consumer
+      description: Use this API to add a role as a queue consumer to access the queues
+        by specifying the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleId'
+        required: true
+      responses:
+        "201":
+          description: Successful creation of queue consumer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueConsumers'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+      x-codegen-request-body-name: body
+  /queues/{id}/consumers/{roleId}:
+    delete:
+      tags:
+      - Queues
+      summary: Remove queue consumer
+      description: Use this API to remove a queue consumer so that they cannot use
+        the queues. You must specify the queue ID and the role ID to remove the queue
+        consumer.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      - name: roleId
+        in: path
+        description: ID of the role
+        required: true
+        schema:
+          type: integer
+      responses:
+        "204":
+          description: The queue consumer is removed successfully.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/participants:
+    get:
+      tags:
+      - Queues
+      summary: Get queue participants
+      description: Use this API to retrieve all roles that can add workItems to the
+        queue by specifying the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: An array of user roles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+      - Queues
+      summary: Add queue participant
+      description: Use this API to add a role as a queue participant by specifying
+        the queue ID. The queue participants can add workItems to the queue.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleId'
+        required: true
+      responses:
+        "201":
+          description: Successful creation of queue participant.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+      x-codegen-request-body-name: body
+  /queues/{id}/participants/{roleId}:
+    delete:
+      tags:
+      - Queues
+      summary: Remove queue participant
+      description: Use this API to remove a queue participant so that they cannot
+        add workItems in the queue. You must specify the queue ID and role ID to remove
+        the queue participant.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      - name: roleId
+        in: path
+        description: ID of the role
+        required: true
+        schema:
+          type: integer
+      responses:
+        "204":
+          description: The queue participant is removed successfully.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/members:
+    get:
+      tags:
+      - Queues
+      summary: Get queue owner
+      description: Use this API to retrieve all users who can add or remove credentials
+        to the queue or edit the queue settings. You must specify the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: An array of queue owners.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMember'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/members/{userId}:
+    put:
+      tags:
+      - Queues
+      summary: Add or update a queue member
+      description: Use this API to add or update a queue member. Specify the queue
+        ID and User ID to add or remove credentials to the queue or edit the queue
+        settings.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      - name: userId
+        in: path
+        description: ID of the user
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  $ref: '#/components/schemas/QueueMemberPermissions'
+        required: true
+      responses:
+        "200":
+          description: The queue member was successfully created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMemberAdd'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Queues
+      summary: Remove queue member
+      description: Use this API to remove users so that they cannot add or remove
+        credentials to the queue or edit the queue settings. Specify the queue ID
+        and User ID to remove a queue member.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+      - name: userId
+        in: path
+        description: ID of the user
+        required: true
+        schema:
+          type: integer
+      responses:
+        "204":
+          description: Successful removal of queue member.
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/file:
+    post:
+      tags:
+      - Workitems
+      summary: Create new work items from a file
+      description: Use this API to create new work items in the queue. You must specify
+        the queue ID and choose a work item CSV file.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - upload
+              type: object
+              properties:
+                upload:
+                  type: string
+                  description: CSV file
+                  format: binary
+        required: true
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/workItemUploadResult'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+  /queues/{id}/workitems:
+    post:
+      tags:
+      - Workitems
+      summary: Create new work items
+      description: Use this API to add or insert work items to an existing queue that
+        matches the work item model.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: List of work item objects
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateWorkItem'
+        required: true
+      responses:
+        "200":
+          description: A list of WorkItems
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWorkItemResponse'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/workitems/{workItemId}:
+    get:
+      tags:
+      - Workitems
+      summary: Get work item by ID
+      description: Use this API to retrieve a specific work item by specifying the
+        ID.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: workItemId
+        in: path
+        description: WorkItem ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Detail of workItems
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItem'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - Workitems
+      summary: Update work item
+      description: "Use this API to update work item data, result, and status."
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: workItemId
+        in: path
+        description: Work item ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Work item object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateWorkItem'
+        required: true
+      responses:
+        "200":
+          description: Updated work item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateWorkItemResponse'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: true
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Workitems
+      summary: Delete work item
+      description: Use this API to delete a specific work item by specifying the ID.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: workItemId
+        in: path
+        description: WorkItem ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Returns NO_CONTENTS
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/workitems/list:
+    post:
+      tags:
+      - Workitems
+      summary: List work items
+      description: Use this API to list work items for a given queue.
+      
+      
+                   **Note:** The work items list API now limits responses to 1000 items or 300 MB, whichever is reached first. Requests exceeding these limits will fail. Reduce the number or size of your work item requests. For more information, refer to [Restricted work item size to prevent Out of Memory issue](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/v36-release-automation-workspace.html).
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+            examples:
+              compoundFilter:
+                value:
+                  sort:
+                    - field: computedStatus
+                      direction: asc
+                  filter:
+                    operator: and # Explicitly added operator for clarity in Swagger UI
+                    operands:
+                      - field: status
+                        value: READY_TO_RUN
+                        operator: eq
+                      - field: comment
+                        operator: substring
+                        value: Bonus
+                  fields: []
+                  page:
+                    offset: 0
+                    total: 31199
+                    totalFilter: 2
+                    length: 100
+              simpleFilter:
+                value:
+                  sort:
+                    - field: computedStatus
+                      direction: asc
+                  filter:
+                    field: comment
+                    operator: substring
+                    value: Bonus
+                  fields: []
+                  page:
+                    offset: 0
+                    total: 31199
+                    totalFilter: 2
+                    length: 100
+        required: true
+      responses:
+        "200":
+          description: A list of work items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkItemFilterResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/workitems/delete:
+    post:
+      tags:
+      - Workitems
+      summary: Delete work items by ID
+      description: Use this API to delete multiple work items by specifying the IDs
+        in the request body.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Work item object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/WorkItemRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/workitems/export:
+    post:
+      tags:
+      - Workitems
+      summary: Export list work items
+      description: Use this API to export work items to a file in the CSV format.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+        required: true
+      responses:
+        "200":
+          description: The request-id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExportResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/workitems/export/download/status/{requestId}:
+    get:
+      tags:
+      - Workitems
+      summary: Get export status
+      description: Use this API to retrieve status of the export by specifying the
+        request ID.
+      parameters:
+      - name: requestId
+        in: path
+        description: Request ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Details of export status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/workitems/export/download/{downloadFileId}:
+    get:
+      tags:
+      - Workitems
+      summary: Download exported work items
+      description: USe this API to download an exported work item file.
+      parameters:
+      - name: downloadFileId
+        in: path
+        description: Use the download file ID from the status API
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            text/csv:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            text/csv:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /automations:
+    post:
+      tags:
+      - Automations
+      summary: Create automation
+      description: "Use this API to create an automation by specifying the queue ID.\
+        \ Automation is a combination of queue, bot, device pool, and runas users."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAutomation'
+        required: true
+      responses:
+        "200":
+          description: Newly created automation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Automation'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /automations/list:
+    post:
+      tags:
+      - Automations
+      summary: List of automations
+      description: Use this API to retrieve a list of all automations by using a specific
+        queue.
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: An array of automations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Automation'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /automations/{id}:
+    get:
+      tags:
+      - Automations
+      summary: Get specific automation
+      description: Use this API to retrieve a specific automation by specifying the
+        ID.
+      parameters:
+      - name: id
+        in: path
+        description: Unique ID of the automation
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns automation details by given ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Automation'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - Automations
+      summary: Update automation
+      description: Use this API to update details of a specific automation by specifying
+        the ID.
+      parameters:
+      - name: id
+        in: path
+        description: Unique ID of the automation
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Automation'
+        required: true
+      responses:
+        "200":
+          description: Updates automation by given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Automation'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Automations
+      summary: Delete automation
+      description: Use this API to delete an automation by specifying the ID.
+      parameters:
+      - name: id
+        in: path
+        description: Unique ID of the automation
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Returns NO_CONTENTS
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ExportQueueRequest:
+      required:
+      - exportName
+      - includeWorkItems
+      - queueIds
+      type: object
+      properties:
+        exportName:
+          type: string
+          description: Export package name
+          example: Finance Queue
+        encryptedPassword:
+          type: string
+          description: Encrypted archive password
+          example: 2R8vJNF5E5EfaTLxr3tWI7kjs+uBFYaIHnBRBdtEUdbLKRg5acLhH4I=
+        includeWorkItems:
+          type: boolean
+          description: True if export archive should contain required workItems
+          example: true
+        queueIds:
+          type: array
+          description: Queue ids to export
+          example:
+          - 1
+          - 2
+          - 3
+          items:
+            type: integer
+            description: Queue id
+    ExportQueueResponse:
+      required:
+      - requestId
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: UUID that can be used to get status of export request.
+          example: 19bea097-afab-467f-bd25-1270e4c6f716
+    ImportQueueResponse:
+      required:
+      - requestId
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: UUID that can be used to get status of import request.
+          example: 19bea097-afab-467f-bd25-1270e4c6f716
+    StatusResponse:
+      required:
+      - downloadFileName
+      - requestId
+      - status
+      - type
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Queue Request ID.
+          example: 50421ecb-9ce0-46e6-99ed-85ab623b5420
+        type:
+          type: string
+          enum:
+          - WORKITEM_EXPORT
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - FAILED
+        downloadFileName:
+          type: string
+          description: File name that is same as downloaded exported file
+          example: /crdata/Server Files/wlm-files/workitems/4090a32b-79c1-4fd8-b88a-b1ea8c994cb0/72b676eb-2801-47cb-91ea-5f71f06df0ba/cr-work-items-20250714-095032.csv
+        downloadFileId:
+          type: string
+          description: file identifier  that can be used to download exported file
+          example: 72b676eb-2801-47cb-91ea-5f71f06df0ba
+        errorMessage:
+          type: string
+          description: Shows error in case of failed operation.
+          example: "null"
+    WorkItemModelWithoutId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the workitem model
+          example: Bonus Template
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemModelAttributeWithoutId'
+    WorkItemModel:
+      type: object
+      properties:
+        id:
+          type: number
+          description: unique identifier
+          example: 5.0
+        name:
+          type: string
+          description: Name of the work item model
+          example: Bonus Template
+        createdBy:
+          type: integer
+          description: ID of the user who created the work item model.
+          example: 27
+        createdOn:
+          type: string
+          description: Date when the work item model was created in the ISO 8601 format.
+          example: 2025-07-18T08:19:07.663681Z
+        updatedBy:
+          type: integer
+          description: ID of the user who last updated the work item model.
+          example: 29
+        updatedOn:
+          type: string
+          description: Date when the work item model was last updated in the ISO 8601
+            format.
+          example: 2025-07-25T06:20:04.163681Z
+        tenantId:
+          type: integer
+          description: The unique identifier for the tenant that is associated with
+            the work item model.
+          example: 1
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemModelAttribute'
+    WorkItemModelAttributeWithoutId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of the work item model
+          example: Employee Salary
+        type:
+          type: string
+          enum:
+          - NUMBER
+          - TEXT
+          - DATE
+    WorkItemModelAttribute:
+      type: object
+      properties:
+        id:
+          type: number
+          description: unique identifier of the value in the workitem model template
+        name:
+          type: string
+          description: name of the work item model
+          example: Employee Salary
+        type:
+          type: string
+          enum:
+          - NUMBER
+          - TEXT
+          - DATE
+    WorkItemModelList:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of WorkItemModel.
+          items:
+            $ref: '#/components/schemas/WorkItemModel'
+    WorkItemRequest:
+      required:
+      - workitemIds
+      type: object
+      properties:
+        workitemIds:
+          type: array
+          items:
+            type: number
+            description: List of workItem ids
+            example: 31242.0
+    WorkItemFilterResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of workItems.
+          items:
+            $ref: '#/components/schemas/WorkItem'
+    UpdateWorkItemResponse:
+      $ref: '#/components/schemas/WorkItem'
+    QueueFilterResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of queues.
+          items:
+            $ref: '#/components/schemas/Queue'
+    QueueConsumers:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier of the queue
+          example: 440.0
+        createdBy:
+          type: string
+          description: ID of the user who created the Bot/file
+          example: "97"
+        createdOn:
+          type: string
+          description: Date when the role was created
+          example: 2025-07-18T08:19:07.663681Z
+        updatedBy:
+          type: number
+          description: Id of the user who made a latest update to the role
+          example: 97.0
+        updatedOn:
+          type: string
+          description: Date when the role was last updated
+          example: 2025-07-25T06:20:04.163681Z
+        tenantId:
+          type: string
+          description: The unique identifier for the tenant that is associated with
+            the tenant. The tenant ID is assigned to the tenant's resources.
+          example: "5"
+        version:
+          type: string
+          description: File version
+          example: "0"
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+        description:
+          type: string
+          description: Description of the queue
+          example: Finance queue to calculate bonus.
+        name:
+          type: string
+          description: Name of the queue
+          example: Finanace Queue
+        permissions:
+          $ref: '#/components/schemas/QueueMemberPermissions'
+        countPrincipals:
+          type: number
+          description: Total number of active directory principal users
+          example: 0.0
+        systemRole:
+          type: boolean
+          description: System role specified
+        principals:
+          type: array
+          description: List of principals
+          items:
+            type: integer
+            description: List of principals
+    ExportRequest:
+      type: object
+      properties:
+        workitem_ids:
+          $ref: '#/components/schemas/WorkitemsArray'
+      description: ExportRequest follows the filter request object to export work
+        items
+    WorkitemsArray:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            description: work item id
+      description: ' list of work item ids'
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting, and pagination\
+        \ rules"
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: computedStatus
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in ascending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        total:
+          type: integer
+          description: Total workitems items in the list
+          example: 7
+        length:
+          type: integer
+          description: Page length
+          example: 100
+      description: Pagingation rules allows you to retrieve a limited collection of
+        results or offset a collection of results.
+    Filter:
+      description: "Filters the result based on operator, field, or value."
+      oneOf:
+        - $ref: '#/components/schemas/CompoundFilter'
+        - $ref: '#/components/schemas/SimpleFilter'
+        
+      discriminator:
+        propertyName: operator
+        mapping:
+          NONE: '#/components/schemas/SimpleFilter'
+          lt: '#/components/schemas/SimpleFilter'
+          le: '#/components/schemas/SimpleFilter'
+          eq: '#/components/schemas/SimpleFilter'
+          ne: '#/components/schemas/SimpleFilter'
+          ge: '#/components/schemas/SimpleFilter'
+          gt: '#/components/schemas/SimpleFilter'
+          substring: '#/components/schemas/SimpleFilter'
+          and: '#/components/schemas/CompoundFilter'
+          or: '#/components/schemas/CompoundFilter'
+          not: '#/components/schemas/CompoundFilter'
+    SimpleFilter:
+      type: object
+      required:
+        - field
+        - operator
+        - value
+      properties:
+        field:
+          type: string
+          description: Filtering field.
+          example: name
+        value:
+          type: string
+          description: Filter value
+          example: finance_workitem
+        operator:
+          type: string
+          description: Operator for simple comparison.
+          example: substring
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          
+    CompoundFilter:
+      type: object
+      required:
+        - operator
+        - operands
+      properties:
+        operator:
+          type: string
+          description: Logical operator.
+          enum:
+          - and
+          - or
+          - not
+        operands:
+          type: array
+          description: Array of nested filter conditions.
+          items:
+            $ref: '#/components/schemas/Filter'
+    PageResponse:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        total:
+          type: integer
+          description: Total number of items
+          example: 10
+        totalFilter:
+          type: integer
+          description: Total number of items matching filter
+          example: 1
+      description: Pagination response
+    ExportResponse:
+      type: string
+      description: Request ID
+      example: 19bea097-afab-467f-bd25-1270e4c6f716
+    WorkItemJson:
+      type: object
+      properties:
+          Customer Name:
+            type: string
+          Invoice Id:
+            type: string
+          Amount:
+            type: string
+          Email:
+            type: string
+            format: email
+          Invoice Date:
+            type: string
+            format: date-time
+      example:
+          Customer Name: Jane
+          Invoice Id: INV123
+          Amount: "140"
+          Email: jane@automationanywhere.com
+          Invoice Date: 2025-01-10T00:18:48Z
+      description: WorkItem as JSON object. There is a limitation in the list endpoints that it will return an empty JSON object, as a workaround you can call the Get work items by ID endpoint to get JSON parameters and their corresponding values.
+    CreateWorkItem:
+      type: object
+      properties:
+        workItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemJson'
+    UpdateWorkItem:
+      type: object
+      properties:
+        id:
+          type: number
+          description: work item ID
+          example: 31242.0
+        queueId:
+          type: number
+          description: queue ID
+        version:
+          type: number
+          description: Hibernate maintained version of work item object
+        status:
+          type: string
+          enum:
+          - READY_TO_RUN
+          - DATA_ERROR
+          - UNKNOWN
+          - NEW
+          - QUEUED
+          - ACTIVE
+          - FAILED
+          - COMPLETED
+          - ON_HOLD
+        result:
+          type: string
+          description: Status of the work item
+        json:
+          $ref: '#/components/schemas/WorkItemJson'
+    workItemUploadResult:
+      type: object
+      properties:
+        result:
+          type: string
+          description: A Success or Failed message is displayed
+          example: Success
+    CreateWorkItemResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItem'
+    CreateQueue:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the queue.
+          example: Finance Queue
+        description:
+          type: string
+          description: Description of the queue.
+          example: Calculate bonus for each employee
+        reactivationThreshold:
+          type: integer
+          description: Minimum number of workItems in the queue to reactivate queue
+          example: 1
+        manualProcessingTime:
+          type: integer
+          description: efforts required to process the queue manually
+        disallowDuplicate:
+          type: boolean
+        autoRetryLimit:
+          type: integer
+        manualProcessingTimeUnit:
+          type: string
+          enum:
+          - SECONDS
+          - MINUTES
+          - HOURS
+          - DAYS
+        workItemModelId:
+          type: integer
+          example: 6
+        workItemProcessingOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemProcessingOrder'
+        displayColumnIds:
+          type: array
+          example:
+          - 16
+          - 17
+          - 18
+          items:
+            type: integer
+            description: Ids of corresponding displayColumns
+    Queue:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific queue
+          example: 9.0
+        name:
+          type: string
+          description: Name of the queue
+          example: Finance Queue
+        description:
+          type: string
+          description: Description of the queue
+          example: Calculate bonus for each employee
+        reactivationThreshold:
+          type: integer
+          description: Minimum number of workItems in the queue to reactivate queue
+          example: 1
+        manualProcessingTime:
+          type: integer
+          description: Efforts required to process the queue manually
+        manualProcessingTimeUnit:
+          type: string
+          description: Time duration to process the queue manually
+          enum:
+          - SECONDS
+          - MINUTES
+          - HOURS
+          - DAYS
+        disallowDuplicate:
+          type: boolean
+          description: Do not allow duplicate work item.
+        autoRetryLimit:
+          type: integer
+          description: Enter a re-try limit to automatically retry the queue in case
+            of a failure
+        status:
+          type: string
+          description: Status of the queue
+          enum:
+          - DRAFT
+          - IN_USE
+          - NOT_IN_USE
+        workItemModelId:
+          type: integer
+          description: ID of the work item model
+          example: 6
+        workItemProcessingOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemProcessingOrder'
+        displayColumnIds:
+          type: array
+          example:
+          - "16"
+          - "17"
+          - "18"
+          items:
+            type: integer
+            description: Ids of corresponding displayColumns
+        createdBy:
+          type: integer
+          description: 'User ID who has created the queue '
+          example: 97
+        createdOn:
+          type: string
+          description: Time the queue was created in the ISO 8601 format.
+          example: 2025-07-18T08:19:07.663681Z
+        updatedBy:
+          type: integer
+          description: User ID who last updated the queue
+          example: 97
+        updatedOn:
+          type: string
+          description: Time the queue was last updated in the ISO 8601 format.
+          example: 2025-07-25T06:20:04.163681Z
+        tenantId:
+          type: integer
+          description: Unique ID of the tenant
+          example: 1
+        version:
+          type: integer
+          description: Version of the queue
+        considerReactivationThreshold:
+          type: boolean
+          description: This is an optional parameter. It is recommended to retain
+            the deafult value.
+        markDuplicate:
+          type: boolean
+          description: Set true if you do not want duplicate work items in this queue.
+            Else set false.
+    WorkItemProcessingOrder:
+      type: object
+      properties:
+        columnId:
+          type: integer
+          example: 2
+        priority:
+          type: integer
+        sortDirection:
+          type: string
+          example: asc
+    WorkItem:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific workItem
+          example: 31250.0
+        deviceId:
+          type: number
+          description: Reference key with device entity
+        queueId:
+          type: number
+          description: Reference key with queue entity
+        automationId:
+          type: number
+          description: Reference key with automation entity
+        status:
+          type: string
+          enum:
+          - READY_TO_RUN
+          - DATA_ERROR
+          - UNKNOWN
+          - STAGED
+          - QUEUED
+          - ACTIVE
+          - UNSUCCESSFUL
+          - SUCCESSFUL
+          - ON_HOLD
+        startTime:
+          type: string
+          description: Start time in ISO 8601 format
+          example: 2025-07-18T08:19:07.663681Z
+        endTime:
+          type: string
+          description: Start time in ISO 8601 format
+          example: 2025-07-20T06:29:07.663681Z
+        col1:
+          type: string
+          description: First displayable column in workitem
+          example: Jane
+        col2:
+          type: string
+          description: Second displayable column in workitem
+          example: Doe
+        col3:
+          type: string
+          description: Third displayable column in workitem
+          example: "45"
+        deviceUserId:
+          type: number
+          description: Runas user ID who has access to the device
+        createdBy:
+          type: integer
+          description: User ID who has created the work items
+          example: 97
+        createdOn:
+          type: string
+          description: Time stamp when the workitem was created in the ISO 8601 format.
+          example: 2025-07-18T08:19:07.663681Z
+        updatedBy:
+          type: integer
+          description: User ID who has last updated the work item
+          example: 97
+        updatedOn:
+          type: string
+          description: Time stamp when the workitem was updated in the ISO 8601 format.
+          example: 2025-07-25T06:20:04.163681Z
+        comment:
+          type: string
+          description: Comments added to the workitem
+          example: Bonus workitems
+        json:
+          $ref: '#/components/schemas/WorkItemJson'
+        result:
+          type: string
+          description: output of workItem's processing
+        totalPausedTime:
+          type: integer
+          description: Total pause time to process the workitems
+        error:
+          type: string
+          description: Error while processing workitem
+          example: "null"
+        deferredUntil:
+          type: string
+          description: Time in ISO 8601 format until the work item is deferred
+          example: 2025-08-15T06:20:04.163681Z
+        jobExecutionId:
+          type: string
+          description: ID of the job successfully completed
+          example: "null"
+        retryCount:
+          type: integer
+          description: The total number of times this work item has been retried.
+        hashCode:
+          type: integer
+          description: Hash code of the workitem's contents
+          example: -2081237442
+        version:
+          type: integer
+          description: Version of the workitem
+    CreateAutomation:
+      required:
+      - fileId
+      - name
+      - poolId
+      - queueId
+      - runAsUserIds
+      - zoneId
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the automation
+          example: Finance Automation
+        rdpEnabled:
+          type: boolean
+          description: Enable or disable remote desktop protocol (RDP) for your automation.
+        runElevated:
+          type: boolean
+          description: Enable run with administrator privilleges
+        description:
+          type: string
+          description: Description of the automation
+          example: Automation to calculate finances
+        botInput:
+          type: object
+          properties: {}
+          description: "Inputs required for the bot to execute. For more details on\
+            \ different bot inputs, see [Bot deploy](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/deploy-api-supported.html)."
+        status:
+          type: string
+          description: Queue specific action
+          enum:
+          - ACTIVE
+          - PAUSE
+        fileId:
+          type: number
+          description: The bot id of the associated bot
+        botLabel:
+          type: string
+          description: The label of a bot
+          example: Bot
+        botVersion:
+          type: number
+          description: The version of the bot
+          example: 1.0
+        runAsUserIds:
+          type: array
+          description: List of ids of runAs users which could login to the devices
+            to run automation
+          items:
+            type: number
+        queueId:
+          type: number
+          description: The queue id of the associated queue
+          example: 12.0
+        poolId:
+          type: number
+          description: The pool id of the associated pool
+          example: 12.0
+        priority:
+          type: number
+          description: The priority of this automation in case if automation is running
+            in priority mode of the device pool
+          example: 1.0
+        handleUnexpectedPopups:
+          type: boolean
+          description: Enable or disable dealing with unexpected or unplanned dialog
+            boxes or windows that appear during the execution.
+          example: false
+        defaultDevices:
+          type: boolean
+          description: "Enable default device mode, runAs users will use default device\
+            \ to login and run automation"
+        zoneId:
+          type: string
+          description: ID of the time zone from where the automation is scheduled.
+          example: Asia/Calcutta
+        schedules:
+          required:
+          - daysOfWeek
+          - intervals
+          - ordinal
+          type: object
+          properties:
+            ordinal:
+              type: number
+              description: "Ordinal numder (such as 1, 2, 3) that indicates the ranking\
+                \ or order of the intervals."
+              example: 1.0
+            daysOfWeek:
+              type: array
+              description: "Week days like MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY,\
+                \ SATURDAY, SUNDAY"
+              items:
+                type: string
+                enum:
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
+            intervals:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateInterval'
+    CreateInterval:
+      required:
+      - endTime
+      - ordinal
+      - startTime
+      type: object
+      properties:
+        startTime:
+          type: string
+          description: Start time of the interval specified for automation.
+          example: 22:15:00
+        endTime:
+          type: string
+          description: End time of the interval specified for automation.
+          example: 22:30:00
+        ordinal:
+          type: number
+          description: "Ordinal numder (such as 1, 2, 3) that indicates the ranking\
+            \ or order of the intervals."
+          example: 1.0
+    Interval:
+      required:
+      - endTime
+      - id
+      - ordinal
+      - startTime
+      - tenantUuid
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of the interval.
+          example: 1.0
+        startTime:
+          type: string
+          description: Start time of the interval specified for automation.
+          example: 22:15:00
+        endTime:
+          type: string
+          description: End time of the interval specified for automation.
+          example: 22:30:00
+        ordinal:
+          type: number
+          description: "Ordinal numder (such as 1, 2, 3) that indicates the ranking\
+            \ or order of the intervals."
+          example: 1.0
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: c0c31e64-f0ec-3754-424d-50422be0d52b
+    Automation:
+      required:
+      - fileId
+      - id
+      - name
+      - owner
+      - poolId
+      - priority
+      - queueId
+      - runAsUserIds
+      - startedBy
+      - startedOn
+      - zoneId
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier of the automation
+          example: 10.0
+        createdBy:
+          type: number
+          description: ID of the user who has created the automation
+          example: 97.0
+        createdOn:
+          type: string
+          description: Date when the automation was created
+          example: 2025-07-18T08:19:07.663681Z
+        updatedBy:
+          type: number
+          description: ID of the user who last updated the automation
+          example: 97.0
+        updatedOn:
+          type: string
+          description: Date when the automationwas last updated
+          example: 2025-07-25T06:20:04.163681Z
+        tenantId:
+          type: number
+          description: The unique identifier for the tenant that is associated with
+            the tenant. The tenant ID is assigned to the tenant's resources.
+          example: 1.0
+        version:
+          type: number
+          description: Version of the automation
+          example: 0.0
+        name:
+          type: string
+          description: Name specified for the automation
+          example: Finance Automation
+        status:
+          type: string
+          description: Queue specific action
+          enum:
+          - ACTIVE
+          - PAUSE
+        runElevated:
+          type: boolean
+          description: Enable run with administrator privilleges
+        rdpEnabled:
+          type: boolean
+          description: Enable or disable remote desktop protocol (RDP) for your automation.
+        description:
+          type: string
+          description: Description specified for the Automation
+          example: Automation to calculate finances
+        fileId:
+          type: number
+          description: ID of the file
+          example: 0.0
+        botLabel:
+          type: string
+          description: The label of a bot
+          example: Bot
+        botVersion:
+          type: number
+          description: The version of the bot
+          example: 0.0
+        runAsUserIds:
+          type: array
+          description: ID of the run as user
+          example: "97, 101"
+          items:
+            type: number
+        queueId:
+          type: number
+          description: Unique ID of the queue
+          example: 12.0
+        poolId:
+          type: number
+          description: Unique ID of the Pool of devices
+          example: 12.0
+        priority:
+          type: number
+          description: Set priority to run the automation
+          example: 1.0
+        workItemsProcessed:
+          type: number
+          example: 4.0
+        averageProcessingTime:
+          type: number
+          format: double
+        totalPausedTimeInSec:
+          type: number
+          example: 60.0
+        startedOn:
+          type: string
+          description: Time the automation was started on
+          example: 2025-07-18T06:19:07.663681Z
+        startedBy:
+          type: number
+          description: Unique ID of the user who has started the automation
+          example: 97.0
+        handleUnexpectedPopups:
+          type: boolean
+          description: Enable or disable dealing with unexpected or unplanned dialog
+            boxes or windows that appear during the execution.
+          example: false
+        resiliency:
+          required:
+          - common
+          type: object
+          properties:
+            common:
+              required:
+              - detectAndNotify
+              - handleUnexpectedPopups
+              - recording
+              type: object
+              properties:
+                detectAndNotify:
+                  required:
+                  - enabled
+                  - hideSensitiveInformation
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    hideSensitiveInformation:
+                      type: boolean
+                recording:
+                  required:
+                  - botStatus
+                  - enabled
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    botStatus:
+                      type: string
+                      example: FAILED
+                handleUnexpectedPopups:
+                  type: boolean
+        defaultDevices:
+          type: boolean
+        owner:
+          type: number
+          description: The owner of an automation
+          example: 1.0
+        hideBotAgentUi:
+          type: boolean
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: c0c31e64-f0ec-3754-424d-50422be0d52b
+        zoneId:
+          type: string
+          description: The local zone ID of the running automation.
+          example: America/Los_Angeles
+        schedules:
+          required:
+          - daysOfWeek
+          - id
+          - intervals
+          - ordinal
+          type: object
+          properties:
+            id:
+              type: number
+              example: 12.0
+            ordinal:
+              type: number
+              description: "Ordinal numder (such as 1, 2, 3) that indicates the ranking\
+                \ or order of the intervals."
+              example: 1.0
+            daysOfWeek:
+              type: array
+              description: "Days of the week like MONDAY, TUESDAY, WEDNESDAY, THURSDAY,\
+                \ FRIDAY, SATURDAY, SUNDAY"
+              items:
+                type: string
+                enum:
+                - MONDAY
+                - TUESDAY
+                - WEDNESDAY
+                - THURSDAY
+                - FRIDAY
+                - SATURDAY
+                - SUNDAY
+            intervals:
+              type: array
+              items:
+                $ref: '#/components/schemas/Interval'
+    Role:
+      required:
+      - name
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific role
+          example: 456.0
+        name:
+          type: string
+          description: Name of the role
+          example: bot_manager
+    RoleId:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific role
+          example: 456.0
+    QueueMember:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            type: integer
+    QueueMemberAdd:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique identifier representing a specific role
+          example: 456.0
+        permissions:
+          $ref: '#/components/schemas/QueueMemberPermissions'
+    QueueMemberPermissions:
+      type: array
+      description: Queue specific actions a given user is allowed to perform
+      items:
+        type: string
+        description: Queue specific action
+        enum:
+        - participate
+        - manage
+        - own
+    Id:
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of an object
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+  responses:
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "409":
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    PathRoleId:
+      name: roleId
+      in: path
+      description: ID of the role
+      required: true
+      schema:
+        type: integer
+    PathUserId:
+      name: userId
+      in: path
+      description: ID of the user
+      required: true
+      schema:
+        type: integer
+    PathQueueId:
+      name: id
+      in: path
+      description: ID of the queue
+      required: true
+      schema:
+        type: integer
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

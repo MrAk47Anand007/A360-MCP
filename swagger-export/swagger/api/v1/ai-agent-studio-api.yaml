@@ -1,0 +1,423 @@
+swagger: '2.0'
+info:
+  title: AI agent Studio APIs
+  description: API documentation for AI agent Studio
+  version: "1.0.0"
+schemes:
+  - http
+  - https
+basePath: /gai/prompttools/v1
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: [ ]
+paths:
+  /custommodel:
+    post:
+      consumes:
+        - application/json
+      summary: Creates Custom Model
+      tags:
+        - Custom Model
+      parameters:
+        - in: header
+          name: x-authorization
+          type: string
+          required: true
+        - in: body
+          name: Model definition in json
+          schema:
+            $ref: '#/definitions/Connector'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Connector'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /custommodel/vendors/{vendorName}/models/{modelName}:
+    get:
+      consumes:
+        - application/json
+      summary: Gets Custom Model Information
+      tags:
+        - Custom Model
+      parameters:
+        - in: header
+          name: x-authorization
+          type: string
+          required: true
+        - in: path
+          name: vendorName
+          required: true
+          type: string
+          description: Vendor Name
+        - in: path
+          name: modelName
+          required: true
+          type: string
+          description: Model Name
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Connector'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+    delete:
+      consumes:
+        - application/json
+      summary: Deletes Custom Model
+      tags:
+        - Custom Model
+      parameters:
+        - in: header
+          name: x-authorization
+          type: string
+          required: true
+        - in: path
+          name: vendorName
+          required: true
+          type: string
+          description: Vendor Name
+        - in: path
+          name: modelName
+          required: true
+          type: string
+          description: Model Name
+      responses:
+        204:
+          description: Successfully processed no content
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+  /custommodel/list:
+    post:
+      consumes:
+        - application/json
+      summary: Gets list of Custom Models for all vendors
+      tags:
+        - Custom Model
+      parameters:
+        - in: header
+          name: x-authorization
+          type: string
+          required: true
+        - in: body
+          name: List custom model filter request. For example, {}
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ConnectorList'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+definitions:
+  AuthKey:
+    type: object
+    properties:
+      location:
+        type: string
+        description: valid value is "header"
+        example: header
+      keyName:
+        type: string
+        description: Name of the authentication key. For example, "Authorization"
+        example: Authorization
+      prefix:
+        type: string
+        description: Prefix to be added to the key. For example, "Bearer "
+  AwsSignatureV4:
+    type: object
+    properties:
+      accessKey:
+        $ref: '#/definitions/AuthKey'
+      secretKey:
+        $ref: '#/definitions/AuthKey'
+      sessionToken:
+        $ref: '#/definitions/AuthKey'
+  CustomKeys:
+    type: object
+    properties:
+      keys:
+        type: array
+        items:
+          $ref: '#/definitions/AuthKey'
+  AuthAction:
+    type: object
+    properties:
+      auth_type:
+        type: string
+        description: Type of authentication. API_KEY for API Key, OAUTH2 for OAuth2, CUSTOM_KEYS for multiple keys.
+        example: API_KEY
+        enum:
+          - API_KEY
+          - OAUTH2
+          - CUSTOM_KEYS
+      auth:
+        type: object
+        properties:
+          api_auth:
+            $ref: '#/definitions/AuthKey'
+          o_auth:
+            $ref: '#/definitions/AuthKey'
+          custom_keys:
+            $ref: '#/definitions/CustomKeys'
+  Value:
+    type: object
+    description: Describes type and value of the attribute
+    properties:
+      type:
+        type: string
+        enum:
+          - TEXT
+          - TEXTAREA
+          - DECIMAL
+          - INTEGER
+          - JSON
+      string:
+        type: string
+        description: Value of the parameter. Used for TEXT, TEXTAREA and JSON types.
+      number:
+        type: string
+        description: Value of the parameter. Used for DECIMAL and INTEGER types.
+      boolean:
+        type: string
+      min:
+        type: string
+        description: Minimum value for the parameter. Used for DECIMAL and INTEGER types.
+      max:
+        type: string
+        description: Maximum value for the parameter. Used for DECIMAL and INTEGER types.
+  Attribute:
+    type: object
+    properties:
+      name:
+        type: string
+      label:
+        type: string
+      description:
+        type: string
+      required_input:
+        type: boolean
+      optional:
+        type: boolean
+      value:
+        $ref: '#/definitions/Value'
+      location:
+        type: string
+      prefix:
+        type: string
+      secure:
+        type: boolean
+      annotations:
+        type: array
+        items:
+          type: string
+          description: PROMPT_QUERY substitutes corresponding variable with prompt entered in AI SKills page, REQUEST_PARAMETER uses corresponding variable to appear on Model Connection page, MODEL_PARAMETER uses corresponding variable to appear on Model Connection page, RESPONSE_PARAMETER represents the variable that will be returned in the response
+          enum:
+            - REQUEST_PARAMETER
+            - MODEL_PARAMETER
+            - RESPONSE_PARAMETER
+            - PROMPT_QUERY
+      canonical_name:
+        type: string
+        description: Json path to the variable in the AAI canonical schema. Use choices[0].value to populate LLM response, use choices[0].promptTokens to populate number of tokens consumed by prompt, use choices[0].completionTokens to populate number of tokens consumed for generating response, use choices[0].totalTokens to populate total tokens consumed to fulfill the request.
+        example: choices[0].value
+  Param:
+    type: object
+    properties:
+      type:
+        type: string
+        enum:
+          - HEADERS
+          - PATH_PARAM
+          - QUERY_PARAM
+      attribute:
+        type: array
+        items:
+          $ref: '#/definitions/Attribute'
+  Variable:
+    type: object
+    properties:
+      path:
+        type: string
+        description: Json path to the variable in the request/response body
+        example: $.messages[0].content
+      attribute:
+        $ref: '#/definitions/Attribute'
+  Request:
+    type: object
+    description: Describes Request object
+    properties:
+      type:
+        type: string
+        enum:
+          - RAW
+      raw:
+        type: object
+        properties:
+          body:
+            type: string
+            description: Sample (JSON) Request body. This is the body that will be sent to the vendor API. The body can contain variables that will be replaced by the user input.
+            example: "{\"model\": \"gpt-35-turbo\",\"messages\":[{\"role\":\"system\",\"content\":\"What is the capital of France?\"}],\"max_tokens\":500,\"temperature\":0.7,\"frequency_penalty\":0,\"presence_penalty\":0,\"top_p\":0.95,\"stop\":null}"
+          variables:
+            type: array
+            description: List of variables that the user can input in Model Connection UI or AI Skills UI
+            items:
+              $ref: '#/definitions/Variable'
+  Response:
+    type: object
+    properties:
+      body:
+        type: string
+        description: Sample (JSON) Response body. This is the body that will be received from the vendor API. The body can contain variables that will be displayed as LLM response or other parameters like token usage which is used for tracking.
+        example: "{\"id\":\"chatcmpl-123\",\"object\":\"chat.completion\",\"created\":1677652288,\"model\":\"gpt-35-turbo\",\"system_fingerprint\":\"fp_44709d6fcb\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nHello there, how may I assist you today?\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":12,\"total_tokens\":21}}"
+      variables:
+        type: array
+        description: List of variables that are used in the Automation Anywhere response. Must include variable representing LLM Response. Other variables could be input, output, total tokens consumed by the model.
+        items:
+          $ref: '#/definitions/Variable'
+  Action:
+    type: object
+    description: Describes Model information
+    properties:
+      name:
+        type: string
+        description: Name of the model
+        example: Meta-Llama-3-8B-Instruct
+      description:
+        type: string
+        description: Description of the model
+        example: The Llama 3 instruction tuned models are optimized for dialogue use cases
+      method:
+        type: string
+        description: HTTP method. Should be always POST
+        example: POST
+      uri:
+        type: string
+        description: URI of the REST API. URI can contain parameters that will be replaced by the user input. Parameter can either be a PATH_PARAM variable or a QUERY_PARAM variable. You can also add HEADERS that are associated with this API request. In the example, deploymentId and projectId are a PATH_PARAM variable and apiVersion is a QUERY_PARAM variable.
+        example: https://{projectId}.openai.azure.com/openai/deployments/{deploymentId}/chat/completions?api-version={apiVersion}
+      params:
+        type: array
+        description: List of parameters that are used in the API request. Parameters can be either HEADERS, PATH_PARAM or QUERY_PARAM parameters.
+        items:
+          $ref: '#/definitions/Param'
+      request:
+        $ref: '#/definitions/Request'
+      response:
+        $ref: '#/definitions/Response'
+      display_name:
+        type: string
+  Connector:
+    type: object
+    description: Describes Vendor and associated models information
+    properties:
+      name:
+        type: string
+        description: Name of the vendor
+        example: Meta
+      description:
+        type: string
+      version:
+        type: string
+        description: Used for future reference. Set it to "1".
+      auth_action:
+        $ref: '#/definitions/AuthAction'
+      api_type:
+        type: string
+        description: Type of API. Should be always REST.
+        example: REST
+      actions:
+        type: array
+        items:
+          $ref: '#/definitions/Action'
+  ConnectorList:
+    type: object
+    description: Describes list of vendors and associated models information
+    properties:
+      connectors:
+        type: array
+        items:
+          $ref: '#/definitions/Connector'
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      details:
+        type: string
+        description: Error detail
+      message:
+        type: string
+        description: Message description.
+responses:
+  400:
+    description: Bad request
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  403:
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Conflict
+    schema:
+      $ref: '#/definitions/Error'
+  415:
+    description: Unsupported Media Type
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

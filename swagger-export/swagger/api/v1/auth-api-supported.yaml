@@ -1,0 +1,154 @@
+swagger: '2.0'
+info:
+  title: Authentication API
+  description: Use the Authentication API to generate, validate, and manage JSON Web Tokens (JWT) that are required for authorization in all Enterprise Control Room APIs.
+   
+   
+    The JWT authorization is based on the roles and permission of the user's account that is used in the request body.
+        
+        - An authentication token's default time out is 20 minutes.
+
+                   **Note:** The default timeout for tokens is configurable.
+        
+        - Include the Authentication token or Bearer token in a header file for requests in other Control Room APIs.
+        
+        - **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+
+
+  version: "LTS - 1.0.0"
+schemes:
+  - http
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /authentication/token:
+    get:
+      summary: Verify if a token is valid
+      description: >
+         Use this endpoint to validate an existing JWT. The token is included in the request URL. There is no request body for this endpoint. The response is either `"valid": true`(the token is valid) or `"valid": false`(the token is not valid).
+        
+         
+         The query parameter **token** is deprecated and will be removed in future releases. It is deprecated as providing a token in a query param gets the token logged in the logs.
+        
+         Instead pass the token through **X-Authorization** in the request header. 
+         
+
+      tags:
+        - auth
+      parameters:
+        - name: token
+          in: query
+          type: string
+          description: token
+        - name: X-Authorization
+          in: header
+          type: string
+          description: token
+      responses:
+        200:
+          description: A successful response can be either true or false.
+          schema:
+            type: object
+            properties:
+              valid:
+                type: boolean
+                description: >
+                  'true' - if token is valid, 'false' - otherwise
+        500:
+          $ref: '#/responses/500'
+  /authentication/logout:
+    post:
+      summary: Logout a user and delete the JWT (Java Web token)
+      description: >
+         This endpoint immediately invalidates an access token so that it cannot be used for authentication. The token to be logged out is passed in a header file with the request.
+         
+         >> **Header file example:** `-H X-Authorization <token>` or `Authorization: Bearer <<bearer token>>`
+         
+
+      tags:
+        - auth
+      parameters:
+        - in: header
+          name: X-Authorization
+          description: Authentication token in X-Authorization header for authenticated user to logout.
+          required: true
+          type: string
+          pattern: '[0-9a-zA-Z-_]*\.[0-9a-zA-Z-_]*\.[0-9a-zA-Z-_]*'
+      responses:
+        204:
+          description: Successful Logout
+        500:
+          $ref: '#/responses/500'
+  /authentication/app/login:
+      post:
+        summary: Authenticate app User
+        description: >
+             This endpoint is a service to service authentication API used by Automation Anywhere internally supported applications. This API is not supported for use by external users.
+        tags:
+           - auth
+        parameters:
+          - in: body
+            name: body
+            required: true
+            schema:
+              $ref: '#/definitions/ServiceUserAuthRequest'
+        responses:
+          200:
+            description: Auth object containing token generated for specific user
+            schema:
+              $ref: '#/definitions/ServiceUserAuthResponse'
+          400:
+            $ref: '#/responses/400'
+          401:
+            $ref: '#/responses/401'
+          500:
+            $ref: '#/responses/500'
+definitions:
+  ServiceUserAuthRequest:
+    type: object
+    properties:
+      username:
+        type: string
+        example: serviceuser
+        description: App username
+      password:
+        type: string
+        example: mypassword@123
+        description: App password
+  ServiceUserAuthResponse:
+    type: object
+    properties:
+      token:
+        type: string
+        description: JWT token
+        example: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiIxIiwiY2xpZW50VHlwZS
+      jwtPkPem:
+        type: string
+        description: JWT private key to validate tokens, including this one
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+      details:
+        type: string
+        description: More details of the error message
+responses:
+  400:
+    description: Bad Request
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

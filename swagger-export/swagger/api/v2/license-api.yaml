@@ -1,0 +1,372 @@
+swagger: "2.0"
+info:
+  version: "2.0.0"
+  title: "License API"
+  description: The License API contains endpoints to retrieve Control Room license details (such as expiration date and license mode) and manually sync the Control Room with the license server after license reallocation or renewal.<br>
+    
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+basePath: "/v2/license"
+schemes:
+  - "http"
+  - "https"
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /sync:
+    put:
+      summary: "Updates Control Room licenses with License Server"
+      description: "Latest license entitlements and expiry date get updated from License Server."
+      tags:
+        - "License"
+      consumes:
+        - "application/json"
+      responses:
+        '200':
+          $ref: '#/responses/200'
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '500':
+          $ref: '#/responses/500'
+  /details:
+    get:
+      summary: "Returns details of the installed license on Control Room"
+      description: Retrieve details of the Control Room license, including license type, expiration date, Fail-Safe status, and license server sync status. <br>
+
+        <b>Note:</b> <p>If the `controlRoomLicenseServerSyncStatus` parameter returns False, use the Sync endpoint to update the license allocations and expiration date from the license server.</p>
+        
+      tags:
+        - "License"
+      consumes:
+        - "application/json"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LicenseDetails'
+        '401':
+          $ref: '#/responses/401'
+        '402':
+          $ref: '#/responses/402'
+        '403':
+          $ref: '#/responses/403'
+        '500':
+          $ref: '#/responses/500'
+  /product/list:
+    post:
+      summary: "Provides details of Control Room licenses: products and their features"
+      description: Retrieve Control Room license details like the license type, number of available licenses, number of licenses used in a specific Control Room instance, and number of licenses used in all Control Room instances.
+      tags:
+        - "License"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProductListResponse'
+        '401':
+          $ref: '#/responses/401'
+        '402':
+          $ref: '#/responses/402'
+        '403':
+          $ref: '#/responses/403'
+        '500':
+          $ref: '#/responses/500'
+
+definitions:
+  LicenseDetails:
+    type: object
+    required:
+      - type
+      - installationDate
+      - expirationDate
+      - failSafeStatus
+      - controlRoomLicenseServerSyncStatus
+      - licenseMode
+      - tenantLicenseToken
+      - crLsSyncErrorText
+    properties:
+      type:
+        type: string
+        description: The type of license currently installed on the Control Room. Possible values can be TRIAL or PURCHASED.
+        example: PURCHASED
+      installationDate:
+        type: string
+        description: License installation Date and Time
+        example: "2022-05-19T23:40:25.001Z"
+      expirationDate:
+        type: string
+        description: License expiry Date and Time
+        example: "2023-05-12T23:59:59.999Z"
+      failSafeStatus:
+        type: integer
+        description: A numerical value that represents the Fail-Safe status of the Cloud Control Room. Values. 0 means the Control Room is connected, 1 means the Control Room is in Fail-Safe mode, and 2 means the Fail-Safe status has expired. If the Control Room is on cloud license, this value is set based on connectivity status to the License Server. Always 0 if the Control Room is on file license.
+        example: 0
+      controlRoomLicenseServerSyncStatus:
+        type: boolean
+        description: TRUE if the license consumption count in Control Room and License Server are in sync. FALSE if the license consumption count in Control Room is more than checked out license counts from License Server. The extra licenses must be released from Control Room in such case. Always TRUE if the Control Room is on file license.
+        example: true
+      installedCrId:
+        type: string
+        description: If the Control Room is on cloud license, the installed GUID is shown. Empty otherwise.
+        example: b96edac7-b7e3-57bf-b857-ad14ac754674
+      licenseMode:
+        type: string
+        description: Possible values are FileLicense or CloudLicense
+        example: CloudLicense
+      tenantLicenseToken:
+        type: string
+        description: Tenant's license token. It appears when you install the license via cloud.
+        example: eyJhbGciOiJSUzI1NiJ9.ey
+      crLsSyncErrorText:
+        type: string
+        description: Control Room Error Text. Number of licenses you have over consumed.
+        example: CloudBotRunner=1;
+  ProductListResponse:
+    type: object
+    required:
+      - page
+      - list
+    properties:
+      page:
+        $ref: '#/definitions/PageResponse'
+      list:
+        type: array
+        description: List of products
+        items:
+          $ref: '#/definitions/ProductList'
+
+  ProductList:
+    type: object
+    required:
+      - id
+      - name
+      - licenseType
+    properties:
+      id:
+        type: integer
+        description: Product id.
+        example: 1
+      name:
+        type: string
+        description: Product name
+        example: ControlRoom
+      feature:
+        $ref: '#/definitions/Feature'
+      licenseType:
+        type: string
+        description: Trial or Purchased type of the product
+        example: PURCHASED
+
+  Feature:
+    type: object
+    required:
+      - id
+      - name
+      - enable
+      - purchasedCount
+      - usedCountByThisCr
+      - usedCountByAllCr
+      - availableCount
+      - licenseCountUnit
+    properties:
+      id:
+        type: integer
+        description: Unique ID of the feature.
+        example: 85
+      name:
+        type: string
+        description: Returns the device license, such as Development for Bot Creator, Runtime for unattended Bot Runner, and AttendedRuntime for attended Bot Runner licenses.
+        example: AttendedRuntime
+      enable:
+        type: boolean
+        description: A flag indicating if a license is enabled or disabled. If the returned value is false, that license cannot be assigned to a user.
+        example: true
+      purchasedCount:
+        type: integer
+        description: The total number of licenses purchased for the feature.
+        example: 30
+      usedCountByThisCr:
+        type: integer
+        description: The number of licenses used in this Control Room instance.
+        example: 4
+      usedCountByAllCr:
+        type: integer
+        description: The total number of licenses that are used. If the license is file-based, this number matches the number in the usedCountByThisCr parameter. If the license is cloud-based, this parameter returns the total number of licenses used in all of the customer's Control Room instances
+        example: 4
+      availableCount:
+        type: integer
+        description: The number of licenses that are available for allocation.
+        example: 26
+      licenseCountUnit:
+        type: string
+        description: Unit of license.
+        enum:
+          - NUMBER
+          - SECONDS
+
+  FilterRequest:
+    type: object
+    description: Filter request, which includes filtering, sorting and pagination rules
+    properties:
+      filter:
+        $ref: '#/definitions/Filter'
+      sort:
+        type: array
+        description: Sort directions
+        items:
+          $ref: '#/definitions/Sort'
+      page:
+        $ref: '#/definitions/PageRequest'
+  Sort:
+    type: object
+    description: Sorting rules
+    properties:
+      field:
+        type: string
+        description: Field name to sort by
+        example: id
+      direction:
+        type: string
+        description: Sorting direction
+        enum:
+          - asc
+          - desc
+        example: asc
+  Ops:
+     type: object
+     description: Operands rules
+     properties:
+      operator:
+        type: string
+        description: Operator
+        enum:
+          - gt
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - and
+          - substring
+          - NONE
+          - or
+          - not
+  PageRequest:
+    type: object
+    description: Pagingation rules
+    properties:
+      offset:
+        type: integer
+        description: Page starting index
+        example: 0
+      length:
+        type: integer
+        description: Page length
+        example: 100
+  PageResponse:
+    type: object
+    description: Pagingation response
+    properties:
+      offset:
+        type: integer
+        description: Page starting index
+        example: 0
+      total:
+        type: integer
+        description: Total number of items
+        example: 7
+      totalFilter:
+        type: integer
+        description: Total number of items matching filter
+        example: 1
+  Filter:
+    type: object
+    description: Filter rules
+    properties:
+      operator:
+        type: string
+        description: Operator
+        enum:
+          - and
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - NONE
+          - or
+          - not
+      operands:
+        type: array
+        items: 
+          $ref: '#/definitions/Ops'
+        example:
+          - operator: lt
+            field: purchasedCount
+            value: 31
+          - operator: gt
+            field: usedCountByThisCr
+            value: 3
+
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+      details:
+        type: string
+        description: Details of an error
+
+responses:
+  '200':
+    description: Successful
+  '400':
+    description: Bad Rquest
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  '402':
+    description: License Expired
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

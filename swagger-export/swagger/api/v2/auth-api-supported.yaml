@@ -1,0 +1,316 @@
+openapi: 3.0.1
+info:
+  title: Authentication API
+  description: |-
+    Use the Authentication API to generate, refresh, and manage JSON Web Tokens (JWT) that are required for authorization in all Enterprise Control Room APIs.
+
+    The JWT authorization is based on the roles and permission of the user's account that is used in the request body.
+    - An authentication token's default time out is 20 minutes.
+    **Note:** The default timeout for tokens is configurable.
+    - Include the Authentication token or Bearer token in a header file for requests in other Control Room APIs.
+    - **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: LTS - 2.0.0
+servers:
+- url: /v2
+paths:
+  /authentication:
+    post:
+      tags:
+      - auth
+      summary: Authenticate user
+      description: "Use this endpoint to authenticate a registered user. A successful\
+        \ response returns a JSON object that includes a JWT (JSON Web Token). By\
+        \ default, a token is valid for 20 minutes. Add the JWT to header files of\
+        \ other Control Room APIs for authorization.\n\n\n - The **username** is the\
+        \ name of a Control Room user.\n - The **password** is the password for the\
+        \ specified user.\n - The **apiKey** is required to configure Single Sign\
+        \ On (SSO). It can also be used in place of a password for users that are\
+        \ assigned the [API key generation role](https://docs.automationanywhere.com/csh?context=csh-cloud-control-room-apikey-role).\n\
+        \n \n > **Note:** **apiKey** or **password** is used to generate a valid token.\
+        \ Both (apiKey and password) cannot be used together in a request body.\n\
+        \         \n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+        required: true
+      responses:
+        "200":
+          description: "This is a JSON object that contains the JWT generated for\
+            \ the registered Control Room User. In addition to the JWT this response\
+            \ contains details regarding the users roles, permissions, and licenses."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseV2'
+        "400":
+          description: Bad Rquest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /authentication/token:
+    post:
+      tags:
+      - auth
+      summary: Refresh a valid token
+      description: "Use this endpoint to refresh a valid token.\n- The default token\
+        \ expiration is 20 minutes. \n- The token used for the refresh is expired\
+        \ once a refresh token is generated.\n\n >> **Note:** The default timeout\
+        \ for tokens is configurable.\n \n"
+      parameters:
+      - name: X-Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "This is a JSON object containing the refresh token. In addition\
+            \ to the refresh token this response contains details regarding the users\
+            \ roles, permissions, and licenses."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseRefreshV2'
+        "400":
+          description: Bad Rquest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    RoleBasicV2:
+      required:
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role
+          example: "22"
+        name:
+          type: string
+          description: Name of role
+          example: "AAE_Bot_Developer"
+    LicenseFeature:
+      type: string
+      description: License feature
+      enum:
+      - DEVELOPMENT
+      - RUNTIME
+      - ANALYTICSCLIENT
+      - ATTENDEDRUNTIME
+      - DISCOVERYBOTANALYZER
+      - DISCOVERYBOTRECORDER
+      - AARIUSER
+      - CITIZENDEVELOPER
+      - CLOUDBOTRUNNER
+    AuthRequest:
+      type: object
+      required:
+        - username
+      anyOf:
+        - required: [password]
+        - required: [apiKey]
+      properties:
+          username:
+            type: string
+            description: The user's username.
+            example: jdoe
+          password:
+            type: string
+            description: The user's password. Either password or apiKey is used.
+              Both cannot be used together.
+            example: mypassword@123
+          apiKey:
+            type: string
+            description: apiKey can be used as a password for any authentication type.
+            example: Vie;Z:IvtAhY0NU7baRLYEeIYUJSKO
+          multipleLogin:
+            type: boolean
+            description: "Allow or disallow multiple login. For more information on\
+              \ multilogin, see [Multi Login user](https://docs.automationanywhere.com/csh?context=csh-multi-login-user)."
+            example: false
+
+        
+    UserV2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific user.
+          example: "9"
+        username:
+          type: string
+          description: User name of the user.
+          example: jdoe
+        domain:
+          type: string
+          description: ActiveDirectory(LDAP) domain
+        firstName:
+          type: string
+          description: First name of the user.
+          example: John
+        lastName:
+          type: string
+          description: Last name of the user.
+          example: Doe
+        principalId:
+          type: string
+          example: "9"
+        email:
+          type: string
+          description: Email id of the user.
+          example: a@a.com
+        emailVerified:
+          description: Confirms email verification
+          type: boolean
+          example: true
+        passwordSet:
+          type: boolean
+          example: true
+        questionsSet:
+          type: boolean
+          example: true
+        enableAutoLogin:
+          type: boolean
+          example: true
+        licenseFeatures:
+          type: array
+          description: License assigned to the user.
+          items:
+            $ref: '#/components/schemas/LicenseFeature'
+        roles:
+          type: array
+          description: Roles assigned to the user.
+          items:
+            $ref: '#/components/schemas/RoleBasicV2'
+        multipleLoginAllowed:
+          type: boolean
+          description: Mutliple login status
+          example: false
+        deleted:
+          type: boolean
+          example: false
+    AuthResponseV2:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiIxIiwiY2xpZW50VHlwZS
+        user:
+          $ref: '#/components/schemas/UserV2'
+        permissions:
+          type: array
+          description: Permissions assigned to the user.
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        tenantUuid:
+          type: string
+          description: Tenant uuid of the logged in user
+          example: 4630ea50-31da-4ae9-912e-ef8b235f883b
+        ttlSeconds:
+          type: string
+          description: The ttlSeconds parameter is only relevant for refresh tokens. This value is ignored in the initial authentication response.
+          example: "0"
+    AuthResponseRefreshV2:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiIxIiwiY2xpZW50VHlwZS
+        user:
+          $ref: '#/components/schemas/UserV2'
+        permissions:
+          type: array
+          description: Permissions assigned to the user.
+          items:
+            $ref: '#/components/schemas/GlobalPermission'
+        tenantUuid:
+          type: string
+          description: Tenant uuid of the logged in user
+          example: 4630ea50-31da-4ae9-912e-ef8b235f883b
+        ttlSeconds:
+          type: string
+          description: Time in seconds for which the token is active
+          example: "1200"  
+    GlobalPermission:
+      type: object
+      properties:
+        action:
+          type: string
+          description: The action that the user is allowed to perform
+          example: View
+        resourceType:
+          type: string
+          description: The resource on which the action is allowed
+          example: Settings
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+        details:
+          type: string
+          description: More details of the error message
+    RefreshAuthV2Request:
+      type: object
+      properties:
+        token:
+          type: string
+          description: current JWT token. Enter the token you want to refresh.
+          example: eyJhbGciOiJSUzUxMiJ9.eyJzdWI
+  responses:
+    "400":
+      description: Bad Rquest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-original-swagger-version: "2.0"

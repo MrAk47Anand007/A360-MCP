@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-06-05T06:16:50.965Z",
+  "swaggerFiles": [
+    "swagger-export/swagger/api/v2/auth-api-supported.yaml",
+    "swagger-export/swagger/api/v2/repository-management-api.yaml",
+    "swagger-export/swagger/api/v3/deploy-api-supported.yaml",
+    "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml",
+    "swagger-export/swagger/api/v2/packages-api-supported.yaml"
+  ],
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/v2/authentication",
+      "source": "swagger-export/swagger/api/v2/auth-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/authentication/token",
+      "source": "swagger-export/swagger/api/v2/auth-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/file/list",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "PUT",
+      "path": "/v2/repository/folders/{folderid}",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/folders/{folderid}",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v2/repository/folders/{folderid}",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/folders/{folderid}/list",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/workspaces/{workspaceType}/files/list",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v2/repository/files/{id}",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "PUT",
+      "path": "/v2/repository/role/{roleid}/permissions",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/repository/role/{roleid}/folder/{folderid}/permissions",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/repository/files/{fileid}/content",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/repository/files/{fileid}/parents",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/repository/files/{fileid}/dependencies",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "PUT",
+      "path": "/v2/repository/files/{fileid}/dependencies/{workspaceId}",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/files/packagesVersionUpdate",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/recover",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/repository/files/version/assignLabel",
+      "source": "swagger-export/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v3/automations/deploy",
+      "source": "swagger-export/swagger/api/v3/deploy-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v3/activity/list",
+      "source": "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "method": "GET",
+      "path": "/v3/activity/execution/{id}",
+      "source": "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v3/activity/manage",
+      "source": "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v3/activity/metrics",
+      "source": "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "method": "POST",
+      "path": "/v2/packages/{name}/versions/usage",
+      "source": "swagger-export/swagger/api/v2/packages-api-supported.yaml"
+    }
+  ]
+}

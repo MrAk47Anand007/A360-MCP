@@ -1,0 +1,727 @@
+openapi: 3.0.1
+
+info:
+  title: Bot Deploy API (v4)
+  description: Use the v4 Bot Deploy API to deploy automations from the public workspace to Bot Runner devices. To deploy automations you must have the following permissions.
+     <ul><li> View and Run my bots feature permission</li>
+      <li> Run and schedule permissions for the folders that contain the bots</li>
+      <li> Access to Bot Runner licensed users</li>
+      <li> Access to either a default device or a device pool </li></ul>
+   All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: 1.0.0
+
+security:
+  - AccessToken: []
+
+paths:
+  /automations/deploy:
+    post:
+      summary: Deploy attended or unattended or headless automations.
+      description: 
+       <p> A user with access to bot runners or a bot user with bot runner license can do unattended deployment. A user with bot creator, attended runtime, or citizen developer license can do attended deployments. You can also pass variables to bots when they are deployed.
+         The request body example below shows the unattended deployment type. You can also run attended deployment by replacing <i>UnAttendedRequest</i> parameters with <i>AttendedRequest</i> parameters. You can view the <i>AttendedRequest</i> parameters in the <b>Schemas</b> section at the end of the swagger.
+        You cannot specify both <i>UnAttendedRequest</i> and <i>AttendedRequest</i> at the same time.</p>
+       <p> <b>Note:</b> </p> 
+       <ul>
+       <li>V4 Bot Deploy API has all the functionalities of the V3 Bot Deploy API. The reason V4 Bot Deploy is introduced is to clearly segregate between attended and unattended deployments. The parameters for the attended deployment is different from the unattended deployment parameters. Unlike V3 Bot Deploy API, V4 Bot Deploy API is extendable for any new use cases. It is recommended to use the enhanced V4 Bot Deploy API over the V3 Bot Deploy API.</li>
+       <li>Bot deploy request can be made without any input fields. If you specify inputs, make sure that the bot to successfully receive these mapped in values, the variable for that bot must be marked as input. Additionally, the name of the variable in the bot has to match the value that is being mapped in the request body.</li></ul>
+       <p>Example value specified below is for List Bot Input. You can view the other Bot input types in the <b>Schemas</b> section at the end of the swagger.</p>
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeploymentRequest"
+        required: true
+      tags:
+        - automations
+      responses:
+        "200":
+          description: A deployment id is returned, that can be used to check the status of
+            deployment using the callback.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeployResponse"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+servers:
+  - url: /v4
+
+components:
+  
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header
+  
+  schemas:
+    DeploymentRequest:
+      type: object
+      required:
+        - botId
+        - deployInput
+      properties:
+        botId:
+          type: integer
+          description: Bot Id of bot to be deployed.
+          example: 21
+        automationName:
+          type: string
+          description: Name of the automation being deployed.
+          example: SampleBot
+        description:
+          type: string
+          description: Description of the automation being deployed.
+          example: My first bot deploy using api
+        botLabel:
+          type: string
+          description: Label for the bot being deployed.
+        runElevated:
+          type: boolean
+          description: Specifies whether to deploy the bot with elevated permissions.
+        hideBotAgentUi:
+          type: boolean
+          description: Specifies whether to hide the bot agent UI.
+        callbackInfo:
+          $ref: "#/components/schemas/CallbackInfo"
+        automationPriority:
+          $ref: "#/components/schemas/AutomationPriority"
+        botInput:
+          $ref: "#/components/schemas/botInput"
+
+      oneOf:
+            - $ref: "#/components/schemas/AttendedRequest"
+            - $ref: "#/components/schemas/UnattendedRequest"
+            - $ref: "#/components/schemas/HeadlessRequest"
+    
+    AttendedRequest:
+      type: object
+      description: Attended deployments can be done on any device accessible by the user
+      properties:
+        attendedRequest:
+          $ref: "#/components/schemas/attendedRequestObj"   
+          
+    attendedRequestObj:
+      type: object
+      properties:
+        deploymentDeviceId:
+          type: integer
+          description: unique id of the device on the which bot has to be executed.
+        queueDeployment:
+          type: boolean
+          description: Specifies whether the deployment has to be queued
+        launchInChildWindow:
+          type: boolean
+          description: Specifies whether the bot needs to launched in a child window on the device.
+        launchInVirtualDesktop:
+          type: boolean
+          description: Specifies whether the bot needs to launched in a virtual desktop on the device.
+      oneOf:
+        - required:
+          - launchInChildWindow
+        - required:
+          - launchInVirtualDesktop
+
+    UnattendedRequest:
+      type: object
+      description: Unattended deployments can be done on any devices associatged to the runAsUser
+      properties:
+        unattendedRequest:
+          $ref: "#/components/schemas/unattendedRequestObj" 
+
+    unattendedRequestObj:
+     type: object
+     required:
+        - runAsUserIds
+        - deviceUsageType
+     properties:
+      runAsUserIds:
+            type: array
+            items:
+              type: integer
+              description: List of runAs Users ids to deploy bot. The bot will be
+                deployed on associated default device for each runAsUser or on 1
+                of the devices from the device pool(s) if provided
+              example: 639
+      poolIds:
+          type: array
+          items:
+            type: integer
+            description: List of pool Ids. The bot will be deployed in one of the device
+              from pool(s) for each runAs User.
+            example: 2
+      numOfRunAsUsersToUse:
+          type: integer
+          description: Used to indicate how many run as users should be used from the list of runAsUserIds provided.
+            <li>System will pick the specified number of runAsUsers with the least number of tasks queued for the use at the moment of deploy request. </li>
+            <li> If 0 then all the users will be used.</li>
+            <li> If the number is greater than the number of runAsUsers provided or less than 0 it will error out.</li>
+      deviceUsageType:
+          type: string
+          description: deviceUsageType specifies how the deployment devices have to be used.
+            <li> PREFER_DEFAULT_DEVICE - If runner has default device and is busy will use device from pool. poolIds cannot be empty.</li>
+            <li> RUN_ON_POOL_DEVICES - Deployment will use device from pool irrespective of user's default device. poolIds cannot be empty.</li>
+            <li> RUN_ONLY_ON_DEFAULT_DEVICE - Deployment will use runner's default device even when pool(s) is provided. All user(s) must have default devices. </li>
+          enum:
+            - PREFER_DEFAULT_DEVICE
+            - RUN_ON_POOL_DEVICES
+            - RUN_ONLY_ON_DEFAULT_DEVICE
+
+    HeadlessRequest:
+      type: object
+      description: Headless deployments are done on one of the On-Demand Bot Runner devices.
+      properties:
+        headlessRequest:
+          $ref: "#/components/schemas/headlessRequestObj"
+
+    headlessRequestObj:
+      type: object
+      properties:
+        numberOfExecutions:
+          type: integer
+          description: Number of executions to run for a given Headless request.
+        sharedRunAsUserId:
+          type: integer
+          description: RunAsUser's id to deploy bot.
+          example: 639
+    
+    CallbackInfo:
+      type: object
+      required:
+        - url
+      description: callbackInfo provides the callback API URL and authentication token for the callback server. The API parameters such as device ID, user ID, deployment ID, status of the bot, and bot output details are captured as a payload in the callback server. 
+         <p>After the bot is deployed, the Control Room sends the deployment status and output variable values to this callback server. For example, to test the callback, you can create an account in https://pipedream.com/ and use the endpoint (similar to https://eogp1yk2w1o3ec2.m.pipedream.net) to receive the status and the output variable values.</p>
+         <p><b>Note:</b> The callback server must accept POST calls to receive the bot execution data and the deployment status from the Control Room. </p>
+      properties:
+        url:
+          type: string
+          description: Callback API URL.
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+            description: Callback API headers. Headers may contain authentication token,
+              content type etc. Both key & value are of type string.
+      example:
+        url: https://callbackserver.com/storeBotExecutionStatus
+        headers:
+          X-Authorization: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiI0Ii
+    AutomationPriority:
+      type: string
+      enum:
+        - PRIORITY_MEDIUM
+        - PRIORITY_HIGH
+        - PRIORITY_LOW
+      default: PRIORITY_MEDIUM
+      description: Priority of the automation.
+    DeployResponse:
+      type: object
+      properties:
+        deploymentId:
+          type: string
+          description: Deployment  ID created.
+          example: 120a1243-a434-22aa-ab3f-f1123ae2523b
+    AttributeType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+        - BOOLEAN
+        - FILE
+        - ITERATOR
+        - LIST
+        - DICTIONARY
+        - TABLE
+        - VARIABLE
+        - CONDITIONAL
+        - WINDOW
+        - TASKBOT
+        - DATETIME
+        - UIOBJECT
+        - RECORD
+        - EXCEPTION
+        - CREDENTIAL
+        - COORDINATE
+        - IMAGE
+        - REGION
+        - PROPERTIES
+        - TRIGGER
+        - CONDITIONALGROUP
+        - FORM
+        - FORMELEMENT
+        - HOTKEY
+        - WORKITEM
+      default: STRING
+      example: LIST
+
+    botInput:
+     type: object
+     properties:
+      iTestList:
+        "$ref": "#/components/schemas/iTestList"
+
+    iTestList:
+     type: object
+     properties:
+      type:
+        $ref: "#/components/schemas/AttributeType"
+      list:
+        type: array
+        items:
+          type: object
+          properties:  
+            type: 
+              type: string
+            string: 
+              type: string
+        example:
+        - type: STRING
+          string: TestValues1
+        - type: STRING
+          string: TestValue2
+    Value:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        expression:
+          type: string
+        string:
+          type: string
+        number:
+          type: string
+        boolean:
+          type: string
+        repository:
+          type: string
+        variableName:
+          type: string
+        packageId:
+          type: string
+        packageName:
+          type: string
+        iteratorId:
+          type: string
+        iteratorName:
+          type: string
+        conditionalId:
+          type: string
+        conditionalName:
+          type: string
+        table:
+          $ref: "#/components/schemas/Table"
+        dictionary:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dictionary"
+        taskbotFile:
+          $ref: "#/components/schemas/TaskbotFile"
+        taskbotInput:
+          $ref: "#/components/schemas/TaskbotInput"
+        taskbotOutput:
+          $ref: "#/components/schemas/TaskbotOutput"
+        window:
+          $ref: "#/components/schemas/Window"
+        uiObject:
+          $ref: "#/components/schemas/UIObject"
+        record:
+          $ref: "#/components/schemas/Record"
+        exceptionName:
+          type: string
+        credential:
+          $ref: "#/components/schemas/CredentialObject"
+        uiObjectWindow:
+          $ref: "#/components/schemas/WindowValue"
+        coordinate:
+          $ref: "#/components/schemas/Coordinate"
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        triggerName:
+          type: string
+        file:
+          $ref: "#/components/schemas/NestedStringValue"
+        formElementId:
+          type: string
+        formElementType:
+          type: string
+        formInstanceId:
+          type: string
+        hotKey:
+          $ref: "#/components/schemas/HotKey"
+        queueName:
+          type: string
+        taskbotSelf:
+          type: boolean
+          format: boolean
+
+    Dictionary:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          $ref: "#/components/schemas/Value"
+    Table:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/components/schemas/Schema"
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Row"
+    Row:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/Value"
+    Schema:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/AttributeType"
+    TaskbotFile:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        string:
+          type: string
+        repository:
+          type: boolean
+          format: boolean
+        expression:
+          type: string
+    TaskbotInput:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        dictionary:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dictionary"
+    TaskbotOutput:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        dictionary:
+          $ref: "#/components/schemas/Dictionary"
+    Window:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        class:
+          type: string
+        handle:
+          type: integer
+          format: int64
+        isChild:
+          type: boolean
+          format: boolean
+        location:
+          $ref: "#/components/schemas/WindowLocation"
+        size:
+          $ref: "#/components/schemas/WindowSize"
+        presetType:
+          $ref: "#/components/schemas/WindowPreset"
+    WindowLocation:
+      type: object
+      properties:
+        top:
+          type: integer
+          format: int32
+        left:
+          type: integer
+          format: int32
+    WindowSize:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+    WindowPreset:
+      type: string
+      enum:
+        - NONE
+        - CURRENTLY_ACTIVE
+        - DESKTOP
+        - TASKBAR
+      default: NONE
+    UIObject:
+      type: object
+      properties:
+        blob:
+          type: string
+          format: byte
+        controlType:
+          $ref: "#/components/schemas/UIObjectControlType"
+        technologyType:
+          $ref: "#/components/schemas/UIObjectTechnologyType"
+        criteria:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/UIObjectSelectionCriterion"
+        capture:
+          $ref: "#/components/schemas/RectangleImageCapture"
+    UIObjectControlType:
+      type: string
+      enum:
+        - UNKNOWN_CONTROL
+        - BUTTON
+        - TEXTBOX
+        - LINK
+        - RADIO
+        - CHECKBOX
+        - COMBOBOX
+        - MENUBAR
+        - LISTVIEW
+        - TABLE
+        - CALENDAR
+        - DATEPICKER
+        - SLIDER
+        - TREE
+        - PAGETAB
+        - LABEL
+        - SCROLLBAR_HORIZONTAL
+        - DROPDOWN
+        - CLIENT
+        - IMAGE_BUTTON
+        - ANY_CONTROL
+        - PAGETABITEM
+        - SCROLLBAR_VERTICAL
+      default: UNKNOWN_CONTROL
+    UIObjectTechnologyType:
+      type: string
+      enum:
+        - UNKNOWN
+        - MS_ACTIVE_ACCESSIBILITY
+        - MS_UI_AUTOMATION
+        - JAVA
+        - SILVERLIGHT
+        - FLASH
+        - HTML
+        - AISENSE
+        - SAP
+        - ANY_TECHNOLOGY
+      default: UNKNOWN
+    UIObjectSelectionCriterion:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          format: boolean
+        value:
+          $ref: "#/components/schemas/Value"
+    RectangleImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotRectangle:
+          $ref: "#/components/schemas/Rectangle"
+        thumbnailRectangle:
+          $ref: "#/components/schemas/Rectangle"
+        securelyRecorded:
+          type: boolean
+          format: boolean
+    Record:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/components/schemas/Schema"
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/Value"
+    CredentialObject:
+      type: object
+      properties:
+        name:
+          type: string
+        lockerName:
+          type: string
+        attributeName:
+          type: string
+    WindowValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        window:
+          $ref: "#/components/schemas/Window"
+        expression:
+          type: string
+    Coordinate:
+      type: object
+      properties:
+        x:
+          $ref: "#/components/schemas/Value"
+        y:
+          $ref: "#/components/schemas/Value"
+        capture:
+          $ref: "#/components/schemas/PointImageCapture"
+    PointImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotPoint:
+          $ref: "#/components/schemas/Point"
+        screenshotX:
+          type: integer
+          format: int32
+        screenshotY:
+          type: integer
+          format: int32
+        screenshotWidth:
+          type: integer
+          format: int32
+        screenshotHeight:
+          type: integer
+          format: int32
+        securelyRecorded:
+          type: boolean
+          format: boolean
+    Point:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+    Region:
+      type: object
+      properties:
+        x:
+          $ref: "#/components/schemas/Value"
+        y:
+          $ref: "#/components/schemas/Value"
+        width:
+          $ref: "#/components/schemas/Value"
+        height:
+          $ref: "#/components/schemas/Value"
+        capture:
+          $ref: "#/components/schemas/RectangleImageCapture"
+    NestedStringValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        string:
+          type: string
+        expression:
+          type: string
+    HotKey:
+      type: object
+      properties:
+        key:
+          type: string
+        modifierKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/HotKeyModifierKey"
+    HotKeyModifierKey:
+      type: string
+      enum:
+        - CONTROL
+        - SHIFT
+        - ALT
+        - WINDOWS
+        - ALT_GRAPH
+      default: CONTROL
+    Property:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/Value"
+        value:
+          $ref: "#/components/schemas/Value"
+        enabled:
+          type: boolean
+          format: boolean
+    Rectangle:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error Message
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message
+    

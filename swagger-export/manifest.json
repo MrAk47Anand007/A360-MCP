@@ -1,0 +1,296 @@
+{
+  "source": "https://community.cloud.automationanywhere.digital/swagger/",
+  "count": 29,
+  "specs": [
+    {
+      "label": "Authentication API",
+      "rawPath": "/swagger/api/v1/auth-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/auth-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 4974,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/auth-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/auth-api-supported.yaml"
+    },
+    {
+      "label": "Audit API",
+      "rawPath": "/swagger/api/v1/audit-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/audit-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 12914,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/audit-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/audit-api-supported.yaml"
+    },
+    {
+      "label": "Device API",
+      "rawPath": "/swagger/api/v1/device-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/device-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 8565,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/device-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/device-api-supported.yaml"
+    },
+    {
+      "label": "Automations API",
+      "rawPath": "/swagger/api/v1/automations-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/automations-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 28632,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/automations-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/automations-api-supported.yaml"
+    },
+    {
+      "label": "Trigger API",
+      "rawPath": "/swagger/api/v1/trigger-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/trigger-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 5892,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/trigger-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/trigger-api-supported.yaml"
+    },
+    {
+      "label": "API Task Execution",
+      "rawPath": "/swagger/api/v1/api-task-execution-details.yaml",
+      "file": "swagger-export/swagger/api/v1/api-task-execution-details.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 14037,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/api-task-execution-details.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/api-task-execution-details.yaml"
+    },
+    {
+      "label": "Code Analysis API",
+      "rawPath": "/swagger/api/v1/policy-management-api.yaml",
+      "file": "swagger-export/swagger/api/v1/policy-management-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 2180,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/policy-management-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/policy-management-api.yaml"
+    },
+    {
+      "label": "AI Agent Studio API",
+      "rawPath": "/swagger/api/v1/ai-agent-studio-api.yaml",
+      "file": "swagger-export/swagger/api/v1/ai-agent-studio-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 12683,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/ai-agent-studio-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/ai-agent-studio-api.yaml"
+    },
+    {
+      "label": "ACC Automations dashboard API",
+      "rawPath": "/swagger/api/v1/acc-automations-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v1/acc-automations-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 66421,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v1/acc-automations-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v1/acc-automations-api-supported.yaml"
+    },
+    {
+      "label": "Authentication API",
+      "rawPath": "/swagger/api/v2/auth-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/auth-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 10525,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/auth-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/auth-api-supported.yaml"
+    },
+    {
+      "label": "User Management API",
+      "rawPath": "/swagger/api/v2/um-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/um-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 52413,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/um-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/um-api-supported.yaml"
+    },
+    {
+      "label": "Credential Vault API",
+      "rawPath": "/swagger/api/v2/cv-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/cv-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 45958,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/cv-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/cv-api-supported.yaml"
+    },
+    {
+      "label": "Bot Execution Orchestrator API",
+      "rawPath": "/swagger/api/v2/bot-execution-orchestrator-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/bot-execution-orchestrator-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 11096,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/bot-execution-orchestrator-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "label": "Repository Management API",
+      "rawPath": "/swagger/api/v2/repository-management-api.yaml",
+      "file": "swagger-export/swagger/api/v2/repository-management-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 88541,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/repository-management-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/repository-management-api.yaml"
+    },
+    {
+      "label": "BotInsight API",
+      "rawPath": "/swagger/api/v2/botinsight-api.yaml",
+      "file": "swagger-export/swagger/api/v2/botinsight-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 18120,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/botinsight-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/botinsight-api.yaml"
+    },
+    {
+      "label": "BLM API",
+      "rawPath": "/swagger/api/v2/blm-api.yaml",
+      "file": "swagger-export/swagger/api/v2/blm-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 16772,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/blm-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/blm-api.yaml"
+    },
+    {
+      "label": "Device Pool API",
+      "rawPath": "/swagger/api/v2/device-pools-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/device-pools-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 18698,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/device-pools-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/device-pools-api-supported.yaml"
+    },
+    {
+      "label": "License API",
+      "rawPath": "/swagger/api/v2/license-api.yaml",
+      "file": "swagger-export/swagger/api/v2/license-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 11032,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/license-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/license-api.yaml"
+    },
+    {
+      "label": "Process Composer",
+      "rawPath": "/swagger/api/v2/aari-process.yaml",
+      "file": "swagger-export/swagger/api/v2/aari-process.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 22246,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/aari-process.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/aari-process.yaml"
+    },
+    {
+      "label": "Automations API",
+      "rawPath": "/swagger/api/v2/automations-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/automations-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 42218,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/automations-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/automations-api-supported.yaml"
+    },
+    {
+      "label": "Code Analysis API",
+      "rawPath": "/swagger/api/v2/policy-management-api.yaml",
+      "file": "swagger-export/swagger/api/v2/policy-management-api.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 4724,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/policy-management-api.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/policy-management-api.yaml"
+    },
+    {
+      "label": "Team Management API",
+      "rawPath": "/swagger/api/v2/aari-team-management.yaml",
+      "file": "swagger-export/swagger/api/v2/aari-team-management.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 7666,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/aari-team-management.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/aari-team-management.yaml"
+    },
+    {
+      "label": "Packages Usage API",
+      "rawPath": "/swagger/api/v2/packages-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v2/packages-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 8236,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v2/packages-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v2/packages-api-supported.yaml"
+    },
+    {
+      "label": "Bot deploy API",
+      "rawPath": "/swagger/api/v3/deploy-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v3/deploy-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 24677,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v3/deploy-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v3/deploy-api-supported.yaml"
+    },
+    {
+      "label": "Workload Management API",
+      "rawPath": "/swagger/api/v3/wlm-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v3/wlm-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 93280,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v3/wlm-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v3/wlm-api-supported.yaml"
+    },
+    {
+      "label": "Bot Execution Orchestrator API",
+      "rawPath": "/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 38609,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v3/bot-execution-orchestrator-api-supported.yaml"
+    },
+    {
+      "label": "Bot Deployment API",
+      "rawPath": "/swagger/api/v4/deploy-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v4/deploy-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 22001,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v4/deploy-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v4/deploy-api-supported.yaml"
+    },
+    {
+      "label": "Workload Management API",
+      "rawPath": "/swagger/api/v4/wlm-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v4/wlm-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 34547,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v4/wlm-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v4/wlm-api-supported.yaml"
+    },
+    {
+      "label": "Migration API",
+      "rawPath": "/swagger/api/v4/migration-api-supported.yaml",
+      "file": "swagger-export/swagger/api/v4/migration-api-supported.yaml",
+      "status": 200,
+      "contentType": "application/octet-stream",
+      "textLength": 14741,
+      "uiUrl": "https://community.cloud.automationanywhere.digital/swagger/ui/?url=/swagger/api/v4/migration-api-supported.yaml",
+      "rawUrl": "https://community.cloud.automationanywhere.digital/swagger/api/v4/migration-api-supported.yaml"
+    }
+  ]
+}

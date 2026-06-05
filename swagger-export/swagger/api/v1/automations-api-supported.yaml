@@ -1,0 +1,1200 @@
+swagger: '2.0'
+
+info:
+  title: Bot Scheduler API
+  description: "Use the Bot Scheduler APIs to create, update, delete, and return details on scheduled automations.
+      <br>
+      
+      <b>Prerequisites</b><br>
+      Ensure that you are allocated the following resources:
+      <li><b>Schedule my bots to run</b> feature permission.</li>
+      <li><b>Run and schedule</b> permissions for the folders that contain the bots.</li>
+      <li>Access to the Bot Runner licensed users.</li>
+      <li>Access to either a default device or a device pool</li><br>
+      
+      **Note:** If the user associated with the Bot Runner license has a default device assigned to their account, the bot deploys on that device. If no default device is assigned, or you want to select a different device, then you must specify a device pool.
+
+      
+      All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`"
+  version: 1.0.0
+
+basePath: /v1
+
+schemes:
+  - http
+  - https
+
+produces:
+  - application/json
+
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: |
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+
+security:
+  - AccessToken: []
+
+paths:
+
+  /schedule/automations:
+    post:
+      deprecated: true
+      summary: Create an automation schedule
+      description: >-
+        Use this API to schedule a bot to run on an unattended Bot Runner either one time or on a recurring basis. Ensure that you are allocated the following resources:
+                  <li>View and Run my bots feature permission
+                  <li>Run and schedule permissions for the folders that contain the bots
+                  <li>Access to Bot Runner licensed users
+                  <li>Access to either a default device or a device pool
+
+        <p> <b>Note:</b> Bot schedule can be set up with or without any input fields. If you specify inputs, make sure that the bot to successfully receive these mapped in values, the variable for that bot must be marked as input. Additionally, the name of the variable in the bot has to match the value that is being mapped in the request body.</p>
+        <p>Example value specified below is for Dictionary Bot Input. You can view the other Bot input types in the <b>Models</b> section at the end of the swagger.
+
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ScheduleAutomationRequest'
+      tags:
+        - Automations
+      responses:
+        '200':
+          description: Valid Request.
+          schema:
+            $ref: '#/definitions/ScheduleAutomationResponse'
+        '400':
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Authentication required.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found.
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        '500':
+          description: Server error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /schedule/automations/{id}:
+    put:
+      deprecated: true
+      summary: Update an automation schedule
+      description: "Use this API to update the schedule of an automation. You must specify the automation ID."
+      consumes:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the automation"
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ScheduleAutomationRequest'
+      tags:
+        - Automations
+      responses:
+        '200':
+          description: Valid Request.
+          schema:
+            $ref: '#/definitions/ScheduleAutomationResponse'
+        '400':
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Authentication required.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found.
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        '500':
+          description: Server error.
+          schema:
+            $ref: '#/definitions/Error'
+
+    delete:
+      deprecated: true
+      summary: Delete automation
+      description: Use this API to delete an existing automation. You must specify the automation ID.
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the automation"
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Automations
+      responses:
+        '204':
+          description: Return 'nocontent'
+        '404':
+          description: Not Found.
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        '500':
+          description: Server error.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /schedule/automations/list:
+    post:
+      deprecated: true
+      summary: "List automations available to the user"
+      description: "Use this API to retrieve a list of automations available to the user. You must be assigned a role that includes the View and manage all scheduled activity from my Folders permission.
+           
+           
+           You can send an API request with or without filter parameters. An API request without any filter parameters specified, retrieves details of all the automations in the Control Room. You can use the filter parameters to retrieve specific automation details. For more information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html)."
+      tags:
+        - Automations
+      consumes:
+        - "application/json"
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FilterRequest'
+      responses:
+        '200':
+          description: >-
+            Returns list of automations available to the user
+          schema:
+            $ref: '#/definitions/ScheduleFilterResponse'
+        '400':
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Authentication required.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found.
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        '500':
+          description: Server error.
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+
+  AttributeType:
+    type: string
+    enum:
+      - STRING
+      - NUMBER
+      - BOOLEAN
+      - FILE
+      - ITERATOR
+      - LIST
+      - DICTIONARY
+      - TABLE
+      - VARIABLE
+      - CONDITIONAL
+      - WINDOW
+      - TASKBOT
+      - DATETIME
+      - UIOBJECT
+      - RECORD
+      - EXCEPTION
+      - CREDENTIAL
+      - COORDINATE
+      - IMAGE
+      - REGION
+      - PROPERTIES
+      - TRIGGER
+      - CONDITIONALGROUP
+      - FORM
+      - FORMELEMENT
+      - HOTKEY
+      - WORKITEM
+      - REGEX
+      - PATTERN
+      - FILEREGEX
+      - SESSION
+    default: STRING
+
+  AutomationStatus:
+    type: string
+    enum:
+      - DRAFT
+      - ACTIVE
+      - PAUSED
+      - INACTIVE
+      - COMPLETED
+      - DELETED
+      - ACTIVE_WITH_ERROR
+    default: DRAFT
+
+  Coordinate:
+    type: object
+    properties:
+      x:
+        $ref: '#/definitions/Value'
+      'y':
+        $ref: '#/definitions/Value'
+      capture:
+        $ref: '#/definitions/PointImageCapture'
+
+  CredentialObject:
+    type: object
+    properties:
+      name:
+        type: string
+      lockerName:
+        type: string
+      attributeName:
+        type: string
+
+  DailyRecurrence:
+    type: object
+    description: Specify the daily interval to schedule the bot
+    properties:
+      interval:
+        type: integer
+        format: int32
+
+  DayOfWeek:
+    type: string
+    enum:
+      - SUN
+      - MON
+      - TUE
+      - WED
+      - THU
+      - FRI
+      - SAT
+    default: SUN
+
+  Filter:
+    type: object
+    properties:
+      operator:
+        $ref: '#/definitions/FilterOperator'
+      operands:
+        type: array
+        items:
+          $ref: '#/definitions/Filter'
+        example:
+          operator: substring
+          field: status
+          value: DRAFT
+      field:
+        type: string
+        description: Filtering field can be either name, lastModified, path, or folder.
+        example: name
+      value:
+        type: string
+        description: Filter value
+        example: "My bot_2.22.11.16.15.37.33.admin"
+
+  FilterOperator:
+    type: string
+    enum:
+      - NONE
+      - lt
+      - le
+      - eq
+      - ne
+      - ge
+      - gt
+      - substring
+      - and
+      - or
+      - not
+    default: NONE
+
+  FilterRequest:
+    type: object
+    description: 'Filter request, which includes filtering, sorting, and pagination rules'
+    properties:
+      filter:
+        $ref: '#/definitions/Filter'
+      sort:
+        type: array
+        items:
+          $ref: '#/definitions/Sort'
+      page:
+        $ref: '#/definitions/PageRequest'
+
+  HotKey:
+    type: object
+    properties:
+      key:
+        type: string
+      modifierKeys:
+        type: array
+        items:
+          $ref: '#/definitions/HotKeyModifierKey'
+
+  HotKeyModifierKey:
+    type: string
+    enum:
+      - CONTROL
+      - SHIFT
+      - ALT
+      - WINDOWS
+      - ALT_GRAPH
+    default: CONTROL
+
+  KeyValueItem:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        $ref: '#/definitions/Value'
+
+  MonthOfYear:
+    type: string
+    enum:
+      - JAN
+      - FEB
+      - MAR
+      - APR
+      - MAY
+      - JUN
+      - JUL
+      - AUG
+      - SEP
+      - OCT
+      - NOV
+      - DEC
+    default: JAN
+
+  MonthlyDateRecurrence:
+    type: object
+    properties:
+      monthsOfYear:
+        type: array
+        items:
+          $ref: '#/definitions/MonthOfYear'
+      dateOfMonth:
+        type: integer
+        format: int32
+
+  MonthlyWeekDayRecurrence:
+    type: object
+    properties:
+      monthsOfYear:
+        type: array
+        items:
+          $ref: '#/definitions/MonthOfYear'
+      weekOfMonth:
+        $ref: '#/definitions/WeekOfMonth'
+      dayOfWeek:
+        $ref: '#/definitions/DayOfWeek'
+
+  NestedNumberValue:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      number:
+        type: string
+      expression:
+        type: string
+
+  NestedStringValue:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      string:
+        type: string
+      expression:
+        type: string
+
+  PageRequest:
+    type: object
+    description: Pagination rules, allows you to filter based on desired page
+    properties:
+      offset:
+        type: integer
+        format: int32
+        description: Page starting index
+      length:
+        type: integer
+        format: int32
+        description: Page length
+        example: 100
+  PageResponse:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int32
+      total:
+        type: integer
+        format: int32
+      totalFilter:
+        type: integer
+        format: int32
+  Point:
+    type: object
+    properties:
+      x:
+        type: integer
+        format: int32
+      'y':
+        type: integer
+        format: int32
+  PointImageCapture:
+    type: object
+    properties:
+      thumbnailMetadataPath:
+        type: string
+      screenshotMetadataPath:
+        type: string
+      screenshotPoint:
+        $ref: '#/definitions/Point'
+      screenshotX:
+        type: integer
+        format: int32
+      screenshotY:
+        type: integer
+        format: int32
+      screenshotWidth:
+        type: integer
+        format: int32
+      screenshotHeight:
+        type: integer
+        format: int32
+      securelyRecorded:
+        type: boolean
+        format: boolean
+  Property:
+    type: object
+    properties:
+      name:
+        $ref: '#/definitions/Value'
+      value:
+        $ref: '#/definitions/Value'
+      enabled:
+        type: boolean
+        format: boolean
+  Record:
+    type: object
+    properties:
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/Schema'
+      values:
+        type: array
+        items:
+          $ref: '#/definitions/Value'
+  Rectangle:
+    type: object
+    properties:
+      x:
+        type: integer
+        format: int32
+      'y':
+        type: integer
+        format: int32
+      width:
+        type: integer
+        format: int32
+      height:
+        type: integer
+        format: int32
+  RectangleImageCapture:
+    type: object
+    properties:
+      thumbnailMetadataPath:
+        type: string
+      screenshotMetadataPath:
+        type: string
+      screenshotRectangle:
+        $ref: '#/definitions/Rectangle'
+      thumbnailRectangle:
+        $ref: '#/definitions/Rectangle'
+      securelyRecorded:
+        type: boolean
+        format: boolean
+  RegexFile:
+    type: object
+    properties:
+      folder:
+        $ref: '#/definitions/NestedStringValue'
+      name:
+        $ref: '#/definitions/RegexFileName'
+  RegexFileName:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/NestedStringValue'
+      regexFlags:
+        $ref: '#/definitions/RegexFlags'
+  RegexFlags:
+    type: object
+    properties:
+      multiLine:
+        type: boolean
+        format: boolean
+      dotAll:
+        type: boolean
+        format: boolean
+      caseInsensitive:
+        type: boolean
+        format: boolean
+  Region:
+    type: object
+    properties:
+      x:
+        $ref: '#/definitions/Value'
+      'y':
+        $ref: '#/definitions/Value'
+      width:
+        $ref: '#/definitions/Value'
+      height:
+        $ref: '#/definitions/Value'
+      capture:
+        $ref: '#/definitions/RectangleImageCapture'
+  RepeatOccurrence:
+    type: object
+    properties:
+      runEvery:
+        type: integer
+        format: int64
+        description: Repeat schedule time
+        example: 2
+      timeUnit:
+        $ref: '#/definitions/TimeUnit'
+      endTime:
+        type: string
+        example: "23:59"
+  Row:
+    type: object
+    properties:
+      values:
+        type: array
+        items:
+          $ref: '#/definitions/Value'
+  ScheduleAutomationRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the automation
+        example: "My bot_2.22.11.16.15.37.33.admin"
+      fileId:
+        type: integer
+        format: int64
+        description: Unique ID of the file used for automation
+        example: 1163
+      fileName:
+        type: string
+        description: Name specified for the file
+        example: "My bot_2"
+      status:
+        $ref: '#/definitions/AutomationStatus'
+      deviceIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: Device IDs to schedule the automations
+        example: [97, 100]
+      description:
+        type: string
+        description: Text describing the automation
+        example: Schedule automation to run email bot.
+      rdpEnabled:
+        type: boolean
+        format: boolean
+        description: Indicates if remote desktop is enabled
+      scheduleType:
+        $ref: '#/definitions/ScheduleType'
+      dailyRecurrence:
+        $ref: '#/definitions/DailyRecurrence'
+      timeZone:
+        type: string
+        description: Time zone where the schedule is set
+        example: Asia/Calcutta
+      startDate:
+        type: string
+        description: Start date of the automation.
+        example: "2022-11-16"
+      endDate:
+        type: string
+        description: End date of the automation.
+        example: "2022-12-16"
+      startTime:
+        type: string
+        description: Start time of the automation.
+        example: "16:00"
+      repeatEnabled:
+        type: boolean
+        description: Run the schedule repeatedly
+      repeatOccurrence:
+        $ref: '#/definitions/RepeatOccurrence'
+      runAsUserIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: Specify all the run as user IDs
+        example: [133, 170]
+      botInput:
+        type: object
+        $ref: '#/definitions/botinput'
+      poolIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: The device pool IDs to schedule the automation
+        example: [9, 10]
+      workspaceName:
+        type: string
+        description: Private or public workspace the Bot resides
+        example: public
+      overrideDefaultDevice:
+        type: boolean
+        description: If deploying to the default device, set this parameter to false.
+      misfireScheduleConfig:
+        type: boolean
+        description : Controls how missed schedule executions are handled. This can occur if the scheduler is unable to run a job at its intended time due to unforeseen circumstances. If set to true, it will attempt to re-run the missed job as soon as possible. If set to false (default), it will disregard the missed execution and move on to the next scheduled time for the job.
+      numOfRunAsUsersToUse:
+        type: integer
+        format: int64
+        description: Total run as users to use for the automation
+        example: 2
+      runElevated:
+        type: boolean
+        description: Specifies whether to deploy the bot with elevated permissions.
+      automationPriority:
+        $ref: '#/definitions/AutomationPriority'
+      botLabel:
+        type: string
+        example: Test Bot
+        description: Label specified for the bot.
+
+  ScheduleAutomationResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: Unique ID of the automation
+        example: 3
+      name:
+        type: string
+        description: Name specified for the automation
+        example: "My bot_2.22.11.16.15.37.33.admin"
+      fileId:
+        type: integer
+        format: int64
+        description: Unique ID of the file used for automation
+        example: 1163
+      status:
+        $ref: '#/definitions/AutomationStatus'
+      deviceIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: Device IDs to schedule the automations
+        example: [97, 100]
+      description:
+        type: string
+        description: Text describing the automation
+        example: Schedule automation to run email bot.
+      rdpEnabled:
+        type: boolean
+        format: boolean
+        description: Indicates if remote desktop is enabled
+      scheduleType:
+        $ref: '#/definitions/ScheduleType'
+      dailyRecurrence:
+        $ref: '#/definitions/DailyRecurrence'
+      timeZone:
+        type: string
+        description: Time zone where the schedule is set
+        example: Asia/Calcutta
+      startDate:
+        type: string
+        example: "2022-11-16"
+      endDate:
+        type: string
+        example: "2022-12-16"
+      startTime:
+        type: string
+        example: "16:00"
+      repeatEnabled:
+        type: boolean
+        format: boolean
+        description: Run the schedule repeatedly
+      repeatOccurrence:
+        $ref: '#/definitions/RepeatOccurrence'
+      zonedNextRunDateTime:
+        type: string
+        format: date-time
+      createdBy:
+        type: string
+        description: ID of the user who has created the automation
+        example: 97
+      createdOn:
+        type: string
+        format: date-time
+        example: "2022-11-21T16:22:02.697Z"
+      updatedBy:
+        type: string
+        description: ID of the user who has last updated the automation
+        example: 97
+      updatedOn:
+        type: string
+        format: date-time
+        example: "2022-11-21T16:22:02.697Z"
+      tenantId:
+        type: integer
+        format: int64
+        description: Unique ID of the tenant 
+        example: 1
+      fileName:
+        type: string
+        description: Name specified for the file
+        example: "My bot_2"
+      filePath:
+        type: string
+        description: Path where the file resides
+        example: "Automation Anywhere\\Bots\\My bot_2"
+      runAsUserIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: Specify all the run as user IDs
+        example: [133, 170]
+      botInput:
+        type: object
+        $ref: '#/definitions/Value'
+      tenantUuid:
+        type: string
+        description: UUID of the tenant
+        example: "4090a32b-79c1-4fd8-b88s-b1ea8c994eb0"
+      poolId:
+        type: array
+        items:
+          type: integer
+          format: int64
+        description: The device pool IDs to schedule the automation
+        example: [9, 10]
+      overrideDefaultDevice:
+        type: boolean
+        format: boolean
+      runElevated:
+        type: boolean
+        format: boolean
+      automationPriority:
+        $ref: '#/definitions/AutomationPriority'
+      botLabel:
+        type: string
+        example: Test Bot
+        description: Label specified for the bot.
+
+  ScheduleFilterResponse:
+    type: object
+    properties:
+      page:
+        $ref: '#/definitions/PageResponse'
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ScheduleAutomationResponse'
+
+  ScheduleType:
+    type: string
+    description: Specify the reoccurance interval to run the schedule
+    enum:
+      - NONE
+      - DAILY
+      - WEEKLY
+      - MONTHLY
+      - INSTANT
+    default: NONE
+
+  AutomationPriority:
+    type: string
+    enum:
+      - PRIORITY_MEDIUM
+      - PRIORITY_HIGH
+      - PRIORITY_LOW
+    default: PRIORITY_MEDIUM
+
+  Schema:
+    type: object
+    properties:
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/AttributeType'
+
+  Size2:
+    type: object
+    properties:
+      height:
+        $ref: '#/definitions/NestedNumberValue'
+      width:
+        $ref: '#/definitions/NestedNumberValue'
+
+  Sort:
+    type: object
+    description: Sort directions
+    properties:
+      field:
+        type: string
+        description: Field name to sort by
+        example: name 
+      direction:
+        $ref: '#/definitions/SortDirection'
+
+  SortDirection:
+    type: string
+    description: Sorting direction
+    enum:
+      - asc
+      - desc
+    default: asc
+
+  Table:
+    type: object
+    properties:
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/Schema'
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Row'
+
+  TaskbotFile:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      string:
+        type: string
+      repository:
+        type: boolean
+        format: boolean
+      expression:
+        type: string
+
+  TaskbotInput:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      dictionary:
+        type: array
+        items:
+          $ref: '#/definitions/KeyValueItem'
+      expression:
+        type: string
+
+  TaskbotOutput:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      dictionary:
+        type: array
+        items:
+          $ref: '#/definitions/KeyValueItem'
+
+  TimeUnit:
+    type: string
+    enum:
+      - UNKNOWN
+      - MINUTES
+      - HOURS
+    default: UNKNOWN
+    example: HOURS
+  UIObject:
+    type: object
+    properties:
+      blob:
+        type: string
+        format: byte
+      controlType:
+        $ref: '#/definitions/UIObjectControlType'
+      technologyType:
+        $ref: '#/definitions/UIObjectTechnologyType'
+      criteria:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/UIObjectSelectionCriterion'
+      capture:
+        $ref: '#/definitions/RectangleImageCapture'
+
+  UIObjectControlType:
+    type: string
+    enum:
+      - UNKNOWN_CONTROL
+      - BUTTON
+      - TEXTBOX
+      - LINK
+      - RADIO
+      - CHECKBOX
+      - COMBOBOX
+      - MENUBAR
+      - LISTVIEW
+      - TABLE
+      - CALENDAR
+      - DATEPICKER
+      - SLIDER
+      - TREE
+      - PAGETAB
+      - LABEL
+      - SCROLLBAR_HORIZONTAL
+      - DROPDOWN
+      - CLIENT
+      - IMAGE_BUTTON
+      - ANY_CONTROL
+      - PAGETABITEM
+      - SCROLLBAR_VERTICAL
+      - ACTIVE_TEXT
+      - PASSIVE_TEXT
+      - VARIABLE_ANCHOR
+      - PASSWORD_TEXT
+    default: UNKNOWN_CONTROL
+
+  UIObjectSelectionCriterion:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        format: boolean
+      value:
+        $ref: '#/definitions/Value'
+
+  UIObjectTechnologyType:
+    type: string
+    enum:
+      - UNKNOWN
+      - MS_ACTIVE_ACCESSIBILITY
+      - MS_UI_AUTOMATION
+      - JAVA
+      - SILVERLIGHT
+      - FLASH
+      - HTML
+      - AISENSE
+      - SAP
+      - ANY_TECHNOLOGY
+    default: UNKNOWN
+
+  botinput:
+    type: object
+    properties:
+      iTestList:
+        "$ref": "#/definitions/iTestList"
+
+  iTestList:
+    type: object
+    properties:
+      type:
+        "$ref": "#/definitions/AttributeType"
+      dictionary:
+        type: array
+        items:
+          "$ref": "#/definitions/Dictionary"
+
+  Value:
+    type: object
+    properties:
+      type:
+        "$ref": "#/definitions/AttributeType"
+      dictionary:
+        type: array
+        items:
+          "$ref": "#/definitions/Dictionary"
+  
+  Dictionary:
+    type: object
+    $ref: '#/definitions/Dictprop'
+   
+  Dictprop:
+    type: object
+    properties:  
+      key:
+        type: string
+        example: key1
+      value:
+        $ref: '#/definitions/BotValue'
+
+  BotValue:
+    type: object
+    properties: 
+      type: 
+        type: string
+        example: STRING
+      string:
+        type: string
+        example: value1
+
+  WeekOfMonth:
+    type: string
+    enum:
+      - FIRST
+      - SECOND
+      - THIRD
+      - FOURTH
+      - LAST
+    default: FIRST
+
+  WeeklyRecurrence:
+    type: object
+    properties:
+      interval:
+        type: integer
+        format: int32
+      daysOfWeek:
+        type: array
+        items:
+          $ref: '#/definitions/DayOfWeek'
+
+  Window:
+    type: object
+    properties:
+      name:
+        type: string
+      nameRegex:
+        $ref: '#/definitions/RegexFileName'
+      path:
+        type: string
+      class:
+        type: string
+      handle:
+        type: integer
+        format: int64
+      isChild:
+        type: boolean
+        format: boolean
+      location:
+        $ref: '#/definitions/WindowLocation'
+      size:
+        $ref: '#/definitions/WindowSize'
+      presetType:
+        $ref: '#/definitions/WindowPreset'
+      windowType:
+        $ref: '#/definitions/WindowWindowType'
+      browserTabUrl:
+        type: string
+
+  WindowLocation:
+    type: object
+    properties:
+      top:
+        type: integer
+        format: int32
+      left:
+        type: integer
+        format: int32
+
+  WindowPreset:
+    type: string
+    enum:
+      - NONE
+      - CURRENTLY_ACTIVE
+      - DESKTOP
+      - TASKBAR
+    default: NONE
+
+  WindowSize:
+    type: object
+    properties:
+      height:
+        type: integer
+        format: int32
+      width:
+        type: integer
+        format: int32
+
+  WindowValue:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/AttributeType'
+      window:
+        $ref: '#/definitions/Window'
+      expression:
+        type: string
+      windowResize:
+        $ref: '#/definitions/Size2'
+
+  WindowWindowType:
+    type: string
+    enum:
+      - NATIVE
+      - BROWSER_CHROME
+    default: NATIVE
+
+  protobufAny:
+    type: object
+    properties:
+      typeUrl:
+        type: string
+      value:
+        type: string
+        format: byte
+
+  runtimeError:
+    type: object
+    properties:
+      error:
+        type: string
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      details:
+        type: array
+        items:
+          $ref: '#/definitions/protobufAny'
+
+  ErrorMessage:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Error Message
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Error Message

@@ -1,0 +1,1093 @@
+openapi: 3.0.1
+info:
+  title: Work Load Management (WLM) API
+  description: |-
+    Use the Workload Management (WLM) API to programmatically manage and create work item models, queues, work items, and automations in your Control Room. To create a Workload Management automation process, ensure that you are allocated the following roles and permissions: <li>AAE_Pool Admin role and View all devices permission</li> <li>AAE_Queue Admin role</li> <li>Run bot permission</li> <li>Run or schedule permission on the bots folder</li> <li>Device pool consumer permission</li>
+    Mapping of UI to API status for workload management work item processing:<br> UI -  API<br> New  - NEW<br> Ready to Run - READY_TO_RUN<br> Active -  ACTIVE<br> Completed  - COMPLETED<br> Failed  - FAILED<br> On Hold  - ON_HOLD<br> Data error  - DATA_ERROR<br>
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v4/wlm
+security:
+- AccessToken: []
+paths:
+  /workitemmodels:
+    post:
+      tags:
+      - WorkItemModels
+      summary: Create a work item model
+      description: "Use this API to define a work item model for processing in a queue.\
+        \ Work item model is the structure of a work item, it defines all the fields\
+        \ along with their data types (string, numbers, and date etc)."
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/WorkItemModelWithoutId'
+        required: true
+      responses:
+        "200":
+          description: Return created work item model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemModel'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /workitemmodels/{id}:
+    get:
+      tags:
+      - WorkItemModels
+      summary: Get specific work item model by ID
+      description: Use this API to retrieve a specific work item model. You must specify
+        the ID of the work item model.
+      parameters:
+      - name: id
+        in: path
+        description: model id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns model for given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemModel'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}:
+    get:
+      tags:
+      - Queues
+      summary: Get queue by ID
+      description: Use this API to retrieve a specific queue by specifying the queue
+        ID.
+      parameters:
+      - name: id
+        in: path
+        description: Returns queue by given ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns queue details by given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/consumers:
+    post:
+      tags:
+      - Queues
+      summary: Add queue consumer
+      description: Use this API to add a role as a queue consumer to access the queues
+        by specifying the queue ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleId'
+        required: true
+      responses:
+        "201":
+          description: Successful creation of queue consumer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WlmRoles'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/participants:
+    post:
+      tags:
+      - Queues
+      summary: Add queue participant
+      description: Use this API to add a role as a queue participant by specifying
+        the queue ID. The queue participants can add workItems to the queue.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleId'
+        required: true
+      responses:
+        "201":
+          description: Successful creation of queue participant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WlmRoles'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/members/{userId}:
+    put:
+      tags:
+      - Queues
+      summary: Add or update a queue member
+      description: Use this API to add or update a queue member. Specify the queue
+        ID and User ID to add or remove credentials to the queue or edit the queue
+        settings.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the queue
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: userId
+        in: path
+        description: ID of the user
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  $ref: '#/components/schemas/QueueMemberPermissions'
+        required: true
+      responses:
+        "200":
+          description: The queue member was successfully created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMemberAdd'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /queues/{id}/file:
+    post:
+      tags:
+      - Workitems
+      summary: Create new work items from a file
+      description: Use this API to create new work items in the queue. You must specify
+        the queue ID and choose a work item CSV file.
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - upload
+              type: object
+              properties:
+                upload:
+                  type: string
+                  description: CSV file
+                  format: binary
+        required: true
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/workOrder'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /queues/{id}/workitems/{workItemId}:
+    put:
+      tags:
+      - Workitems
+      summary: Update work item
+      description: "Use this API to update work item data, result, and status."
+      parameters:
+      - name: id
+        in: path
+        description: Queue ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: workItemId
+        in: path
+        description: Work item ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Work item object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateWorkItem'
+        required: true
+      responses:
+        "200":
+          description: Updated work item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateWorkItemResponse'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    WorkItemModelWithoutId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the workitem model
+          example: Bonus Template
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemModelAttributeWithoutId'
+      required:
+        - name
+    WorkItemModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier represented as a string containing an int64
+            value
+          example: "5"
+        name:
+          type: string
+          description: Name of the work item model
+          example: Bonus Template
+        createdBy:
+          type: string
+          description: ID of the user who created the work item model. Represented
+            as a string containing an int64 value
+          example: "27"
+        createdOn:
+          type: string
+          description: Date when the work item model was created in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        updatedBy:
+          type: string
+          description: ID of the user who last updated the work item model. Represented
+            as a string containing an int64 value
+          example: "29"
+        updatedOn:
+          type: string
+          description: Date when the work item model was last updated in the ISO 8601
+            format.
+          example: 2023-10-18T08:19:07.663681Z
+        tenantId:
+          type: string
+          description: The unique identifier for the tenant that is associated with
+            the work item model. Represented as a string containing an int64 value
+          example: "1"
+        version:
+          type: string
+          description: The version assosicated with the work item model. Represented
+            as a string containing an int64 value
+          example: "0"
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemModelAttribute'
+    WorkItemModelAttributeWithoutId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of the work item model
+          example: Employee Salary
+        type:
+          type: string
+          enum:
+          - NUMBER
+          - TEXT
+          - DATE
+      required:
+        - name
+    WorkItemModelAttribute:
+      properties:
+        id:
+          type: string
+          description: unique identifier of the value in the workitem model template.
+            Represented as a string containing an int64 value.
+          example: "3"
+      allOf:
+      - $ref: '#/components/schemas/WorkItemModelAttributeWithoutId'
+    Queue:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific queue. Represented
+            as a string containing an int64 value.
+          example: "9"
+        name:
+          type: string
+          description: Name of the queue
+          example: Finance Queue
+        description:
+          type: string
+          description: Description of the queue
+          example: Calculate bonus for each employee
+        reactivationThreshold:
+          type: string
+          description: Minimum number of workItems in the queue to reactivate queue.
+            Represented as a string containing an int64 value.
+          example: "1"
+          deprecated: true
+        manualProcessingTime:
+          type: string
+          description: Efforts required to process the queue manually. Represented
+            as a string containing an int64 value.
+          example: "1"
+        manualProcessingTimeUnit:
+          type: string
+          description: Time duration to process the queue manually
+          enum:
+          - SECONDS
+          - MINUTES
+          - HOURS
+          - DAYS
+        disallowDuplicate:
+          type: boolean
+          description: Do not allow duplicate work item.
+        autoRetryLimit:
+          type: string
+          description: Enter a re-try limit to automatically retry the queue in case
+            of a failure. Represented as a string containing an int64 value.
+          example: "1"
+        status:
+          type: string
+          description: Status of the queue
+          enum:
+          - DRAFT
+          - IN_USE
+          - NOT_IN_USE
+        workItemModelId:
+          type: string
+          description: ID of the work item model. Represented as a string containing
+            an int64 value.
+          example: "6"
+        workItemProcessingOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItemProcessingOrder'
+        displayColumnIds:
+          type: array
+          example:
+          - "16"
+          - "17"
+          - "18"
+          items:
+            type: string
+            description: Ids of corresponding displayColumns
+        createdBy:
+          type: string
+          description: User ID who has created the queue. Represented as a string
+            containing an int64 value.
+          example: "97"
+        createdOn:
+          type: string
+          description: Time the queue was created in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        updatedBy:
+          type: string
+          description: User ID who last updated the queue. Represented as a string
+            containing an int64 value.
+          example: "97"
+        updatedOn:
+          type: string
+          description: Time the queue was last updated in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        tenantId:
+          type: string
+          description: Unique ID of the tenant. Represented as a string containing
+            an int64 value.
+          example: "1"
+        version:
+          type: string
+          description: Version of the queue. Represented as a string containing an
+            int64 value.
+          example: "1"
+        considerReactivationThreshold:
+          type: boolean
+          description: This is an optional parameter. It is recommended to retain
+            the default value.
+          example: false
+          deprecated: true
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+        expiry:
+          type: string
+          description: Date when the work item model was created in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+    WorkItemProcessingOrder:
+      type: object
+      properties:
+        columnId:
+          type: string
+          description: Represented as a string containing an int64 value.
+          example: "2"
+        priority:
+          type: string
+          description: Represented as a string containing an int64 value.
+          example: "1"
+        name:
+          type: string
+          example: Employee
+        sortDirection:
+          type: string
+          example: asc
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+        id:
+          type: string
+          description: Unique identifier representing a specific queue. Represented
+            as a string containing an int64 value.
+          example: "9"
+    RoleId:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier representing a specific role
+          format: int64
+          example: 456
+    WlmRoles:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/WlmRole'
+    WlmRole:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role. Represented
+            as a string containing an int64 value.
+          example: "456"
+        name:
+          type: string
+          description: Name of the role
+          example: admin
+    QueueMemberAdd:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role. Represented
+            as a string containing an int64 value.
+          example: "456"
+        permissions:
+          $ref: '#/components/schemas/QueueMemberPermissions'
+    QueueMemberPermissions:
+      type: array
+      description: Queue specific actions a given user is allowed to perform
+      items:
+        type: string
+        description: Queue specific action
+        enum:
+        - participate
+        - manage
+        - own
+    workOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific role. Represented
+            as a string containing an int64 value.
+          example: "456"
+        name:
+          type: string
+          description: Name of the uploaded file that has work orders
+          example: workorder.csv
+        type:
+          type: string
+          description: Type of the source of the work items
+          enum:
+          - csv
+          - excel
+          - ftp
+          - database
+        status:
+          type: string
+          description: Status of the work order
+          enum:
+          - draft
+          - new
+          - file_uploaded
+          - in_progress
+          - completed
+          - failed
+          - staged
+          - finalizing
+        queueId:
+          type: string
+          description: Unique identifier representing a specific queue. Represented
+            as a string containing an int64 value.
+          example: "456"
+        queueName:
+          type: string
+          description: Name of the Queue
+          example: Finance Queue
+        filePath:
+          type: string
+          description: Path of the file where workitems file got uploaded.
+          example: \AutomationAnywhere\Server Files\wlm-files
+        uniqueId:
+          type: string
+          description: Unique identifier represented as a string containing an int64
+            value.
+          example: "456"
+        uploadedFileName:
+          type: string
+          description: Source name of the file from where work items got loaded
+          example: workitems.csv
+        startIndex:
+          type: string
+          description: Start index for the workitems to chose from. Represented as
+            a string containing an int64 value.
+          example: "0"
+        connectionString:
+          type: string
+          description: Metdadata to fetch the records
+          example: wlm-files\1\Qx7QDk8Z_MonJun03182147PDT2024_1717464107930;fetchRecords=0
+        executionStartedOn:
+          type: string
+          description: Date when the execution got started in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        totalRecords:
+          type: string
+          description: Total number of workitems to be processed. Represented as a
+            string containing an int64 value.
+          example: "100"
+        createdBy:
+          type: string
+          description: ID of the user who created the work item model. Represented
+            as a string containing an int64 value
+          example: "27"
+        createdOn:
+          type: string
+          description: When the workorder got created in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        updatedBy:
+          type: string
+          description: ID of the user who last updated the work item model. Represented
+            as a string containing an int64 value
+          example: "27"
+        updatedOn:
+          type: string
+          description: When the workorder got updated in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+    UpdateWorkItemResponse:
+      $ref: '#/components/schemas/WorkItem'
+    WorkItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific workItem. Represented
+            as a string containing an int64 value
+          example: "31250"
+        createdBy:
+          type: string
+          description: User ID who has created the work items. Represented as a string
+            containing an int64 value
+          example: "97"
+        createdOn:
+          type: string
+          description: Time stamp when the workitem was created in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        updatedBy:
+          type: string
+          description: User ID who has last updated the work item. Represented as
+            a string containing an int64 value
+          example: "97"
+        updatedOn:
+          type: string
+          description: Time stamp when the workitem was updated in the ISO 8601 format.
+          example: 2023-10-18T08:19:07.663681Z
+        version:
+          type: string
+          description: Version of the workitem
+        json:
+          $ref: '#/components/schemas/WorkItemJson'
+        result:
+          type: string
+          description: output of workItem's processing
+        deviceId:
+          type: string
+          description: Reference key with device entity. Represented as a string containing
+            an int64 value
+        status:
+          type: string
+          enum:
+          - UNKNOWN
+          - ON_HOLD
+          - FAILED
+          - COMPLETED
+          - DATA_ERROR
+          - ACTIVE
+          - STAGED
+          - QUEUED
+          - READY_TO_RUN
+          - NEW
+          - DRAFT
+        startTime:
+          type: string
+          description: Start time in ISO 8601 format
+          example: 2023-10-18T08:19:07.663681Z
+        endTime:
+          type: string
+          description: Start time in ISO 8601 format
+          example: 2023-11-20T08:19:07.663681Z
+        col1:
+          type: string
+          description: First displayable column in workitem
+          example: Jane
+        col2:
+          type: string
+          description: Second displayable column in workitem
+          example: Doe
+        col3:
+          type: string
+          description: Third displayable column in workitem
+          example: "45"
+        col4:
+          type: string
+          description: Fourth displayable column in workitem
+          example: John
+        col5:
+          type: string
+          description: Fifth displayable column in workitem
+          example: Smith
+        col6:
+          type: string
+          description: Sixth displayable column in workitem
+          example: Kevin
+        col7:
+          type: string
+          description: Seventh displayable column in workitem
+          example: Ryan
+        col8:
+          type: string
+          description: Eighth displayable column in workitem
+          example: Kayle
+        col9:
+          type: string
+          description: Nineth displayable column in workitem
+          example: Nicole
+        col10:
+          type: string
+          description: Tenth displayable column in workitem
+          example: Katie
+        deviceUserId:
+          type: string
+          description: Runas user ID who has access to the device. Represented as
+            a string containing an int64 value
+        queueId:
+          type: string
+          description: Reference key with queue entity. Represented as a string containing
+            an int64 value
+        comment:
+          type: string
+          description: Comments added to the workitem
+          example: Bonus workitems
+        automationId:
+          type: string
+          description: Reference key with automation entity. Represented as a string
+            containing an int64 value
+        lastPausedTime:
+          type: string
+          description: The last paused time in ISO 8601 format
+          example: 2023-10-18T08:19:07.663681Z
+        totalPausedTime:
+          type: string
+          description: Total pause time to process the workitems. Represented as a
+            string containing an int64 value
+        error:
+          type: string
+          description: Error while processing workitem
+          example: "null"
+        jobExecutionId:
+          type: string
+          description: ID of the job successfully completed
+          example: "null"
+        deferredUntil:
+          type: string
+          description: Time in ISO 8601 format until the work item is deferred
+          example: 2023-10-18T08:19:07.663681Z
+        retryCount:
+          type: string
+          description: The total number of times this work item has been retried.
+            Represented as a string containing an int64 value
+        hashCode:
+          type: string
+          description: Hash code of the workitem's contents. Represented as a string
+            containing an int64 value
+          example: "-2081237442"
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+    WorkItemJson:
+      type: object
+      description: WorkItem as JSON object. For the List endpoints the JSON value
+        will be empty in the response. Examples provided for the JSON values are displayed
+        for the other endpoints.
+      properties:
+        Customer Name:
+          type: string
+          example: Jane
+        Invoice Id:
+          type: string
+          example: INV123
+        Amount:
+          type: string
+          example: 140
+        email:
+          type: string
+          example: jane@automationanywhere.com
+        Invoice Date:
+          type: string
+          example: 2023-01-10T00:18:48Z
+      
+    UpdateWorkItem:
+      type: object
+      properties:
+        id:
+          type: number
+          description: work item ID
+          example: 31242.0
+        queueId:
+          type: number
+          description: queue ID
+        version:
+          type: number
+          description: Hibernate maintained version of work item object
+        status:
+          type: string
+          enum:
+          - NEW
+          - FAILED
+          - COMPLETED
+          - ON_HOLD
+        result:
+          type: string
+          description: Status of the work item
+        json:
+          $ref: '#/components/schemas/WorkItemJson'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+  responses:
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "409":
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    PathRoleId:
+      name: roleId
+      in: path
+      description: ID of the role
+      required: true
+      schema:
+        type: integer
+        format: int64
+    PathUserId:
+      name: userId
+      in: path
+      description: ID of the user
+      required: true
+      schema:
+        type: integer
+        format: int64
+    PathQueueId:
+      name: id
+      in: path
+      description: ID of the queue
+      required: true
+      schema:
+        type: integer
+        format: int64
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

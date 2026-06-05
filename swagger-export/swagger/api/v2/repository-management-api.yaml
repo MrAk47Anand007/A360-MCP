@@ -1,0 +1,2558 @@
+openapi: 3.0.1
+info:
+  title: Repository Management API
+  description: |-
+    Use the Repository Management APIs to perform specific tasks on objects (bots, folders, and files) that you have permission to access in the Control Room. Automation 360 repository consists of private and public workspaces, which contain folders of bots and their dependency files.
+    The private workspace holds objects that are only accessible to the logged-in user. Bots in the private workspace can only be run on that user's device. The public workspace holds objects that are accessible to all users who have the necessary permissions. When a bot is checked-in from a private workspace to the public workspace, it can be checked out by another user to their private workspace for editing or deployed to a Bot Runner.
+    > **Note:** <li>To view objects in your private workspace, you must have a Bot Creator license and a role that includes the <i>View my bots</i> feature permission.</li> <li>To view objects in the public workspace, you must be assigned a role that includes the <i>View my bots</i> feature permission and the <i>View content</i> bot permission to folders in the public workspace.</li>
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v2/repository
+security:
+- AccessToken: []
+paths:
+  /file/list:
+    post:
+      tags:
+      - Repository
+      summary: "Lists bots, folders, and files in a repository"
+      description: "Use the List API to view details of all the objects (bots, folders,\
+        \ and files) in the Control Room.  \n\n  You can send an API request with\
+        \ or without filter parameters. An API request without any filter parameters\
+        \ specified, retrieves details of all the objects in the Control Room. You\
+        \ can use the filter parameters to retrieve specific set of file or folder\
+        \ objects, instead of fetching all objects in the Control Room. For more information,\
+        \ see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html).\n\
+        \ \n  For example, to view details of a specific bot, use 'eq' or 'substring'\
+        \ operator with field as 'name' and bot name in the 'value' of the filter.\
+        \ This filter will get bot details of all the bots matching the bot name provided.\n\
+        \  >> **Note:** The ID and Parent ID that is specified the the response output\
+        \ is used in other endpoints to create subfolders, delete folder etc."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: "Returns a list of bots, files, or folders; or a blank list\
+            \ as per filter conditions specified."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotsResponse'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/BotsResponse'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/BotsResponse'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/BotsResponse'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/BotsResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /folders/{folderid}:
+    put:
+      tags:
+      - Repository
+      summary: Edit details of a folder
+      description: "Use this endpoint to edit details of a folder such as the name,\
+        \ parent folder ID, and description. You must specify the ID of the folder.\
+        \ To view the ID of the folder, use the folders/{folderid}/list endpoint."
+      parameters:
+      - name: folderid
+        in: path
+        description: Unique ID of the folder.
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditFolderRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Bot'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "412":
+          description: "The folder has more than 100 bots, or has cloned or checked\
+            \ out bots"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/TooManyBotsOrFolderHasCheckedOutAndClonedBots'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/responses/TooManyBotsOrFolderHasCheckedOutAndClonedBots'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/responses/TooManyBotsOrFolderHasCheckedOutAndClonedBots'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/responses/TooManyBotsOrFolderHasCheckedOutAndClonedBots'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/responses/TooManyBotsOrFolderHasCheckedOutAndClonedBots'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    post:
+      tags:
+      - Repository
+      summary: Create a folder
+      description: "Use this endpoint to create a folder within the folder ID provided.\
+        \ You must specify the ID of a parent folder and a sub folder is created within\
+        \ this parent folder. To view the ID of the parent folder, use the file/list\
+        \ endpoint."
+      parameters:
+      - name: folderid
+        in: path
+        description: Unique ID of the folder.
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFolderRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Bot'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Bot'
+        "400":
+          description: Invalid request body or Public folder with the same name already
+            exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/BadRequestBodyOrSameNameFolderErrorCode'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/responses/BadRequestBodyOrSameNameFolderErrorCode'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/responses/BadRequestBodyOrSameNameFolderErrorCode'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/responses/BadRequestBodyOrSameNameFolderErrorCode'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/responses/BadRequestBodyOrSameNameFolderErrorCode'
+        "401":
+          description: Authentication required.
+          content: {}
+        "403":
+          description: "Folder or file has no permission either upload,download,delete,execute\
+            \ or run."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "404":
+          description: Folder or file is not found in control room.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "412":
+          description: "A folder exists in the public workspace with the same name,\
+            \ therefore this folder cannot be created."
+          content: {}
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Repository
+      summary: Delete a folder
+      description: "Use this endpoint to delete a folder. You must specify the ID\
+        \ of the folder. To view the ID of the folder, use the folders/{folderid}/list\
+        \ endpoint."
+      parameters:
+      - name: folderid
+        in: path
+        description: Unique ID of the folder.
+        required: true
+        schema:
+          type: integer
+      responses:
+        "204":
+          description: Delete Successful.
+          content: {}
+        "400":
+          description: Bad Request.
+          content: {}
+        "401":
+          description: Authentication required.
+          content: {}
+        "403":
+          description: "Folder or file has no permission either upload,download,delete,execute\
+            \ or run."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "404":
+          description: "Either the folder doesn't exist, or the user doesn't have\
+            \ a single permission associated with the folder."
+          content: {}
+        "412":
+          description: The folder is not empty so it cannot be deleted.
+          content: {}
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /folders/{folderid}/list:
+    post:
+      tags:
+      - Repository
+      summary: List sub-folders & files
+      description: "Use this endpoint to list all the sub-folders and files under\
+        \ a parent folder. You must specify the ID of a parent folder. To view the\
+        \ ID of the parent folder, use the file/list endpoint."
+      parameters:
+      - name: folderid
+        in: path
+        description: Unique ID of the folder.
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: List of sub folders & files retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+        "400":
+          description: Bad Request.
+          content: {}
+        "401":
+          description: Authentication required.
+          content: {}
+        "403":
+          description: "Folder or file has no permission either upload,download,delete,execute\
+            \ or run."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "404":
+          description: Folder or file is not found in control room.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /workspaces/{workspaceType}/files/list:
+    post:
+      tags:
+      - Repository
+      summary: Lists sub-folders and files in a workspace
+      description: Use this endpoint to view all the sub folders and files in the
+        public or private workspace. You must specify the workspace type from which
+        you want to view the files.
+      parameters:
+      - name: workspaceType
+        in: path
+        description: Type of the workspace which is either public or private
+        required: true
+        schema:
+          type: string
+          format: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: List of sub folders & files retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FoldersAndFilesFilterResponse'
+        "400":
+          description: Bad Request.
+          content: {}
+        "401":
+          description: Authentication required.
+          content: {}
+        "403":
+          description: "Folder or file has no permission either upload,download,delete,execute\
+            \ or run."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "404":
+          description: Folder or file is not found in control room.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FolderListSpecificError'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /files/{id}:
+    delete:
+      tags:
+      - Repository
+      summary: Delete a file
+      description: "Use this endpoint to delete a file. You must specify unique ID\
+        \ of the file you want to delete. To view the ID of the file, use the file/list\
+        \ endpoint."
+      parameters:
+      - name: id
+        in: path
+        description: Unique ID of the file
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /role/{roleid}/permissions:
+    put:
+      tags:
+      - Repository
+      summary: Add or update repository role permissions
+      description: "Use this endpoint to add new permission or update existing repository\
+        \ role permissions for a user created role. To use this endpoint, you must\
+        \ be logged in as the Admin."
+      parameters:
+      - name: roleid
+        in: path
+        description: Role ID that is associated with a custom defined role.
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryPermissions'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /role/{roleid}/folder/{folderid}/permissions:
+    get:
+      tags:
+      - Repository
+      summary: View repository role permissions
+      description: "Use this endpoint to view role permissions for a specific role\
+        \ ID and folder ID. You must specify the role and folder ID for which you\
+        \ want to view the permission. This API lists the permissions the role ID\
+        \ has to clone, upload, download, delete, run, or view contents of a specific\
+        \ folder."
+      parameters:
+      - name: roleid
+        in: path
+        description: Role ID that is associated with a custom defined role.
+        required: true
+        schema:
+          type: integer
+      - name: folderid
+        in: path
+        description: Unique ID of the folder.
+        required: true
+        schema:
+          type: integer
+      - name: includeChildren
+        in: query
+        description: Include children when retrieving the permissions. Specify true
+          to include children or false to not include children.
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryPermissions'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /files/{fileid}/content:
+    get:
+      tags:
+      - Repository
+      summary: View file content
+      description: "Use this endpoint to download the contents of a file. For a bot\
+        \ file, the content is in JSON format."
+      parameters:
+      - name: fileid
+        in: path
+        description: Unique ID of the file
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Disposition:
+              description: Used to specify the name of the download file.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+            application/vnd.aa.form:
+              schema:
+                type: string
+                format: binary
+            application/vnd.aa.taskbot:
+              schema:
+                type: string
+                format: binary
+            application/vnd.aa.headlessbot:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /files/{fileid}/parents:
+    get:
+      tags:
+      - Repository
+      summary: Get immediate parent(s)
+      description: "Use this endpoint to retrieve the first level parent(s) of a specific\
+        \ file. You must specify the file ID. To view the ID of a file, use the file/list\
+        \ endpoint."
+      parameters:
+      - name: fileid
+        in: path
+        description: Unique ID of the file
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: List of immediate parents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileParentsResponse'
+            application/vnd.aa.form:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileParentsResponse'
+            application/vnd.aa.taskbot:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileParentsResponse'
+            application/vnd.aa.headlessbot:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileParentsResponse'
+            application/octet-stream:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileParentsResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /files/{fileid}/dependencies:
+    get:
+      tags:
+      - Repository
+      summary: Get file dependencies
+      description: "Use this endpoint to view all the dependencies for a file. You\
+        \ must specify the file ID. To view the ID of a file, use the file/list endpoint."
+      parameters:
+      - name: fileid
+        in: path
+        description: Unique ID of the file
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: List of file dependencies retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDependencyResponse'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/FileDependencyResponse'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/FileDependencyResponse'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/FileDependencyResponse'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/FileDependencyResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /files/{fileid}/dependencies/{workspaceId}:
+    put:
+      tags:
+      - Repository
+      summary: Update manual dependencies
+      description: Use this endpoint to update the manual dependencies of a file.
+        You can update dependencies for the files residing only in the private workspace.
+        You must specify the ID of the file and the workspace ID. The manual dependencies
+        of the parent file is updated with the value of the field childFileIds.
+      parameters:
+      - name: fileid
+        in: path
+        description: Unique ID of the file
+        required: true
+        schema:
+          type: integer
+      - name: workspaceId
+        in: path
+        description: Unique workspace id of user
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditFileDependenciesRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /files/packagesVersionUpdate:
+    post:
+      tags:
+      - Repository
+      summary: Execute package version update
+      description: Use this endpoint to execute package version update.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageVersionUpdateRequestV2'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /recover:
+    post:
+      tags:
+      - Repository
+      summary: Recover bots and files
+      description: Use this endpoint to recover bots and files from the non-empty
+        private repository of a deleted user to a new user (Bot creator/Citizen developer)
+        having empty private repository.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryRecoveryRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "412":
+          description: 412 Precondition Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /files/version/assignLabel:
+    post:
+      tags:
+      - Repository
+      summary: Assign label to a bot
+      description: Use this endpoint to assign a production label for a particular
+        version of a bot. Currently only PRODUCTION is supported.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignLabelForProduction'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.form:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.taskbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/vnd.aa.headlessbot:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting, and pagination\
+        \ rules"
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: name
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in descending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        length:
+          type: integer
+          description: Page length
+          example: 100
+      description: "Pagination rules, allows you to filter based on desired page"
+    Filter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          example: or
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        operands:
+          type: array
+          example:
+            - operator: substring
+              field: name
+              value: new
+            - operator: substring
+              field: name
+              value: marks
+          items:
+            $ref: '#/components/schemas/Filter'
+
+    FoldersAndFilesFilterResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of directories & files.
+          items:
+            $ref: '#/components/schemas/File'
+    PageResponse:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: "The starting list offset, used for pagination."
+        total:
+          type: integer
+          description: Total number of items
+          example: 4525
+        totalFilter:
+          type: integer
+          description: Total number of items matching filter
+          example: 1
+      description: Pagination response
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Folder identifier
+          example: "155524"
+        parentId:
+          type: string
+          description: Parent folder identifier
+          example: "108889"
+        name:
+          type: string
+          description: Name of file or folder
+          example: my_bots
+        folder:
+          type: boolean
+          description: Whether the specified type is a folder or not
+        folderCount:
+          type: string
+          description: Number of sub-folders
+          example: 2.0
+        productionVersion:
+          type: string
+          description: Current production version of the bot (applicable only with
+            VCS ON)
+          example: "1"
+        latestVersion:
+          type: string
+          description: Latest version of the bot (applicable only with VCS ON)
+          example: "2"
+        type:
+          type: string
+          description: "The content type, also known as MIME type of the file"
+          example: application/vnd.aa.directory
+        path:
+          type: string
+          description: Path of the file or folder in the repository
+          example: Automation Anywhere\Bots
+        size:
+          type: string
+          description: Size of the file. Available only if the item type is file
+          example: "450"
+        lockedBy:
+          type: string
+          description: File locked by information. Available only if the item type
+            is bot and VCS is 'ON'.
+          example: "null"
+        locked:
+          type: boolean
+          description: Whether the file is locked or not. Available only if the item
+            type is file
+          example: false
+        lastModified:
+          type: string
+          description: Date and time when the bot was last updated
+          example: 2025-07-22T10:49:14.602816Z
+        lastModifiedBy:
+          type: string
+          description: ID of the user who last updated the Bot/file
+          example: "97"
+        permission:
+          $ref: '#/components/schemas/Permission'
+        createdBy:
+          type: string
+          description: ID of the user who created the Bot/file
+          example: "97"
+        workspaceId:
+          type: string
+          description: Unique workspace id of user. A workspaceId of 0 indicates the
+            PUBLIC workspace. All others are considered as PRIVATE workspace.
+          example: 21
+        botStatus:
+          type: string
+          description: "Status of the Bot [DRAFT, NEW, PUBLIC, CHECKED_OUT, CLONED]"
+          example: NEW
+        hasErrors:
+          type: boolean
+          description: Whether the specified file or folder contains errors
+          example: false
+        workspaceType:
+          type: string
+          description: Type of the workspace which is either PUBLIC or PRIVATE
+          example: PUBLIC
+        metadata:
+          type: boolean
+          description: Whether the specified file or folder is metadata
+          example: false
+        uri:
+          type: string
+          description: Universal resourse identifier for the file/folder
+        version:
+          type: string
+          description: Version of the bot
+          example: "0"
+        hasTriggers:
+          type: boolean
+          description: Indicates whether the Bot has any triggers set
+        isEdited:
+          type: boolean
+          description: Indicates whether the Bot is previously edited
+          example: false
+        versionNumber:
+          type: string
+          description: File version. Only available in case the item type is bot
+          example: 0
+        botVersionLabel:
+          type: string
+          description: Label version of the bot. Only available in case the item type
+            is bot
+          example: PRODUCTION
+        originalVersion:
+          type: string
+          description: The actual version of the file or folder.
+          example: 1.0
+        codeAnalysisResult:
+          type: string
+          description: Code analysis result of a bot
+          enum:
+          - NOT_APPLICABLE
+          - NOT_SCANNED
+          - NO_VIOLATIONS
+          - LOW_SEVERITY_VIOLATIONS
+          - HIGH_SEVERITY_VIOLATIONS
+        uuid:
+          type: string
+          description: Unique identifier for the file or folder
+          example: ""
+        createdFromFilePath:
+          type: string
+          description: The file path from which the current file or folder was created
+        createdFromFileVersion:
+          type: string
+          description: The version of the file from which the current file or folder was created
+          example: "1.0"
+        gitRepositoryFolder:
+          type: boolean
+          description: Whether the current file or folder is part of a Git repository
+          example: false
+        author:
+          type: string
+          description: The author of the file or folder
+        tags:
+          type: array
+          description: Tags associated with the file or folder
+          example: []
+        typeLabel:
+          type: string
+          description: The type label of the file or folder
+          example: "FOLDER"
+
+      description: File or folder
+
+    Permission:
+      type: object
+      properties:
+        delete:
+          type: boolean
+          description: Indicates if the current logged in user has permission to delete
+            the bot
+        download:
+          type: boolean
+          description: Indicates if the current logged in user has permission to download(check-out)
+            the bot
+        clone:
+          type: boolean
+          description: Indicates if the current logged in user has permission to clone
+            the bot
+        upload:
+          type: boolean
+          description: Indicates if the current logged in user has permission to upload(check-in)
+            the bot
+        run:
+          type: boolean
+          description: Indicates if the current logged in user has permission to run\schedule
+            the bot
+        viewContent:
+          type: boolean
+          description: Indicates if the current logged in user has permission to view
+            the bot content (bot logic).
+        publishBotstore:
+          type: boolean
+          description: Indicates if the current logged in user has permission to publish
+            the bot to botstore.
+        editContent:
+          type: boolean
+          description: Indicates if the current logged in user has permission to modify
+            a bot.
+        createFolder:
+          type: boolean
+          description: Indicates if the current logged in user has permission to create
+            a folder.
+        move:
+          type: boolean
+          description: Indicates if the current logged in user has permission to move
+            the bot to another folder.
+        cancelCheckout:
+          type: boolean
+          description: Indicates if the current logged in user has permission to cancel
+            checkout for the bot.
+        revertCheckout:
+          type: boolean
+          description: Indicates if the current logged in user has permission to revert
+            check out for the bot.
+        viewHistory:
+          type: boolean
+          description: Indicates if the current logged in user has permission to view
+            history for the bot.
+        labelBots:
+          type: boolean
+          description: Indicates if the current logged in user has permission to label
+            the bot.
+    Bot:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "The unique ID of the displayed objects (bots, folders, or\
+            \ files)"
+          example: "155524"
+        parentId:
+          type: string
+          description: The unique ID of the parent folder
+          example: "108889"
+        name:
+          type: string
+          description: "Name of the bot, file, or folder"
+          example: new marks bots
+        permission:
+          $ref: '#/components/schemas/BotPermission'
+        lastModified:
+          type: string
+          description: Date and time of last update
+          example: 2025-07-19T23:08:49.150494Z
+        lastModifiedBy:
+          type: string
+          description: ID of the user who last updated the bot or file
+          example: "275"
+        path:
+          type: string
+          description: Path of the file or folder in the repository
+          example: Automation Anywhere\Bots\new marks bots
+        directory:
+          type: boolean
+          description: Flag for directory
+          example: false
+        size:
+          type: string
+          description: Size in KB
+          example: 947
+        locked:
+          type: boolean
+          description: Indicates whether the file is locked (applicable only with
+            VCS ON)
+          example: false
+        productionVersion:
+          type: string
+          description: Current production version of the bot (applicable only with
+            VCS ON)
+          example: "null"
+        lockedBy:
+          type: string
+          description: User id who has locked the bot (applicable only with VCS ON)
+          example: "0"
+        latestVersion:
+          type: string
+          description: Latest version of the bot (applicable only with VCS ON)
+          example: "3"
+        fileLastModified:
+          type: string
+          description: Date and time when the bot was last updated
+          example: 2025-07-19T23:08:49.150494Z
+    BotPermission:
+      type: object
+      properties:
+        delete:
+          type: boolean
+          description: Indicates if the current logged in user has rights to delete
+            the bot
+        download:
+          type: boolean
+          description: Indicates if the current logged in user has rights to download
+            (check-out) the bot
+        upload:
+          type: boolean
+          description: Indicates if the current logged in user has rights to upload
+            (check-in) the bot
+        run:
+          type: boolean
+          description: Indicates if the current logged in user has rights to run or
+            schedule the bot
+    BotsResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of bots.
+          items:
+            $ref: '#/components/schemas/Bot'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+    FolderListSpecificError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Corresponding Error code for error message.
+        message:
+          type: string
+          description: Message describing error.
+        details:
+          type: string
+          description: More details of the error message.
+        correctiveAction:
+          type: string
+          description: Corrective action to be taken to get rid of this error.
+    HttpStatusCode:
+      type: string
+      description: Status code("OK")
+    path:
+      type: string
+      description: File path
+    RepositoryPermissions:
+      type: array
+      description: List of folder permissions
+      items:
+        $ref: '#/components/schemas/FolderPermission'
+    FolderPermission:
+      type: object
+      properties:
+        folderId:
+          type: integer
+          example: 14
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoRolePermission'
+    RepoRolePermission:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - clone
+          - update
+          - download
+          - delete
+          - run
+          - viewcontent
+        enabled:
+          type: boolean
+    FileParentsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the file
+          example: "1008"
+        name:
+          type: string
+          description: Name of the File
+          example: sample.txt
+        path:
+          type: string
+          description: Relative path of the file
+          example: Automation Anywhere\\Bots\\Example_bots\\sample.txt
+        size:
+          type: number
+          description: Size of the file. Only available in case the item type is file
+          example: 72.0
+        type:
+          type: string
+          description: "The content type, also known as MIME type, of the file"
+          example: text/plain
+        dependencyType:
+          type: string
+          description: "The type of the related object. NONE - If the bot or file\
+            \ does not have a parent, then the API will return the same bot or file.\
+            \ SCANNED - It is the relation with the child bots or files which are\
+            \ scanned and found automatically. MANUAL - It is the relation with the\
+            \ bots or files that are added to the parent bot manually."
+          example: NONE
+        url:
+          type: string
+          description: URL of the bot or file
+          example: https://contorlroom.com/v1/repository/97/1008/download?version=latest
+        requiredByFileId:
+          type: number
+          description: Parent file or folder id
+        lockedBy:
+          type: string
+          description: "User ID who has locked the bot [Applicable to checked out\
+            \ file]"
+          example: "0"
+        botStatus:
+          type: string
+          description: "Status of the Bot [Public/Checkout/New/Clone]"
+          example: New
+        permission:
+          $ref: '#/components/schemas/Permission'
+        versionNumber:
+          type: number
+          description: File version. Only available in case the item type is bot
+          example: 0.0
+        label:
+          type: string
+          description: File label
+          example: "null"
+      description: Bot or File
+    CreateFolderRequest:
+      type: object
+      properties:
+        folderName:
+          type: string
+          description: Name of the new folder you want to create
+          example: my_bots
+    EditFolderRequest:
+      type: object
+      properties:
+        folderId:
+          type: string
+          description: Unique ID of the folder you want to edit the details
+          example: "164086"
+        name:
+          type: string
+          description: Name of the folder
+          example: my_bots
+        description:
+          type: string
+          description: Description of the folder
+          example: My sample bots
+        parentId:
+          type: string
+          description: Unique ID of the parent folder
+          example: "14"
+    EditFileDependenciesRequest:
+      type: object
+      properties:
+        childFileIds:
+          type: array
+          description: Indicates the child file IDs that must be added as a dependency
+            to the specified parent file ID.
+          items:
+            type: integer
+    FileDependency:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the file
+          example: "1008"
+        name:
+          type: string
+          description: Name of the file
+          example: sample.txt
+        path:
+          type: string
+          description: Path of the file in the repository
+          example: Automation Anywhere\\Bots\\Example_bots\\sample.txt
+        size:
+          type: string
+          description: Size of the file. Only available in case the item type is file
+          example: "72"
+        type:
+          type: string
+          description: "The content type, also known as MIME type, of the file"
+          example: text/plain
+        dependencyType:
+          type: string
+          description: "The type of the related object. NONE - If the bot or file\
+            \ does not have a parent, then the API will return the same bot or file.\
+            \ SCANNED - It is the relation with the child bots or files which are\
+            \ scanned and found automatically. MANUAL - It is the relation with the\
+            \ bots or files that are added to the parent bot manually."
+          example: NONE
+        url:
+          type: string
+          description: URL of the bot or file
+          example: https://contorlroom.com/v1/repository/97/1008/download?version=latest
+        requiredByFileId:
+          type: string
+          description: Parent file or folder id
+          example: "0"
+        lockedBy:
+          type: string
+          description: User ID who had locked the File. Only available in case the
+            item type is bot and VCS is 'ON'.
+          example: "0"
+        botStatus:
+          type: string
+          description: "Status of the Bot [Public/Checkout/New/Clone]"
+          example: New
+        permission:
+          $ref: '#/components/schemas/Permission'
+        versionNumber:
+          type: string
+          description: File version
+          example: "0"
+        label:
+          type: string
+          description: File label
+          example: "null"
+      description: File dependency
+    FileDependencyResponse:
+      type: object
+      properties:
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileDependency'
+    PackageVersionUpdateInfo:
+      type: object
+      properties:
+        package_name:
+          type: string
+          description: Name of the package
+          example: MessageBox
+        package_version:
+          type: string
+          description: Version of the package
+          example: 2.0.0-20200716-211611
+      description: Package version update information
+    PackageVersionUpdateRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the request
+          example: Test
+        description:
+          type: string
+          description: Description of the request
+          example: Test description
+        package_info:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackageVersionUpdateInfo'
+        file_ids:
+          type: array
+          description: List of the file ids
+          items:
+            type: integer
+        downgrade_version:
+          type: boolean
+          description: True if the package version downgrade is allowed
+          example: true
+        label:
+          type: string
+          description: File label
+          example: Production
+      description: Package version update request
+    RepositoryRecoveryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the recover activity
+          example: Recover1
+        sourceUserId:
+          type: integer
+          description: Unique ID of the deleted user
+        targetUserId:
+          type: integer
+          description: Unique ID of the target user
+      description: Repository recover request
+    AssignLabelForProduction:
+      type: object
+      properties:
+        fileId:
+          type: integer
+          description: Unique ID of the file
+          example: 545
+        label:
+          type: string
+          description: File Label.
+          example: PRODUCTION
+        versionNumber:
+          type: integer
+          description: File version. Only available in case the item type is bot
+          example: 1
+      description: "Label a version of bot for production request, Currently only\
+        \ PRODUCTION is supported."
+  responses:
+    "200":
+      description: OK
+      content: {}
+    "201":
+      description: Created
+      content: {}
+    "204":
+      description: Delete Successful.
+      content: {}
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "412":
+      description: 412 Precondition Failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/Error'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/Error'
+    FolderNotFoundErrorCode:
+      description: Folder or file is not found in control room.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+    FolderPermissionDeniedErrorCode:
+      description: "Folder or file has no permission either upload,download,delete,execute\
+        \ or run."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.form:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.taskbot:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/vnd.aa.headlessbot:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+        application/octet-stream:
+          schema:
+            $ref: '#/components/schemas/FolderListSpecificError'
+    LoginSessionExpiredErrorCode:
+      description: Authentication required.
+      content: {}
+    BadRequestBodyErrorCode:
+      description: Bad Request.
+      content: {}
+    DirectoryNotEmptyErrorCode:
+      description: The folder is not empty so it cannot be deleted.
+      content: {}
+    PublicFolderExistsErrorCode:
+      description: "A folder exists in the public workspace with the same name, therefore\
+        \ this folder cannot be created."
+      content: {}
+    BadRequestBodyOrSameNameFolderErrorCode:
+      description: "Either the request body is incompatible, or the folder you are\
+        \ trying to create already exists in the public workspace with the same name."
+      content: {}
+    FileNotFoundOrPermissionErrorCode:
+      description: "Either the folder doesn't exist, or the user doesn't have a single\
+        \ permission associated with the folder."
+      content: {}
+    TooManyBotsOrFolderHasCheckedOutAndClonedBots:
+      description: "Either the folder has more than 100 bots, or it contains checked\
+        \ out and cloned bots"
+      content: {}
+  parameters:
+    folderid:
+      name: folderid
+      in: path
+      description: Unique ID of the folder.
+      required: true
+      schema:
+        type: integer
+    id:
+      name: id
+      in: path
+      description: Unique ID of the file
+      required: true
+      schema:
+        type: integer
+    roleid:
+      name: roleid
+      in: path
+      description: Role ID that is associated with a custom defined role.
+      required: true
+      schema:
+        type: integer
+    includeChildren:
+      name: includeChildren
+      in: query
+      description: Include children when retrieving the permissions. Specify true
+        to include children or false to not include children.
+      schema:
+        type: string
+    fileid:
+      name: fileid
+      in: path
+      description: Unique ID of the file
+      required: true
+      schema:
+        type: integer
+    workspaceId:
+      name: workspaceId
+      in: path
+      description: Unique workspace id of user
+      required: true
+      schema:
+        type: integer
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header
+x-original-swagger-version: "2.0"

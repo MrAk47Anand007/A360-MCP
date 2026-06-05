@@ -1,0 +1,600 @@
+swagger: '2.0'
+info:
+  title: BotInsight API
+  description: Automation Anywhere bots are built, run, and monitored in the Control Room. Bot Insight accesses real-time business insights and digital workforce performance data to use content-level productivity data from the bots that are deployed.<br>
+
+    <b>Prerequisites</b> <br>
+    <ul><li>Users with the `AAE_Bot Insight Admin` or `AAE_Admin` role and the `Bot Insight` license can access the Bot Insight API to retrieve business data.</li></ul>
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: '1.0.0'
+schemes:
+  - http
+  - https
+basePath: /v2/botinsight
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /data/api/gettasklogdata:
+    get:
+      summary: Get Task Log Data
+      description: Use the get task log data to retrieve the analytical variables data that is logged during a bot run.
+      consumes:
+        - application/json
+      parameters:
+        - name: botname
+          in: query
+          type: string
+          description: Name of the Bot for which you want to retrieve the data
+        - name: fromdate
+          in: query
+          type: string
+          description: Start date of the period for which to retrieve the data (yyyy-mm-ddThh:mm:ss)
+        - name: todate
+          in: query
+          type: string
+          description: End date of the period for which to retrieve the data (yyyy-mm-ddThh:mm:ss)
+        - name: limit
+          in: query
+          type: string
+          description: The limit of the API response that user want to retrieve
+        - name: pageno
+          in: query
+          type: string
+          description: Page number from which to retrieve the data
+      tags:
+        - Business Data
+      responses:
+        200:
+          description: Bot Business Data Retrieved
+          schema:
+            $ref: '#/definitions/BusinessData'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        407:
+          $ref: '#/responses/407'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /data/api/gettaskvariableprofile:
+    get:
+      summary: Get Bot Variable Profile
+      description: Use Get Bot Variable Profile to retrieve information about the variables in deployed bots, such as the variable name, data type, minimum value, and maximum value.
+      consumes:
+        - application/json
+      parameters:
+        - name: botname
+          in: query
+          type: string
+          description: Name of the Bot for which you want to retrieve data
+        - name: repositorypath
+          in: query
+          type: string
+          description: Control Room repository path of the bot
+      tags:
+        - Business Data
+      responses:
+        200:
+          description: Bot Business Data Retrieved
+          schema:
+            $ref: '#/definitions/ProfileVariable'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        407:
+          $ref: '#/responses/407'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /data/api/deletetasklogdata:
+    delete:
+      summary: Delete Bot Task Log Data
+      description: Delete the business data that is logged in the Bot Insight database on a deployed bot.
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DeleteBusinessDataRequest'
+      tags:
+        - Business Data
+      responses:
+        200:
+          description: Bot Business Data Retrieved
+          schema:
+            $ref: '#/definitions/DeleteBusinessDataResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        407:
+          $ref: '#/responses/407'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /data/api/getbotrundata:
+    get:
+      summary: Get Bot Run Data
+      description: Retrieve information about a bot run, such as the server information and whether the bot ran successfully or encountered an error.
+      consumes:
+        - application/json
+      parameters:
+        - name: pageno
+          in: query
+          type: integer
+          description: The page number of the Bot Run Data that you want to retrieve.
+        - name: limit
+          in: query
+          type: integer
+          description: Optional field. Limits the number of results returned. Defaults to 1000.
+        - name: fromDate
+          in: query
+          type: string
+          description: The starting timestamp for the date range. (yyyy-mm-ddThh:mm:ss)
+        - name: toDate
+          in: query
+          type: string
+          description: The ending timestamp for the date range. (yyyy-mm-ddThh:mm:ss)
+      tags:
+        - Operations Data
+      responses:
+        200:
+          description: Bot Business Data Retrieved
+          schema:
+            $ref: '#/definitions/BotRunDataResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        407:
+          $ref: '#/responses/407'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+  /data/api/getaudittraildata:
+    get:
+      summary: Get Audit Trail Data Detail
+      description: Retrieve information about Control Room events.
+      consumes:
+        - application/json
+      parameters:
+        - name: pageno
+          in: query
+          type: integer
+          description: Page number from which to retrieve the Bot Run Data
+        - name: limit
+          in: query
+          type: integer
+          description: Optional field.Limits the number of results returned. Defaults to 1000.
+        - name: fromDate
+          in: query
+          type: string
+          description: The starting timestamp for the date range. (yyyy-mm-ddThh:mm:ss)
+        - name: toDate
+          in: query
+          type: string
+          description: The ending timestamp for the date range. (yyyy-mm-ddThh:mm:ss)
+      tags:
+        - Operations Data
+      responses:
+        200:
+          description: Bot Business Data Retrieved
+          schema:
+            $ref: '#/definitions/AuditTrailDataResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        407:
+          $ref: '#/responses/407'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+definitions:
+  BusinessData:
+    type: object
+    required:
+      - totalRecords
+      - count
+      - pageNo
+      - botName
+      - repositoryPath
+      - list
+    properties:
+      totalRecords:
+        type: string
+        description: Total Records avilable
+        example: 1
+      count:
+        type: string
+        description: Number of Records that has been retrieved for this request
+        example: 1
+      pageNo:
+        type: string
+        description: Retrieved page Number
+        example: 1
+      botName:
+        type: string
+        description: Retrieved bot name 
+        example: BotSampleName
+      repositoryPath:
+        type: string
+        description: Repository Path of the given bot
+        example: repository:///Automation%20Anywhere/Bots/Samplebot?fileId=580&workspace=PRIVATE&version=0&label=
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Transactions'
+  Transactions:
+    type: object
+    properties:
+      transactionName:
+        type: string
+        description: Specifies the Transaction Name
+        example: Default
+      transactions:
+        type: array
+        items:
+          $ref: '#/definitions/BusinessDataObject'
+  BusinessDataObject:
+    type: object
+    properties:
+      runId:
+        type: string
+        description: Run Id of the Bot ran
+        example: e29732ad-5339-4012-941b-e9a1eb47806c_1a82fe211fc8865e
+      transactionId:
+        type: string
+        description: Transaction Id of the Bot ran
+        example: 2bda3a08-3049-4147-9e2b-8dc9dd8d7665
+      dateLogged:
+        type: string
+        description: Date and Time that bot logged the data
+        format: date-time
+        example: "2025-09-06T10:33:11+00:00"
+      variables:
+        type: array
+        items:
+          $ref: '#/definitions/Variables'
+  Variables:
+    type: object
+    properties:
+      key:
+        type: string
+        description : variable key
+        example: variable1
+      value:
+        type: string
+        description : variable value
+        example: 123
+  ProfileVariable:
+    type: object
+    properties:
+      botId:
+        type: string
+        description: Id of the bot
+        example: PROD_581
+      botName:
+        type: string
+        description: Name of the bot
+        example: BotSampleName
+      totalRecords:
+        type: string
+        description: Total Records that is avialable in DB
+      standardDashboardName:
+        type: string
+        description: Standard Name of the Business Dashboard
+        example: SampleDashboard
+      profileVariables:
+        type: array
+        items:
+          $ref: '#/definitions/ProfileVariableObject'
+  ProfileVariableObject:
+    type: object
+    properties:
+      variableName:
+        type: string
+        description: Name of the profile variable
+        example: transactionStatus
+      internalVariableName:
+        type: string
+        description: Internal Name of the profile variable
+        example: transactionStatus
+      displayName:
+        type: string
+        description: Display Name of the profile variable
+        example: Transaction Status
+      attributeType:
+        type: string
+        description: Attribute Type of the profile variable
+        example: NUMERIC
+      sumOfValue:
+        type: number
+        description: Sum of the value
+        example: 789.0
+      minimumValue:
+        type: number
+        description: Minimum value
+        example: 789.0
+      maximumValue:
+        type: number
+        description: Maximum value
+        example: 789
+      averageOfValues:
+        type: number
+        description: Average of values
+        example: 789
+      totalDistinct:
+        type: integer
+        description: Total number of distinct
+        example: 1
+      totalNullRecords:
+        type: integer
+        description: Total number of null records
+        example: 0
+      enabled:
+        type: string
+        description: Is the variable enabled or not
+        example: Y
+      addedState:
+        type: string
+        description: Added state
+        example: SAME
+  DeleteBusinessDataRequest:
+    type: object
+    properties:
+      botName:
+        type: string
+        description: Name of the bot
+        example: SampleBot
+      repositoryPath:
+        type: string
+        description: Control Room repository path of the bot
+        example: repository:///Automation%20Anywhere/Bots/Samplebot?fileId=580&workspace=PRIVATE&version=0&label=
+      environment:
+        type: string
+        description: Specifies the environment of the bot
+        example: Prod
+      runId:
+        type: string
+        description: Bot Run Id. If you provide Run Id then fromDate and toDate is not required.
+      transactionId:
+        type: string
+        description: Bot Transaction Id. This is an optional field but when user provide Transaction Id then it must be given along with the Run Id.
+      fromDate:
+        type: string
+        description:  Start date of the period for which to you want to delete the data (yyyy-mm-ddThh:mm:ss). Either provide the fromDate or runId.
+        example: "2025-09-06T00:00:00"
+      toDate:
+        type: string
+        description: To Date (yyyy-mm-ddThh:mm:ss) Till which date user want to delete
+        example: "2025-09-09T12:00:00"
+  DeleteBusinessDataResponse:
+    type: object
+    properties:
+      botName:
+        type: string
+        description: Name of the bot
+      repositoryPath:
+        type: string
+        description: Repository of the bot
+      deleteCount:
+        type: integer
+        description: number rows that deleted from db
+  BotRunDataResponse:
+    type: object
+    properties:
+      totalRecords:
+        type: integer
+        description: Total Records that has retrieved as part of the request
+      botRunDataList:
+        type: array
+        description: The array of Bot Run Data objects.
+        items:
+          $ref: '#/definitions/BotRunData'
+  BotRunData:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The bot run unique Id for the particular run.
+        example: 60
+      userName:
+        type: string
+        description: The user name of the user who is running the bot.
+        example: botrun_user
+      hostName:
+        type: string
+        description: The host Name
+        example: 192.120.10.11
+      fileName:
+        type: string
+        description: Bot File Name
+        example: Migration-Excel-DB
+      fileType:
+        type: string
+        description: File Type associated to this bot.
+          <ul>
+          <li>WORKORDER - Depicts the status of the workitems uploaded from the CSV file</li>
+          <li>WLM_TASK - A Work load management bot</li>
+          <li>EXPORT - Bot export</li>
+          <li>API - A bot that is run from an API</li>
+          <li>AARI - A process bot</li>
+          <li>RUN_NOW -  A regular run as a users bot</li>
+          <li>SCHEDULED - A scheduled bot</li>
+          <li>TRIGGER - A triggered bot</li>
+          <li>AUDIT_EXPORT - Audit export</li>
+          <li>QUEUE_EXPORT - Queue export</li>
+          <li>QUEUE_IMPORT - Queue import</li>
+          <li>WORKITEM_EXPORT - List of Workitem export in CSV</li></ul>
+        enum:
+          - WORKORDER
+          - WLM_TASK
+          - EXPORT
+          - API
+          - AARI
+          - RUN_NOW
+          - SCHEDULED
+          - TRIGGER
+          - AUDIT_EXPORT
+          - QUEUE_EXPORT
+          - QUEUE_IMPORT
+          - WORKITEM_EXPORT
+        example: RUN_NOW
+
+      startDate:
+          type: string
+          description: The date and time of when this bot started.
+          example: "2025-09-04T08:58:27.052856200Z"
+      endDate:
+          type: string
+          description: The date and time of when this bot ended.
+          example: "2025-09-04T08:58:27.760804Z"
+      status:
+        type: string
+        description: The status of the bot.
+        example: COMPLETED
+      totalLines:
+        type: integer
+        description: Total number of command lines the bot contains.
+        example: 3
+      currentLine:
+        type: integer
+        description: The current Line that bot is processing
+        example: 3
+      timeTaken:
+        type: integer
+        description: Time taken in milliseconds by the bot to complete the operation.
+        example: 1820
+      progress:
+        type: integer
+        description: The progress of the bot in percentage.
+        example: 100
+  AuditTrailDataResponse:
+    type: object
+    properties:
+      totalRecords:
+        type: integer
+        description: Total Records that has retrieved as part of the request
+      botRunDataList:
+        type: array
+        items:
+          $ref: '#/definitions/AuditTrailData'
+  AuditTrailData:
+    type: object
+    properties:
+      activityType:
+        type: string
+        description: Defines the job activity type
+        example: MULTI_LOGIN
+      createdBy:
+        type: integer
+        description: ID of the user
+        example: 10
+      createdOn:
+        type: string
+        description: On which this has been created
+        example: "2025-10-04T13:49:55Z"
+      detail:
+        type: string
+        description: Detail about the activity
+        properties: 
+           newValue:
+            type: string
+            description: New value
+           attribute:
+             type: string
+             description: Attribute
+      environmentName:
+        type: string
+        description: Environment Name
+        example: DEV
+      eventDescription:
+        type: string
+        description: Event Description
+        example: User botcreate_user created
+      hostName:
+        type: string
+        description: Host Name
+        example: 192.110.10.10
+      id:
+        type: string
+        description: Activity Id
+        example: 1011
+      objectName:
+        type: string
+        description: Object Name
+        example: Sample role
+      requestId:
+        type: string
+        description: Request Id
+        example: f59a56a6dee160d8
+      source:
+        type: string
+        description: Activity Source
+        example: Control Room
+      status:
+        type: string
+        description: Activity Status
+        example: Successful
+      userName:
+        type: string
+        description: Name of the user who performed the activity
+        example: botcreate_user
+  Error:
+    type: string
+    description: Message describing error
+responses:
+  400:
+    description: Bad Request
+  401:
+    description: Unauthorized access
+  403:
+    description: Access forbidden
+  404:
+    description: Resource not found
+  407:
+    description: Authentication Required
+  409:
+    description: Conflict
+  500:
+    description: Internal Server error

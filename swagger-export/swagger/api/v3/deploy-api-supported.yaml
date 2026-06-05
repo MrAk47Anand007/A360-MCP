@@ -1,0 +1,798 @@
+openapi: 3.0.1
+info:
+  title: Bot Deploy API
+  description: |-
+    Use the Bot Deploy API to deploy bots from the public workspace to Bot Runner devices. To deploy bots you must have the following permissions.
+    - View and Run my bots feature permission
+    - Run and schedule permissions for the folders that contain the bots
+    - Access to Bot Runner licensed users
+    - Access to either a default device or a device pool
+
+    This API supports callback URL for environments that have both the Control Room and callback server on the same network. All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 1.0.0
+servers:
+- url: /v3
+security:
+- AccessToken: []
+paths:
+  /automations/deploy:
+    post:
+      tags:
+      - Automations
+      summary: Deploy a bot using runAs Users
+      description: |-
+        <p> Use this endpoint to deploy a bot by using runAs Users. To deploy a bot, the following device selection criteria is applied. </p> <li>If <b>poolIds</b> are not provided, the default device associated with runAs user is used to deploy the bot. </li> <li>If <b>poolIds</b> are provided and <b>overrideDefaultDevice</b> is set to false, the default device associated with runAs user is preffered if any are available. Otherwise, the device is picked from the pool to deploy bot.</li> <li>If <b>poolIds</b> are provided and <b>overrideDefaultDevice</b> is set to true, the device is picked from the pool to deploy bot. </li> <li>If the device is not available or the user is not available then the deployment is queued.</li>
+        
+        <p> <b>Note:</b> Bot deploy request can be made without any input fields. If you specify inputs, make sure that the bot to successfully receive these mapped in values, the variable for that bot must be marked as input. Additionally, the name of the variable in the bot has to match the value that is being mapped in the request body.</p> <p>Example value specified below is for Dictionary Bot Input. You can view the other Bot input types in the <b>Models</b> section at the end of the swagger.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployRequest'
+        required: true
+      responses:
+        "200":
+          description: A deployment ID is returned that can be used to check the status
+            of deployment using the callback URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+
+
+components:
+  schemas:
+    DeployRequest: # Define a base schema with common DeployRequest properties
+      required:
+        - fileId
+        - runAsUserIds
+
+      type: object
+      properties:
+        fileId:
+          type: integer
+          description: File ID of the bot to be deployed.
+          example: 83
+        automationName:
+          type: string
+          description: Name of the automation being deployed.
+          example: Deploy_My_Bot
+        runAsUserIds:
+          type: array
+          items:
+            type: integer
+            description: >-
+              List of runAs User IDs to deploy bot.
+              <li> The bot will be deployed on associated default device for each runAsUser or on 1 of the devices from the device pool(s) if provided.
+            example: 3
+        callbackInfo:
+          $ref: '#/components/schemas/CallbackInfo'
+        poolIds:
+          type: array
+          items:
+            type: integer
+            description: >-
+              You will define the poolIds only when you are running it against a device pool or a pool of runners instead of an individual runner. Identifier of a device pool that has at least one active device. If you enter multiple pool IDs, enter the values in the order of which you want the API to check for available devices. If none of the devices are available at the time of deployment, the automation is queued.
+        overrideDefaultDevice:
+          type: boolean
+          description: >-
+            Indicates whether to use default device or not.
+            <li> This will be effective if the poolId(s) are provided.
+            <li> If the value is set to false, the default device is preferred else device from the pool is picked.
+        runElevated:
+          type: boolean
+          description: Whether to deploy the bot using elevated permissions or not.
+        numOfRunAsUsersToUse:
+          type: integer
+          description: >-
+            Used to indicate how many run as users should be used from the list of runAsUserIds provided.
+            <li> System will pick the specified number of runAsUsers with the least number of tasks queued for the user at the moment of deploy request. </li>
+            <li> If 0 then all the users will be used.</li>
+            <li> If the number is greater than the number of runAsUsers provided or less than 0 it will error out.
+        automationPriority:
+          $ref: '#/components/schemas/AutomationPriority'
+        botLabel:
+          type: string
+          description: label for the bot being deployed.
+        hideBotAgentUi:
+          type: boolean
+          description: "Indicates whether to show running progress UI while bot is\n running.\n - Default will be true, which indicates UI will not be visible."
+        
+      oneOf:        
+            - $ref: '#/components/schemas/String'
+            - $ref: '#/components/schemas/Number'
+            - $ref: '#/components/schemas/Boolean'
+            - $ref: '#/components/schemas/File'
+            - $ref: '#/components/schemas/Iterator'
+            - $ref: '#/components/schemas/List'
+            - $ref: '#/components/schemas/Dictionary'
+            - $ref: '#/components/schemas/Table'
+            - $ref: '#/components/schemas/Variable'
+            #- $ref: '#/components/schemas/Conditional'
+            - $ref: '#/components/schemas/Window'
+            - $ref: '#/components/schemas/TaskBot'
+            - $ref: '#/components/schemas/DateTime'
+            - $ref: '#/components/schemas/UIObject'        
+            - $ref: '#/components/schemas/Record'
+            - $ref: '#/components/schemas/Credential'
+            - $ref: '#/components/schemas/Coordinate'
+            - $ref: '#/components/schemas/Region'
+            - $ref: '#/components/schemas/HotKey'
+
+
+    Dictionary:
+      type: object
+      properties:   
+        botInput:
+              type: object
+              description: "Example of Dictionary Bot Input"
+              properties:
+                myDictionaryInput:
+                  type: object
+                  properties:
+                    type:
+                      $ref: '#/components/schemas/AttributeType'
+                    dictionary:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/DictionaryProperties'
+    DictionaryProperties:
+      type: object
+      properties:  
+        key:
+          type: string
+          example: key1
+        value:
+          $ref: '#/components/schemas/BotValue'
+     
+    BotValue:
+      type: object
+      properties: 
+        type: 
+          type: string
+          example: STRING
+        string:
+          type: string
+          example: value1
+
+    DateTime:
+      type: object
+      properties:
+        botInput:
+              type: object
+              description: Example of DateTime Bot Input
+              properties:
+                dt_input1:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: DATETIME
+                    string:
+                      type: string
+                      example: "2025-04-27T00:15:00-06:00[USA/New York]"
+                dt_input2:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: DATETIME
+                    string:
+                      type: string
+                      example: "2025-04-27T00:15:05-06:00[USA/New York]"
+
+    Window:
+      type: object
+      properties:
+        botInput:
+            type: object
+            description: Example of Window Bot Input
+            properties:
+                name:
+                  type: string
+                  example: Browser
+                path:
+                  type: string
+                  example: https://www.automationanywhere.com/
+                class:
+                  type: string
+                handle:
+                  type: integer
+                  format: int64
+                isChild:
+                  type: boolean
+                  format: boolean
+                location:
+                  $ref: '#/components/schemas/WindowLocation'
+                size:
+                  $ref: '#/components/schemas/WindowSize'
+                presetType:
+                  $ref: '#/components/schemas/WindowPreset'
+    WindowLocation:
+              type: object
+              properties:
+                top:
+                  type: integer
+                  format: int32
+                left:
+                  type: integer
+                  format: int32
+    WindowSize:
+              type: object
+              properties:
+                height:
+                  type: integer
+                  format: int32
+                  example: 800
+                width:
+                  type: integer
+                  format: int32
+                  example: 600
+    WindowPreset:
+              type: string
+              default: NONE
+              enum:
+              - NONE
+              - CURRENTLY_ACTIVE
+              - DESKTOP
+              - TASKBAR
+
+    List:
+      type: object
+      properties:   
+        botInput:
+              type: object
+              description: "Example of List Bot Input"
+              properties:
+                myListInput:
+                  type: object
+                  properties:
+                    type:
+                      $ref: '#/components/schemas/AttributeType'
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/BotValue'
+    String:
+      type: object
+      properties:
+        botInput:
+              type: object
+              description: "Example of String Bot Input"
+              properties:
+                sInput1:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: STRING
+                    string:
+                      type: string
+                      example: "Test Values1"
+                sInput2:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: STRING
+                    string:
+                      type: string
+                      example: "Test Values2"
+    Number:
+      type: object
+      properties:
+        botInput:
+              type: object
+              description: "Example of Number Bot Input"
+              properties:
+                sInput1:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: NUMBER
+                    string:
+                      type: number
+                      example: 123
+                sInput2:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: NUMBER
+                    string:
+                      type: number
+                      example: 456
+
+    Boolean:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Boolean Bot Input"
+          properties:
+            myBooleanInput:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/AttributeType'
+                boolean:
+                  type: boolean
+                  example: true
+
+    File:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of File Bot Input"
+          properties:
+            myFileInput:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/AttributeType'
+                string:
+                  type: string
+                  description: Base64 encoded file content
+                  example: "SGVsbG8gV29ybGQ="
+                fileName:
+                  type: string
+                  description: Name of the file
+                  example: "hello.txt"
+
+    Iterator:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Iterator Bot Input"
+          properties:
+            myIteratorInput:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/AttributeType'
+                start:
+                  type: integer
+                  description: Start value of the iterator
+                  example: 1
+                end:
+                  type: integer
+                  description: End value of the iterator
+                  example: 10
+                step:
+                  type: integer
+                  description: Step value of the iterator
+                  example: 2
+    Table:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Table Bot Input"
+          properties:
+            myTableInput:
+              type: object
+              properties:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Schema'
+                rows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Row'
+    Row:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Value'
+          example: value1
+
+    Schema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Bot
+        type:
+          $ref: '#/components/schemas/AttributeType'
+    Value:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AttributeType'
+        dictionary:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dictionary'
+
+    Variable:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Variable Bot Input"
+          properties:
+            myVariableInput:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/AttributeType'
+                string:
+                  type: string
+                  description: Value of the variable
+                  example: "myVariableValue"
+                variableName:
+                  type: string
+                  description: Name of the variable
+                  example: "myVariable"
+
+    UIObject:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of UIObject Bot Input"
+          properties:
+            myUIObjectInput:
+              type: object
+              properties:
+                blob:
+                  type: string
+                  format: byte
+                controlType:
+                  $ref: '#/components/schemas/UIObjectControlType'
+                technologyType:
+                  $ref: '#/components/schemas/UIObjectTechnologyType'
+                criteria:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/UIObjectSelectionCriterion'
+                capture:
+                  $ref: '#/components/schemas/RectangleImageCapture'
+    UIObjectControlType:
+      type: string
+      enum:
+        - UNKNOWN_CONTROL
+        - BUTTON
+        - TEXTBOX
+        - LINK
+        - RADIO
+        - CHECKBOX
+        - COMBOBOX
+        - MENUBAR
+        - LISTVIEW
+        - TABLE
+        - CALENDAR
+        - DATEPICKER
+        - SLIDER
+        - TREE
+        - PAGETAB
+        - LABEL
+        - SCROLLBAR_HORIZONTAL
+        - DROPDOWN
+        - CLIENT
+        - IMAGE_BUTTON
+        - ANY_CONTROL
+        - PAGETABITEM
+        - SCROLLBAR_VERTICAL
+      default: UNKNOWN_CONTROL
+    UIObjectTechnologyType:
+      type: string
+      enum:
+        - UNKNOWN
+        - MS_ACTIVE_ACCESSIBILITY
+        - MS_UI_AUTOMATION
+        - JAVA
+        - SILVERLIGHT
+        - FLASH
+        - HTML
+        - AISENSE
+        - SAP
+        - ANY_TECHNOLOGY
+      default: UNKNOWN
+    UIObjectSelectionCriterion:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          format: boolean
+        value:
+          $ref: '#/components/schemas/Value'
+    RectangleImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotRectangle:
+          $ref: '#/components/schemas/Rectangle'
+        thumbnailRectangle:
+          $ref: '#/components/schemas/Rectangle'
+        securelyRecorded:
+          type: boolean
+          format: boolean
+    Rectangle:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+
+    HotKey:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of HotKey Bot Input"
+          properties:
+            myHotKeyInput:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: A
+                modifierKeys:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/HotKeyModifierKey'
+    HotKeyModifierKey:
+      type: string
+      enum:
+        - CONTROL
+        - SHIFT
+        - ALT
+        - WINDOWS
+        - ALT_GRAPH
+      default: CONTROL
+
+
+    TaskBot:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of TaskBot Input"
+          properties:
+            myTaskBotInput:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "f7a7e3b0-4a2a-4a1a-8a0a-0a0a0a0a0a0a"
+                name:
+                  type: string
+                  example: "My Task Bot"
+                version:
+                  type: string
+                  example: "1.0"
+                repositoryPath:
+                  type: string
+                  example: "\\My Bots\\TaskBot1.atmx"
+                runAsUser:
+                  type: string
+                  example: "MyUser"
+                arguments:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TaskBotArgument'
+    TaskBotArgument:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Input1"
+        value:
+          $ref: '#/components/schemas/Value'
+        type:
+          $ref: '#/components/schemas/AttributeType'
+
+    Record:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Record Bot Input"
+          properties:
+            myRecordInput:
+              type: object
+              properties:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Schema'
+                values:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Value'
+
+    Credential:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of CredentialObject Bot Input"
+          properties:
+            myCredentialObjectInput:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "MyCredential"
+                lockerName:
+                  type: string
+                  example: "MyLocker"
+                attributeName:
+                  type: string
+                  example: "Username"
+
+
+    Coordinate:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Coordinate Bot Input"
+          properties:
+            myCoordinateInput:
+              type: object
+      
+    Region:
+      type: object
+      properties:
+        botInput:
+          type: object
+          description: "Example of Region Bot Input"
+          properties:
+            myRegionInput:
+              type: object
+              properties:
+                x:
+                  "$ref": "#/components/schemas/Value"
+                  example: 10
+                y:
+                  "$ref": "#/components/schemas/Value"
+                  example: 20
+                width:
+                  "$ref": "#/components/schemas/Value"
+                  example: 100
+                height:
+                  "$ref": "#/components/schemas/Value"
+                  example: 50
+                capture:
+                  "$ref": "#/components/schemas/RectangleImageCapture"
+
+    AttributeType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+        - BOOLEAN
+        - FILE
+        - ITERATOR
+        - LIST
+        - DICTIONARY
+        - TABLE
+        - VARIABLE
+        - CONDITIONAL
+        - WINDOW
+        - TASKBOT
+        - DATETIME
+        - UIOBJECT
+        - RECORD
+        - EXCEPTION
+        - CREDENTIAL
+        - COORDINATE
+        - IMAGE
+        - REGION
+        - PROPERTIES
+        - TRIGGER
+        - CONDITIONALGROUP
+        - FORM
+        - FORMELEMENT
+        - HOTKEY
+        - WORKITEM
+      default: STRING
+      example: DICTIONARY
+      
+    CallbackInfo:
+      required:
+      - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: Callback API URL.
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+            description: "Callback API headers. Headers may contain authentication\
+              \ token, content type etc. Both key & value are of type string."
+      description: Callback URL & Headers.
+      example:
+        url: https://callbackserver.com/storeBotExecutionStatus
+        headers:
+          X-Authorization: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiI0Ii
+    
+    AutomationPriority:
+      type: string
+      default: PRIORITY_MEDIUM
+      enum:
+      - PRIORITY_MEDIUM
+      - PRIORITY_HIGH
+      - PRIORITY_LOW
+    
+    
+    DeployResponse:
+      type: object
+      properties:
+        deploymentId:
+          type: string
+          description: Deployment ID created.
+          example: 340a2949-aa44-41ab-af9b-f9343ae2581c
+
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error Message
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message
+
+
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

@@ -1,0 +1,1781 @@
+openapi: 3.0.1
+info:
+  title: ACC Automations API
+  description: >-
+    The ACC Automations API provides KPI, ranking, run history, duration, and failure
+    analytics for automations (bots) along with detailed execution search. Endpoints are
+    under the base path `/v1/acc/automation/*` and support filtering, paging, and exporting.
+    
+    Core capabilities:
+      * Overview KPIs (counts, success rate, average duration)
+      * Ranked lists (most running, longest running, most failed)
+      * Duration analytics (overall, grouped views, totals)
+      * Execution listing (all, completed, failed)
+      * Run history & about metadata (by workspace type or bot id)
+      * CSV export endpoints for selected ranked / list data
+    
+    Authentication: Supply `X-Authorization` or `Authorization:Bearer <bearer token>`.
+    
+    Permissions & Feature Flags: Access is controlled by Control Room permissions and
+    feature licenses. Some endpoints may require additional feature flags.
+  version: 1.0.0
+
+servers:
+  - url: /v1
+    description: Base URL
+
+security:
+  - AccessToken: []
+
+paths:
+
+  # ACC Automation Insight Endpoints (v1/acc/automation/*)
+  /acc/automation/overview:
+    post:
+      operationId: getAutomationOverview
+      summary: Automation overview KPIs
+      description: Returns high-level KPI metrics for automations in the tenant and (optionally) workspace type.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeRequest'
+      responses:
+        '200':
+          description: Overview metrics response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationOverviewResponse'
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+
+  /acc/automation/runduration:
+    post:
+      operationId: getAutomationRunDuration
+      summary: Automation run duration distribution
+      description: Returns aggregated run duration statistics for automations over a time range.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeRequest'
+      responses:
+        '200':
+          description: Duration metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRunDurationResponse'
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/mostrunning:
+    post:
+      operationId: listMostRunningAutomations
+      summary: Most frequently running automations
+      description: Lists automations with highest execution counts in the time window.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeRequest'
+      responses:
+        '200':
+          description: List of automations and run counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationMostRunningResponse'
+              examples:
+                sample:
+                  value:
+                    metrics:
+                      - id: "166696"
+                        botId: "166696"
+                        name: "JokeAgent"
+                        path: "Automation Anywhere\\Bots\\JokeProcess\\JokeAgent"
+                        count:
+                          successful: "0"
+                          failed: "2"
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/longestrunning:
+    post:
+      operationId: listLongestRunningAutomations
+      summary: Longest running automations
+      description: Lists automations by average / max run duration.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeRequest'
+      responses:
+        '200':
+          description: Ranked duration list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationLongestRunningResponse'
+              examples:
+                sample:
+                  value:
+                    metrics:
+                      - id: "166696"
+                        botId: "166696"
+                        name: "JokeAgent"
+                        path: "Automation Anywhere\\Bots\\JokeProcess\\JokeAgent"
+                        longestBotRun:
+                          id: "f3965b6c-27b6-457e-b2ad-6ec4dd1c0967_89ab7c500b8a2565"
+                          botId: "0"
+                          runDurationMillisec: "1000"
+                          from: "2025-10-13T21:39:05Z"
+                          to: "2025-10-13T21:39:06Z"
+                          averageRunDurationMillisec: "4351"
+                          deviceId: "0"
+                          deviceName: ""
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/mostfailed:
+    post:
+      operationId: listMostFailedAutomations
+      summary: Automations with most failures
+      description: Lists automations ordered by failure count.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeRequest'
+      responses:
+        '200':
+          description: List of most frequently running automations with success / failure counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationMostFailedResponse'
+              examples:
+                sample:
+                  value:
+                    metrics:
+                      - id: "166696"
+                        botId: "166696"
+                        name: "JokeAgent"
+                        path: "Automation Anywhere\\Bots\\JokeProcess\\JokeAgent"
+                        failures:
+                          count: "2"
+                          lastFailedReason: |-
+                            There was a problem at line 1
+                             This may be due to the following reason:
+                            
+                                Bot command can not be executed as associated model connection has been disabled.
+                            
+                             To continue, edit the bot and fix the error. Then, try again.
+                            
+                            
+                            If you continue to see this message, please contact your system administrator.
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/failures:
+    post:
+      operationId: listFailedAutomationExecutions
+      summary: Failed automation executions
+      description: Returns a paginated list of failed automation executions with error details.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationFailuresRequest'
+      responses:
+        '200':
+          description: Failure executions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationFailuresResponse'
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/botexecution/list:
+    post:
+      operationId: listAutomationExecutions
+      summary: Bot execution list (simplified)
+      description: Returns a paginated list of recent bot executions with a simplified item model. This variant only supports paging (no filter/sort in this spec revision).
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BotExecutionListRequest'
+            examples:
+              sample:
+                value:
+                  page:
+                    offset: 0
+                    length: 15
+      responses:
+        '200':
+          description: Simplified execution list response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotExecutionListResponse'
+              examples:
+                sample:
+                  value:
+                    page:
+                      offset: 0
+                      total: 2
+                      totalFilter: 2
+                    list:
+                      - id: "fe3050b6-bed3-40c1-b5bf-e33721866de1_4c41ec09d29b365e"
+                        name: "test_bot_with_pause"
+                        path: "Automation Anywhere\\Bots\\test_bot_with_pause"
+                        userName: "prodrunner"
+                        deviceName: "AABLR0468"
+                        startDateTime: "2022-12-21T09:52:18Z"
+                        botId: "36"
+                      - id: "16dfjtku-bed3-40c1-b5bf-e33721866de1_4c41ec09d29b365e"
+                        name: "test_bot"
+                        path: "Automation Anywhere\\Bots\\Test\\test_bot"
+                        userName: "prodrunner2"
+                        deviceName: "AABLTEST"
+                        startDateTime: "2022-11-21T09:52:18Z"
+                        botId: "37"
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/bot/completed:
+    post:
+      operationId: listCompletedAutomationExecutions
+      summary: Completed bot executions (simplified)
+      description: Returns a list of recent completed bot executions within a time range. Simplified model supports timeRange and size only.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletedBotExecutionsRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST7DAYS
+                  size: 100
+      responses:
+        '200':
+          description: Simplified completed executions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompletedBotExecutionListResponse'
+              examples:
+                sample:
+                  value:
+                    list:
+                      - botId: "20"
+                        name: "test_paused_bot"
+                        path: "Automation Anywhere\\Bots\\test_paused_bot"
+                        startDateTime: "2023-02-16T09:28:54Z"
+                        id: "0967c31c-0860-4d81-bf81-c968f5cb9d79_8fcb579d9aa3ef3e"
+                      - botId: "20"
+                        name: "test_paused_bot"
+                        path: "Automation Anywhere\\Bots\\test_paused_bot"
+                        startDateTime: "2023-02-16T08:55:18Z"
+                        id: "3ed2a55a-0270-45cd-9127-90114d06a675_220554a21bd1795d"
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/bot/failed:
+    post:
+      operationId: listFailedBotExecutions
+      summary: Failed bot executions list (simplified)
+      description: Returns a list of recent failed bot executions within a time range. Simplified model supports timeRange and size only, with failureReason for each execution.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FailedBotExecutionsRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST30DAYS
+                  size: 100
+      responses:
+        '200':
+          description: Simplified failed executions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailedBotExecutionListResponse'
+              examples:
+                sample:
+                  value:
+                    list:
+                      - botId: "20"
+                        name: "test_paused_bot"
+                        path: "Automation Anywhere\\Bots\\test_paused_bot"
+                        startDateTime: "2023-02-16T09:28:54Z"
+                        id: "0967c31c-0860-4d81-bf81-c968f5cb9d79_8fcb579d9aa3ef3e"
+                        failureReason: "Failure reason1"
+                      - botId: "20"
+                        name: "test_paused_bot"
+                        path: "Automation Anywhere\\Bots\\test_paused_bot"
+                        startDateTime: "2023-02-16T08:55:18Z"
+                        id: "3ed2a55a-0270-45cd-9127-90114d06a675_220554a21bd1795d"
+                        failureReason: "Failure reason2"
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  # Export endpoints
+  /acc/automation/mostrunning/export:
+    post:
+      operationId: exportMostRunningAutomations
+      summary: Export most running automations (CSV)
+      description: Returns CSV stream of ranked most running automations.
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Most-Running-Automations-last24hours-20251013-205408
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/longestrunning/export:
+    post:
+      operationId: exportLongestRunningAutomations
+      summary: Export longest running automations (CSV)
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Longest-Running-Automations-last24hours-20251013-205846
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/mostfailed/export:
+    post:
+      operationId: exportMostFailedAutomations
+      summary: Export most failed automations (CSV)
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Most-Failures-Automations-last24hours-20251013-205936
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/runhistory/export:
+    post:
+      operationId: exportAutomationRunHistory
+      summary: Export automation run history (CSV)
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Automations-Run-History-last24hours-20251014-132353
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  # About & run history parameterized by bot or workspace type
+  /acc/automation/{botId}/about:
+    get:
+      operationId: getAutomationAbout
+      summary: Automation about metadata
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/BotIdParam'
+      responses:
+        '200':
+          description: About metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationAboutResponse'
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /acc/automation/overview/{workSpaceType}:
+    post:
+      operationId: getWorkspaceAutomationOverview
+      summary: Workspace automation overview KPIs
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TimeRangeRequest' }
+      responses:
+        '200': { description: Overview metrics response, content: { application/json: { schema: { $ref: '#/components/schemas/AutomationOverviewResponse' } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/mostrunning/{workSpaceType}:
+    post:
+      operationId: listMostRunningAutomationsByWorkspace
+      summary: Most running automations (workspace scoped)
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeSizeRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  size: 100
+      responses:
+        '200':
+          description: Workspace-scoped most running automations with success / failure counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationMostRunningResponse'
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/mostrunning/{workSpaceType}/export:
+    post:
+      operationId: exportMostRunningAutomationsByWorkspace
+      summary: Export most running automations (workspace scoped CSV)
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Most-Running-Automations-PRIVATE-last24hours-20251014-132800
+      responses:
+        '200': { description: CSV export, content: { text/csv: { schema: { type: string, format: binary } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/runhistory/{workSpaceType}:
+    post:
+      operationId: listAutomationRunHistoryByWorkspace
+      summary: Automation run history (workspace scoped)
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeSizeRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  size: 100
+      responses:
+        '200': { description: Execution list response, content: { application/json: { schema: { $ref: '#/components/schemas/ExecutionResponse' } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/runhistory/{workSpaceType}/export:
+    post:
+      operationId: exportAutomationRunHistoryByWorkspace
+      summary: Export automation run history (workspace scoped CSV)
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST24HOURS
+                  fileName: Private-Automations-Run-History-last24hours-20251014-133045
+      responses:
+        '200': { description: CSV export, content: { text/csv: { schema: { type: string, format: binary } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/about/{workSpaceType}:
+    post:
+      operationId: getAutomationAboutByWorkspace
+      summary: Automation about metadata (workspace scoped)
+      description: Returns about metadata for automations filtered by workspace type and optional id/userId context.
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/WorkSpaceTypeParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationAboutWorkspaceRequest'
+            examples:
+              sample:
+                value:
+                  id: "169794"
+                  userId: "41553"
+      responses:
+        '200':
+          description: About metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationAboutResponse'
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  # Grouped run duration endpoints
+  /acc/automation/{groupBy}/runduration:
+    post:
+      operationId: getGroupedAutomationRunDuration
+      summary: Grouped automation run duration metrics
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/GroupByParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TimeRangeRequest' }
+      responses:
+        '200':
+          description: Grouped duration metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationGroupedRunDurationResponse'
+              examples:
+                sample:
+                  value:
+                    groupByField: deviceName
+                    groupBy:
+                      - fieldName: device1
+                        runDurationMilliseconds: "59376990"
+                        percentageValue: 97.63
+                      - fieldName: device2
+                        runDurationMilliseconds: "463806"
+                        percentageValue: 0.76
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/{groupBy}/runduration/list:
+    post:
+      operationId: listGroupedAutomationRunDuration
+      summary: Grouped automation run duration list
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/GroupByParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeFilterRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST7DAYS
+                  sort: null
+                  filter: null
+                  page:
+                    offset: 0
+                    length: 15
+      responses:
+        '200':
+          description: Grouped run duration ranked list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationGroupedRunDurationListResponse'
+              examples:
+                sample:
+                  value:
+                    list:
+                      - id: ec1d496f-45fc-44a0-a131-ba0264989dc9
+                        fieldId: "169390"
+                        automationName: bot
+                        runDurationMilliseconds: "21827"
+                        folderPath: "Automation Anywhere\\Bots\\temporal check\\bot"
+                      - id: a7d219c3-1ea2-4398-a84b-f30ddb19b7c0
+                        fieldId: "166696"
+                        automationName: JokeAgent
+                        runDurationMilliseconds: "21124"
+                        folderPath: "Automation Anywhere\\Bots\\JokeProcess\\JokeAgent"
+                      - id: 678bbfcf-a347-4dfa-9628-9a5d47c61c1b
+                        fieldId: "61785"
+                        automationName: LI_UIAuto_10242024114540_extractionbot
+                        runDurationMilliseconds: "5631"
+                        folderPath: "Automation Anywhere\\Bots\\Document Workspace Processes\\LI_UIAuto_10242024114540\\LI_UIAuto_10242024114540_extractionbot"
+                    page:
+                      offset: 0
+                      total: 3
+                      totalFilter: 3
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/{groupBy}/runduration/list/export:
+    post:
+      operationId: exportGroupedAutomationRunDuration
+      summary: Export grouped automation run duration list (CSV)
+      tags: [ acc-automation ]
+      parameters:
+        - $ref: '#/components/parameters/GroupByParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeRangeFilterExportRequest'
+            examples:
+              sample:
+                value:
+                  timeRange:
+                    type: LAST7DAYS
+                  sort: null
+                  filter:
+                    field: automationName
+                    value: bot
+                    operator: substring
+                  fileName: Automation-run-hours-last7days-20251014-135056
+      responses:
+        '200': { description: CSV export, content: { text/csv: { schema: { type: string, format: binary } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /acc/automation/runduration/total:
+    post:
+      operationId: getAutomationTotalRunTime
+      summary: Total automation run time metrics
+      tags: [ acc-automation ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TimeRangeRequest' }
+      responses:
+        '200': { description: Aggregated total run time in milliseconds, content: { application/json: { schema: { $ref: '#/components/schemas/AutomationTotalRunTimeResponse' } } } }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+
+components:
+
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: 'X-Authorization: _token_'
+      name: X-Authorization
+      in: header
+
+  parameters:
+    BotIdParam:
+      name: botId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique bot (automation) identifier.
+    WorkSpaceTypeParam:
+      name: workSpaceType
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace type scope (for example PRIVATE, PUBLIC).
+    GroupByParam:
+      name: groupBy
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Field to group by for duration metrics (for automationName, deviceName, userName, executionStatus, executionType, licenseType).
+  responses:
+    BadRequestError:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenError:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFoundError:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    AutomationTotalRunTimeResponse:
+      type: object
+      description: Total cumulative run time across matching automations (milliseconds).
+      properties:
+        totalRunTime:
+          type: integer
+          format: int64
+          example: 123456789
+          description: Total run time in milliseconds.
+    AutomationAboutResponse:
+      type: object
+      description: About metadata for a single automation.
+      properties:
+        botId: { type: integer, format: int64 }
+        botName: { type: string }
+        version: { type: string }
+        lastModifiedDate: { type: string, description: ISO timestamp of last modification }
+        technicalOwners:
+          type: array
+          items:
+            type: object
+            properties:
+              type: { type: string, description: Owner type (CREATOR or LAST_MODIFIER) }
+              firstName: { type: string }
+              lastName: { type: string }
+              userName: { type: string }
+              userId: { type: integer, format: int64 }
+        lastSuccessfulRun:
+          type: object
+          properties:
+            endDateTime: { type: string }
+            status: { type: string }
+        lastFailedRun:
+          type: object
+          properties:
+            endDateTime: { type: string }
+            status: { type: string }
+    AutomationAboutWorkspaceRequest:
+      type: object
+      description: Request payload to retrieve automation about metadata scoped to a workspace type with optional automation id and user context.
+      properties:
+        id:
+          type: string
+          description: Optional automation identifier for which to fetch about metadata.
+          example: "169794"
+        userId:
+          type: string
+          description: Optional user identifier providing context (e.g., personalization or access scoping).
+          example: "41553"
+      example:
+        id: "169794"
+        userId: "41553"
+    TimeRangeRequest:
+      type: object
+      description: Wrapper request containing a timeRange.
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    TimeRangeFilterRequest:
+      type: object
+      description: Time range plus optional filter and paging.
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        filter:
+          $ref: '#/components/schemas/Filter'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+        sort:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Sort'
+    TimeRangeExportRequest:
+      type: object
+      description: Request for exporting ranked automation data to CSV with a client-supplied file name (without extension).
+      required: [ timeRange, fileName ]
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        fileName:
+          type: string
+          description: Suggested base file name to use for the exported CSV (extension may be appended by server).
+          example: Most-Running-Automations-last24hours-20251013-205408
+      example:
+        timeRange:
+          type: LAST24HOURS
+        fileName: Most-Running-Automations-last24hours-20251013-205408
+    TimeRangeFilterExportRequest:
+      type: object
+      description: Time range export request allowing optional filter/sort plus mandatory file name.
+      required: [ timeRange, fileName ]
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Sort'
+          description: Optional sort directives (nullable).
+        page:
+          $ref: '#/components/schemas/PageRequest'
+        fileName:
+          type: string
+          description: Suggested base file name for export (extension may be appended by server).
+          example: Automation-run-hours-last7days-20251014-135056
+      example:
+        timeRange:
+          type: LAST7DAYS
+        sort: null
+        filter:
+          field: automationName
+          value: bot
+          operator: substring
+        fileName: Automation-run-hours-last7days-20251014-135056
+    TimeRangeSizeRequest:
+      type: object
+      description: Request containing a time range and a maximum size (no paging object) for ranked workspace-scoped lists.
+      required: [ timeRange, size ]
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        size:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum number of items to return.
+          example: 100
+      example:
+        timeRange:
+          type: LAST24HOURS
+        size: 100
+    AutomationOverviewResponse:
+      type: object
+      description: Overview metrics returned as a list of key/value pairs (status category and its value).
+      properties:
+        data:
+          type: array
+          description: Collection of overview metric entries.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Metric / status category name.
+                enum: [ RUNNING, COMPLETED, FAILED, SCHEDULED ]
+                example: RUNNING
+              value:
+                type: string
+                description: Metric value (stringified to preserve large counts without overflow in some clients).
+                example: "209"
+      example:
+        data:
+          - field: "string"
+            value: "string"
+          - field: "string"
+            value: "string"
+    AutomationRunDurationResponse:
+      type: object
+      description: Time series of aggregated run duration values for the selected time range.
+      properties:
+        data:
+          type: array
+          description: Ordered list of time buckets and their aggregated duration values.
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+                format: date-time
+                description: ISO 8601 timestamp representing the start of the time bucket.
+                example: "2025-10-13T00:00:00.000Z"
+              value:
+                type: number
+                format: double
+                description: Aggregated run duration (e.g. total or average) for the bucket in milliseconds.
+                example: 299724.0
+        timeUnit:
+          type: string
+          description: Granularity of the time buckets.
+          enum: [ MINUTES, HOURS, DAYS ]
+          example: HOURS
+      example:
+        data:
+          - time: "string"
+            value: number
+          - time: "string"
+            value: number
+        timeUnit: "string"
+    AutomationGroupedRunDurationResponse:
+      type: object
+      description: Aggregated run duration grouped by a field (e.g., deviceName, bot, workSpaceType) with percentage contribution.
+      properties:
+        groupByField:
+          type: string
+          description: The field name used for grouping.
+          example: deviceName
+        groupBy:
+          type: array
+          description: Collection of grouped duration aggregates.
+          items:
+            type: object
+            properties:
+              fieldName:
+                type: string
+                description: Value of the grouping field.
+                example: ip-172-151-15-1
+              runDurationMilliseconds:
+                type: string
+                description: Total run duration in milliseconds for this group (stringified).
+                example: "59376990"
+              percentageValue:
+                type: number
+                format: double
+                description: Percentage contribution of this group's duration to the overall total.
+                example: 97.63
+      example:
+        groupByField: "string"
+        groupBy:
+          - fieldName: "string"
+            runDurationMilliseconds: "string"
+            percentageValue: number
+          - fieldName: "string"
+            runDurationMilliseconds: "string"
+            percentageValue: number
+    AutomationGroupedRunDurationListResponse:
+      type: object
+      description: Paginated grouped run duration list for a grouping dimension.
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier for the grouped metric entry.
+              fieldId:
+                type: string
+                description: Identifier of the grouped field value (e.g., automation id).
+              automationName:
+                type: string
+                description: Name of the automation when grouping by automation.
+              runDurationMilliseconds:
+                type: string
+                description: Total run duration in milliseconds for this grouping key (stringified).
+              folderPath:
+                type: string
+                description: Full path of the automation in the repository (if applicable).
+      example:
+        page:
+          offset: integer
+          total: integer
+          totalFilter: integer
+        list:
+          - id: "string"
+            fieldId: "string"
+            automationName: "string"
+            runDurationMilliseconds: "string"
+            folderPath: "string"
+          - id: "string"
+            fieldId: "string"
+            automationName: "string"
+            runDurationMilliseconds: "string"
+            folderPath: "string"
+    AutomationMostRunningResponse:
+      type: object
+      description: List of most frequently running automations with aggregated run counts.
+      properties:
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, description: Unique automation metric id }
+              botId: { type: string, description: Bot identifier }
+              name: { type: string, description: Bot name }
+              path: { type: string, description: Full repository path of the bot }
+              count:
+                type: object
+                properties:
+                  successful: { type: string, description: Number of successful executions (stringified) }
+                  failed: { type: string, description: Number of failed executions (stringified) }
+      example:
+        metrics:
+          - id: "string"
+            botId: "string"
+            name: "string"
+            path: "string"
+            count:
+              successful: "string"
+              failed: "string"
+          - id: "string"
+            botId: "string"
+            name: "string"
+            path: "string"
+            count:
+              successful: "string"
+              failed: "string"
+    AutomationLongestRunningResponse:
+      type: object
+      description: List of automations ranked by their longest (and average) run durations within the selected time range.
+      properties:
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, description: Unique automation metric id }
+              botId: { type: string, description: Bot identifier }
+              name: { type: string, description: Bot name }
+              path: { type: string, description: Full repository path of the bot }
+              longestBotRun:
+                type: object
+                description: Details of the single longest execution observed in the period plus average duration stats.
+                properties:
+                  id: { type: string, description: Execution id of the longest run }
+                  botId: { type: string, description: Bot id (may be 0 if derived) }
+                  runDurationMillisec: { type: string, description: Duration in milliseconds of the longest run (stringified) }
+                  from: { type: string, format: date-time, description: Start timestamp of the longest run }
+                  to: { type: string, format: date-time, description: End timestamp of the longest run }
+                  averageRunDurationMillisec: { type: string, description: Average run duration in milliseconds over all runs in the period (stringified) }
+                  deviceId: { type: string, description: Device id used for the longest run }
+                  deviceName: { type: string, description: Device name used for the longest run }
+      example:
+        metrics:
+          - id: "string"
+            botId: "string"
+            name: "string"
+            path: "string"
+            longestBotRun:
+              id: "string"
+              botId: "string"
+              runDurationMillisec: "string"
+              from: "string"
+              to: "string"
+              averageRunDurationMillisec: "string"
+              deviceId: "string"
+              deviceName: "string"
+    AutomationMostFailedResponse:
+      type: object
+      description: List of automations ranked by highest failed execution counts within the selected time range.
+      properties:
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, description: Unique automation metric id }
+              botId: { type: string, description: Bot identifier }
+              name: { type: string, description: Bot name }
+              path: { type: string, description: Full repository path of the bot }
+              failures:
+                type: object
+                description: Failure statistics for this automation.
+                properties:
+                  count: { type: string, description: Number of failed executions (stringified) }
+                  lastFailedReason: { type: string, description: Error message / reason from the latest failed execution }
+      example:
+        metrics:
+          - id: "string"
+            botId: "string"
+            name: "string"
+            path: "string"
+            failures:
+              count: "string"
+              lastFailedReason: "string"
+          - id: "string"
+            botId: "string"
+            name: "string"
+            path: "string"
+            failures:
+              count: "string"
+              lastFailedReason: "string"
+    AutomationFailuresRequest:
+      type: object
+      description: Request payload for listing failed automation runs (simplified).
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        botId:
+          type: integer
+          format: int64
+          description: Optional bot identifier to scope failures.
+          example: 22
+        size:
+          type: integer
+          description: Maximum number of failed runs to return.
+          example: 20
+    AutomationFailuresResponse:
+      type: object
+      description: List of failed runs with error messages.
+      properties:
+        runs:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, description: Unique execution id }
+              errorMessage: { type: string, description: Failure reason / stack or user-readable message }
+              from: { type: string, format: date-time, description: Start timestamp of the failed run }
+              to: { type: string, format: date-time, description: End timestamp of the failed run }
+      example:
+        runs:
+          - id: "string"
+            errorMessage: "string"
+            from: "string"
+            to: "string"
+          - id: "string"
+            errorMessage: "string"
+            from: "string"
+            to: "string"
+    Sort:
+      type: object
+      description: Sorting rules
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+            - asc
+            - desc
+
+    PageRequest:
+      type: object
+      description: Pagination rules
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        length:
+          type: integer
+          description: Page length
+          example: 1
+
+    Filter:
+      type: object
+      description: Filter rules
+      example: {"operator":"eq","value":"COMPLETED","field":"status"}
+      properties:
+        operator:
+          type: string
+          description: Operator
+          enum:
+            - NONE
+            - lt
+            - le
+            - eq
+            - ne
+            - ge
+            - gt
+            - substring
+            - and
+            - or
+            - not
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        field:
+          type: string
+          description: Filter field could be either name,lastModified,path or directory.
+        value:
+          type: string
+          description: Filter value
+
+    PageResponse:
+      type: object
+      description: Pagination response
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+          example: 0
+        total:
+          type: integer
+          description: Total number of items
+          example: 2
+        totalFilter:
+          type: integer
+          description: Total number of items matching filter
+          example: 1
+
+
+    TimeRange:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - CUSTOM
+            - LAST24HOURS
+            - LAST7DAYS
+            - LAST30DAYS
+            - LAST60DAYS
+            - LAST90DAYS
+          example: LAST24HOURS
+          description: The period of time for the requested activity metrics
+            <ul>
+              <li>CUSTOM - Specify a custom start (from) and end (to) date and time.</li>
+              <li>LAST24HOURS - The last twenty‑four hours.</li>
+              <li>LAST7DAYS - The last seven full days (rolling window).</li>
+              <li>LAST30DAYS - The last thirty full days (rolling window).</li>
+              <li>LAST60DAYS - The last sixty full days (rolling window).</li>
+              <li>LAST90DAYS - The last ninety full days (rolling window).</li>
+            </ul>
+
+    Execution:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique execution id
+          example: 972f41ee-90e7-4a62-8d1-055dc9c3b59c_668b1db6649c43da
+        automationName:
+          type: string
+          description: Name of the automation to which the execution is associated
+          example: testbot.2022.04.13.22.22.50.john_creator
+        fileName:
+          type: string
+          description: Name of the automation that is deployed to execute
+          example: testbot
+        type:
+          type: string
+          enum:
+            - WORKORDER
+            - WLM_TASK
+            - EXPORT
+            - API
+            - AARI
+            - RUN_NOW
+            - SCHEDULED
+            - TRIGGER
+            - AUDIT_EXPORT
+            - QUEUE_EXPORT
+            - QUEUE_IMPORT
+            - WORKITEM_EXPORT
+          example: TRIGGER
+          deprecated: true
+          description: Old Activity Type (deprecated in favor of activityType & initiationType)
+            <ul>
+            <li>WORKORDER - Depicts the status of the workitems uploaded from the CSV file</li>
+            <li>WLM_TASK - A Work load management bot</li>
+            <li>EXPORT - Automation export</li>
+            <li>API - An automation that is run from an API</li>
+            <li>AARI - A process bot</li>
+            <li>RUN_NOW -  A regular run as a users automation</li>
+            <li>SCHEDULED - A scheduled automation</li>
+            <li>TRIGGER - A triggered automation</li>
+            <li>AUDIT_EXPORT - Audit export</li>
+            <li>QUEUE_EXPORT - Queue export</li>
+            <li>QUEUE_IMPORT - Queue import</li>
+            <li>WORKITEM_EXPORT - List of Workitem export in CSV</li></ul>
+
+        startDateTime:
+          type: string
+          description: Date and time when the execution started
+          example: "2022-04-14T06:39:24.254386346Z"
+        endDateTime:
+          type: string
+          description: Date and time when the execution ended
+          example: "2022-04-14T06:39:27.438843100Z"
+        command:
+          type: string
+          description: Current command of the execution
+          example: "messageBox"
+        status:
+          type: string
+          enum:
+            - COMPLETED
+            - DEPLOYED
+            - RUNNING
+            - RUN_PAUSED
+            - UNKNOWN
+            - RUN_FAILED
+            - RUN_ABORTED
+            - RUN_TIMED_OUT
+            - DEPLOY_FAILED
+            - QUEUED
+            - UPDATE
+            - PENDING_EXECUTION
+          description: Current status of the execution
+            <li>COMPLETED - Automation successfully completed execution</li>
+            <li>DEPLOYED - Autologin is successful, and automation is deployed to a device</li>
+            <li>DEPLOY_FAILED - Automation failed to deploy to the device because, for example, autologin failed</li>
+            <li>QUEUED - Requested user or device is busy running another execution</li>
+            <li>PENDING_EXECUTION - Device has been selected, but automation has not yet been deployed to that device</li>
+            <li>RUNNING -  Automation started execution</li>
+            <li>UPDATE -  Automation is in progress</li>
+            <li>RUN_FAILED - Automation failed after being deployed to a device</li>
+            <li>RUN_PAUSED - User paused the automation</li>
+            <li>RUN_ABORTED - User aborted the automation</li>
+            <li>RUN_TIMED_OUT - Automation failed to complete tasks within a specific time period</li>
+            <li>UNKNOWN - Connection between the service and the device was lost</li>
+            </ul>
+        progress:
+          type: integer
+          description: Current progress of the execution in percentage
+          example: 100
+        automationId:
+          type: string
+          description: Schedule id of the automation
+          example: ""
+        userId:
+          type: string
+          description: Corresponding User id of the device where the automation is deployed
+          example: 1
+        deviceId:
+          type: string
+          description: Device id where the automation is deployed
+          example: 1
+        currentLine:
+          type: integer
+          description: Current line of automation that is deployed to execute
+          example: 1
+        totalLines:
+          type: integer
+          description: Total lines of the automation that is deployed to execute
+          example: 1
+        fileId:
+          type: string
+          description: Id of the automation that is deployed to execute
+          example: 1
+        modifiedBy:
+          type: string
+          description: Id of the user who last updated the execution
+          example: john_creator
+        createdBy:
+          type: string
+          description: Id of the user who created the automation associated with the execution
+          example: john_creator
+        modifiedOn:
+          type: string
+          description: Date and time when the execution was last updated
+          example: "2022-04-14T06:35:24.773187700Z"
+        createdOn:
+          type: string
+          description: Date and time when the execution was created
+          example: "2022-04-14T06:36:25.873480700Z"
+        deploymentId:
+          type: string
+          description: Deployment id to which the execution is associated
+          example: 494562cb-7c24-41d2-ae0e-8b8c5084ae90
+        queueName:
+          type: string
+          description: Queue name (deprecated)
+          example: ""
+          deprecated: true
+        queueId:
+          type: string
+          description: Queue id (deprecated)
+          example: ""
+          deprecated: true
+        usingRdp:
+          type: boolean
+          enum:
+            - true
+            - false
+          description: A flag that shows whether or not the automation is using remote deployment protocol
+        message:
+          type: string
+          description: Error message that describes the state of the execution
+          example: ""
+        canManage:
+          type: boolean
+          enum:
+            - true
+            - false
+          description: A flag that shows if the current logged in user has rights to manage the execution
+        deviceName:
+          type: string
+          description: The name of the device the automation is designated to run on
+          example: AAUS34NS3RM
+        userName:
+          type: string
+          description: The username of the user the automation is designated to run from
+          example: john_unattended
+        tenantUuid:
+          type: string
+          description: The UUID code of the tenant the automation is being run from
+          example: e135e92d-27dd-405e-bc52-b8fad270476f
+        automationPriority:
+          type: string
+          description: The automation priority used when it is in queue
+          default: PRIORITY_MEDIUM
+          enum:
+            - PRIORITY_LOW
+            - PRIORITY_MEDIUM
+            - PRIORITY_HIGH
+        runElevated:
+          type: boolean
+          description: A flag showing whether the automation deployed using elevated permissions or not
+          example: false
+        botLabel:
+          type: string
+          description: Label for the automation. It can be used to distinguish automations from categories like production and testing
+          example: PRODUCTION
+        currentBotName:
+          type: string
+          description: The automation's current bot name. It can change during the execution
+          example: testbot
+        callbackInfo:
+          type: string
+          description: No value is returned for this parameter in the list API. Use the fetch execution API with specific id to retrieve that information
+          example: ""
+        parentId:
+          type: string
+          description: Only returned for child executions that are spawned by a parent execution. Will be the same as the parent execution's unique ID.
+          example: 8f1d7270-3ca7-4c51-b412-2c214c6550cf
+
+        initiationType:
+          type: string
+          enum:
+            - API
+            - RUN_NOW
+            - SCHEDULED
+            - TRIGGER
+            - EXPORT
+            - IMPORT
+            - AARI
+            - WLM
+            - MIGRATION
+            - CREATOR
+            - DEBUG
+            - RECORDER
+          example: TRIGGER
+          description: Initiation type for the activity.
+            <ul>
+            <li>API - Activity initiated by API or backend.</li>
+            <li>RUN_NOW - Activity initiated from Run Now option.</li>
+            <li>SCHEDULED -Activity initiated from schedule.</li>
+            <li>TRIGGER - Activity initiated by trigger.</li>
+            <li>EXPORT - Activity initiated by an export of data.</li>
+            <li>IMPORT - Activity initiated by an import of data.</li>
+            <li>AARI - Activity initiated by Automation Anywhere Robotic Interface (AARI).</li>
+            <li>WLM - Activity initiation by Workload Management (WLM).</li>
+            <li>MIGRATION - Activity created by internal migration.</li>
+            <li>CREATOR - Activity run from the bot creator editor page.</li>
+            <li>DEBUG - Activity run from the debug mode of the bot creator editor page.</li>
+            <li>RECORDER - Activity initiated by bot recorder.</li>
+            </ul>
+        activityType:
+          type: string
+          enum:
+            - BOT
+            - AUDIT_EXPORT
+            - QUEUE_EXPORT
+            - QUEUE_IMPORT
+            - WORKITEM_EXPORT
+            - BLM_EXPORT
+            - ROLE_EXPORT
+            - WORK_ORDER
+            - PROCESS
+            - FORM
+            - APPROVAL
+            - DOCUMENT_VALIDATION
+            - TASK_PROCESS
+            - TASK_APPROVAL
+            - TASK_DOCUMENT_VALIDATION
+            - TASK_BOT
+            - TASK_API
+            - API_TASK
+          example: BOT
+          description: The type of activity.
+            <ul>
+            <li>BOT - Bot for robotic process automation.</li>
+            <li>AUDIT_EXPORT - Export of a csv of Control Room audit logs.</li>
+            <li>QUEUE_EXPORT - Export of a queue from workload management (WLM) in zip format.</li>
+            <li>QUEUE_IMPORT - Import of a queue from workload management (WLM).</li>
+            <li>WORKITEM_EXPORT - Export of a work item from workload management (WLM) in CSV format.</li>
+            <li>ROLE_EXPORT - Export of assigned user and runasuser to a CSV file.</li>
+            <li>BLM_EXPORT - Export of a single bot with its dependent files.</li>
+            </ul>
+        refId:
+          type: string
+          example: 4-0
+          description: Reference id only for process related executions.
+    ExecutionResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+          description: list of automation executions.
+    BotExecutionListRequest:
+      type: object
+      description: Request for listing bot executions (simplified) using only paging.
+      properties:
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      example:
+        page:
+          offset: 0
+          length: 15
+    BotExecutionListItem:
+      type: object
+      description: Simplified bot execution list item.
+      properties:
+        id: { type: string, description: Unique execution id }
+        name: { type: string, description: Bot name at time of execution }
+        path: { type: string, description: Repository path of the bot }
+        userName: { type: string, description: Username that ran the bot }
+        deviceName: { type: string, description: Device name where bot ran }
+        startDateTime: { type: string, format: date-time, description: Execution start timestamp }
+        botId: { type: string, description: Bot identifier }
+    BotExecutionListResponse:
+      type: object
+      description: Simplified paginated bot execution list.
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BotExecutionListItem'
+      example:
+        page:
+          offset: integer
+          total: integer
+          totalFilter: integer
+        list:
+          - id: "string"
+            name: "string"
+            path: "string"
+            userName: "string"
+            deviceName: "string"
+            startDateTime: "string"
+            botId: "string"
+          - id: "string"
+            name: "string"
+            path: "string"
+            userName: "string"
+            deviceName: "string"
+            startDateTime: "string"
+            botId: "string"
+    CompletedBotExecutionsRequest:
+      type: object
+      description: Request to list completed bot executions within a time range (no paging; bounded by size).
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        size:
+          type: integer
+          description: Maximum number of completed executions to return.
+          example: 100
+      example:
+        timeRange:
+          type: LAST7DAYS
+        size: 100
+    CompletedBotExecutionItem:
+      type: object
+      description: Simplified completed bot execution.
+      properties:
+        botId: { type: string, description: Bot identifier }
+        name: { type: string, description: Bot name }
+        path: { type: string, description: Repository path of the bot }
+        startDateTime: { type: string, format: date-time, description: Start time of the execution }
+        id: { type: string, description: Unique execution id }
+    CompletedBotExecutionListResponse:
+      type: object
+      description: List of completed bot executions (simplified).
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletedBotExecutionItem'
+      example:
+        list:
+          - botId: "string"
+            name: "string"
+            path: "string"
+            startDateTime: "string"
+            id: "string"
+          - botId: "string"
+            name: "string"
+            path: "string"
+            startDateTime: "string"
+            id: "string"
+    FailedBotExecutionsRequest:
+      type: object
+      description: Request to list failed bot executions within a time range (no paging; bounded by size).
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+        size:
+          type: integer
+          description: Maximum number of failed executions to return.
+          example: 100
+      example:
+        timeRange:
+          type: LAST30DAYS
+        size: 100
+    FailedBotExecutionItem:
+      type: object
+      description: Simplified failed bot execution.
+      properties:
+        botId: { type: string, description: Bot identifier }
+        name: { type: string, description: Bot name }
+        path: { type: string, description: Repository path of the bot }
+        startDateTime: { type: string, format: date-time, description: Start time of the execution }
+        id: { type: string, description: Unique execution id }
+        failureReason: { type: string, description: Failure reason / message }
+    FailedBotExecutionListResponse:
+      type: object
+      description: List of failed bot executions (simplified).
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailedBotExecutionItem'
+      example:
+        list:
+          - botId: "string"
+            name: "string"
+            path: "string"
+            startDateTime: "string"
+            id: "string"
+            failureReason: "string"
+          - botId: "string"
+            name: "string"
+            path: "string"
+            startDateTime: "string"
+            id: "string"
+            failureReason: "string"
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message

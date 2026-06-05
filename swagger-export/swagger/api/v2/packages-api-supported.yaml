@@ -1,0 +1,256 @@
+openapi: 3.0.1
+info:
+  title: Packages Usage API
+  description: |-
+    Use the Packages Usage API to retrieve the list of automations using different versions of a package.
+    You need the following permission to retrieve this information.
+    <ul>
+      <li><b>Manage packages</b><br>
+    </ul>
+
+    For more information about roles and permissions, see [Roles and permissions](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-features-api-id-to-ui-map.html).
+
+    All API calls must contain an authentication token from Authentication API (generates JSON Web token)
+
+    **Header:** `X-Authorization: <<authentication token>>`
+  version: 2.0.0
+servers:
+- url: /v2/packages
+security:
+- AccessToken: []
+paths:
+  /{name}/versions/usage:
+    post:
+      tags:
+      - Usage
+      summary: Retrieve Package Usage Information
+      description: "Use the Retrieve Package Usage Information API to retrieve a list of automations that use
+        various versions of the named package.<br>
+        This endpoint supports filtering by package version and status,
+        sorting, and pagination. For more
+        information, see [Filtering, pagination, and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html)."
+      parameters:
+      - name: name
+        in: path
+        description: Package name
+        required: true
+        schema:
+          type: string
+        example: MessageBox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+      responses:
+        "200":
+          description: "Returns a list of automations using the versions of named package;
+            or a blank list as per filter conditions specified, along with page offset and
+            and total and filtered counts"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageVersionsUsageResponseV2'
+        "400":
+          $ref: '#/components/responses/400'
+        "401":
+          $ref: '#/components/responses/401'
+        "403":
+          $ref: '#/components/responses/403'
+        "404":
+          $ref: '#/components/responses/404'
+        "500":
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    PackageVersionsUsageResponseV2:
+      required:
+      - name
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            title: Usage
+            type: object
+            properties:
+              id:
+                type: string
+                description: Id representing a package version used in a specific automation
+                example: 100002709
+              packageStatus:
+                type: string
+                description: Status of the package version
+                example:
+                    Enabled
+                enum:
+                - Enabled
+                - Disabled
+              packageVersion:
+                type: string
+                description: The package version used in the automation
+                example: 3.8.1
+              automationName:
+                type: string
+                description: The name of the automation
+                example: CurrencyConverter
+              automationType:
+                type: string
+                description: The type of the automation using the package version
+                example: application/vnd.aa.taskbot
+              automationPath:
+                type: string
+                description: The path of the automation using the package version
+                example: Bots\UsecaseSmoke32
+              updatedOn:
+                type: string
+                description: Timestamp when the automation was last updated
+                example: 2025-03-21T16:16:57.403584Z
+              updatedBy:
+                type: string
+                description: Id of the user who last updated the automation
+                example: john.doe
+              defaultVersion:
+                type: boolean
+                description: true, if the package version is the default version; else false
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting, and pagination\
+        \ rules."
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: packageVersion
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in descending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index; must be 0 or greater
+          example: 0
+        length:
+          type: integer
+          description: Total number of items to display; must be greater than 0 upto a maximum of 1000
+          example: 100
+      description: "Pagination rules, allows you to filter based on desired page"
+    PageResponse:
+        type: object
+        properties:
+          offset:
+            type: integer
+            description: Page starting index
+          total:
+            type: integer
+            description: Total number of items to display
+            example: 100
+          totalFilter:
+            type: integer
+            description: Total number of items matching filter
+            example: 100
+        description: "Pagination rules, allows you to filter based on desired page"
+    Filter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          example: eq
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        field:
+          type: string
+          description: "Filtering field can be any field in the Usage items listed in PackageVersionsUsageResponseV2 schema"
+          example: packageStatus
+        value:
+          type: string
+          description: Filter value
+          example: DISABLED
+      description: "Filters the result based on operator, field, and value."
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+        details:
+          type: string
+          description: More details of the error message
+  responses:
+    "204":
+      description: Successful delete.
+      content: {}
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

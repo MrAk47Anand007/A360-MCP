@@ -1,0 +1,602 @@
+openapi: 3.0.1
+info:
+  title: Device Pool API
+  description: |-
+    A device pool is a logical grouping of devices that is used by a Bot Runner to distribute and manage the running of unattended bots. Use the Device Pool APIs to retrieve a list of device pools, create, update, or delete a device pool. You must have device pool owner or device pool admin access to view and manage the device pools. To create a new device pool, you must have a role with the create device pool permissions.
+
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v2/devices
+security:
+- AccessToken: []
+paths:
+  /pools/list:
+    post:
+      tags:
+      - DevicePool
+      summary: List of device pools
+      description: "Use this endpoint to retrieve device pools that are available\
+        \ for you. You can send an API request with or without filter parameters.\
+        \ An API request without any filter parameters specified, retrieves details\
+        \ of all the device pools. You can use the filter parameters to retrieve specific\
+        \ device pools as well. For more information, see [Filtering, pagination,\
+        \ and sorting](https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/control-room-api/cloud-api-filter-request.html)."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: Returns list of device pools available to the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePoolsResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /pools/{id}:
+    get:
+      tags:
+      - DevicePool
+      summary: List specific device pool
+      description: "Use this endpoint to retrieve details of a specific device pool.\
+        \ You must specify the device pool ID. To view the device pool ID, use the\
+        \ /pools/list endpoint."
+      parameters:
+      - name: id
+        in: path
+        description: ID of the pool
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Returns details of the specific device pool
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePoolResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - DevicePool
+      summary: Update a device pool
+      description: "Use this endpoint to update a device pool. A successfully completed\
+        \ response returns the details of the updated pool. You must specify the device\
+        \ pool ID. To view the device pool ID, use the /pools/list endpoint."
+      parameters:
+      - name: id
+        in: path
+        description: ID of the pool
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePoolRequest'
+        required: true
+      responses:
+        "200":
+          description: Details of the device pool updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePoolResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - DevicePool
+      summary: Delete a pool
+      description: "Use this endpoint to delete an existing pool. You must have the\
+        \ AAE_Pool Admin role to delete a pool. You must specify the device pool ID.\
+        \ To view the device pool ID, use the pools/list endpoint."
+      parameters:
+      - name: id
+        in: path
+        description: ID of the device pool
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Return 'nocontent'
+          content: {}
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pools:
+    post:
+      tags:
+      - DevicePool
+      summary: Create a device pool
+      description: Use this endpoint to create a device pool. A successfully completed
+        response returns details of the device pool created. You must have the AAE_Pool_Admin
+        role to create a device pool.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePoolRequest'
+        required: true
+      responses:
+        "200":
+          description: Details of the device pool created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePoolResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: name
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in descending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        length:
+          type: integer
+          description: Page length
+          example: 100
+      description: "Pagingation rules, allows you to filter based on desired page"
+    Filter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        operands:
+          type: array
+          example:
+            operator: substring
+            field: status
+            value: CONNECTED
+          items:
+            $ref: '#/components/schemas/Filter'
+        field:
+          type: string
+          description: "Filtering field can be either name, lastModified, path, or\
+            \ folder."
+          example: name
+        value:
+          type: string
+          description: Filter value
+          example: My_device_pool
+      description: "Filters the result based on operator, field, or value."
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting, and pagination\
+        \ rules"
+    DevicePoolsResponse:
+      type: object
+      properties:
+        page:
+          type: object
+          properties:
+            offset:
+              type: integer
+              description: Page starting index
+            total:
+              type: integer
+              description: Total number of items
+              example: 1
+            totalFilter:
+              type: integer
+              description: Total number of items matching filter
+              example: 1
+            list:
+              type: array
+              description: list of device pools
+              items:
+                $ref: '#/components/schemas/DevicePoolSnapshot'
+    DevicePoolSnapshot:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the device pool
+          example: 8
+        name:
+          type: string
+          description: Name of the device pool
+          example: My_device_pool
+        status:
+          type: string
+          description: Status of the device pool
+          example: CONNECTED
+          enum:
+          - POOL_STATUS_UNKNOWN
+          - CONNECTED
+          - DISCONNECTED
+          - OFFLINE
+        detailedStatus:
+          type: string
+          description: Detailed status of all devices in the pool
+          example: ALL_CONNECTED
+          enum:
+          - POOL_DEVICES_STATUS_UNKNOWN
+          - ALL_CONNECTED
+          - ALL_DISCONNECTED
+          - SOME_CONNECTED
+          - OFFLINE
+        automationCount:
+          type: integer
+          description: Number of automations associated with this pool
+        ownerIds:
+          type: array
+          description: Array of integers indicating the owners of the pool
+          example: 
+          - "41213"
+          items:
+            type: string
+        deviceCount:
+          type: integer
+          description: Number of devices in the pool
+          example: 2
+        deviceIds:
+          type: array
+          description: Array of integers indicating the devices in the pool
+          example: 
+          - "37441"
+          - "37449"
+          items:
+            type: string
+        poolType:
+          type: string
+          description: The type of the device pool.
+          example: BASIC
+          enum:
+          - BASIC
+          - MAC_OS
+    DevicePoolResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the device pool created
+          example: 101
+        name:
+          type: string
+          description: Name of the device pool
+          example: My_device_pool
+        description:
+          type: string
+          description: Description of the pool
+          example: Group of unattended Bot machines
+        automationScheme:
+          type: string
+          description: automation scheme associated with the pool
+          example: ROUND_ROBIN
+          enum:
+          - AUTOMATION_SCHEME_UNKNOWN
+          - ROUND_ROBIN
+          - PRIORITY
+        status:
+          type: string
+          description: Status of the created pool
+          example: CONNECTED
+          enum:
+          - POOL_STATUS_UNKNOWN
+          - CONNECTED
+          - DISCONNECTED
+          - OFFLINE
+        timeSlice:
+          type: string
+          description: Time interval specified for running the Bots in ROUND_ROBIN
+            scheme
+          example: 5
+        timeSliceUnit:
+          type: string
+          description: "Time slice specified in SECONDS, MINUTES, or HOURS"
+          example: MINUTES
+          enum:
+          - TIME_SLICE_UNIT_UNKNOWN
+          - SECONDS
+          - MINUTES
+          - HOURS
+        deviceIds:
+          type: array
+          description: Array of integers indicating the devices in the pool
+          example:
+          - 37471
+          items:
+            type: integer
+        ownerIds:
+          type: array
+          description: Array of integers indicating the owners of the pool
+          example: 
+          - 50649507
+          - 89992671
+          items:
+            type: integer
+        consumerIds:
+          type: array
+          description: Array of integers indicating the roles associated with the
+            pool
+          example: []
+          items:
+            type: integer
+        detailedStatus:
+          type: string
+          description: Detailed status of all the devices in the pool
+          example: ALL_CONNECTED
+          enum:
+          - POOL_DEVICES_STATUS_UNKNOWN
+          - ALL_CONNECTED
+          - ALL_DISCONNECTED
+          - SOME_CONNECTED
+          - OFFLINE
+        updatedBy:
+          type: string
+          description: ID of the user who last modified this pool
+          example: 41703
+        updatedOn:
+          type: string
+          description: Time at which the pool was last updated
+          example: 2025-08-01T03:30:13.069195Z
+        createdBy:
+          type: string
+          description: ID of the user who created this pool
+          example: 41703
+        createdOn:
+          type: integer
+          description: Time at which the pool was created
+          example: 2025-08-01T03:30:13.069186Z
+        tenantUuid:
+          type: string
+          description: The universally unique identifier (UUID) of the tenant. This
+            UUID is used for accessing the tenant via the API.
+          example: 4090a32b-79c1-4fd8-b88a-b1ea8c994cb0
+        tenantId:
+          type: string
+          description: The unique identifier for the tenant and is based on the tenant
+            name. The tenant ID is assigned to the tenant's resources.
+          example: "101"
+        poolType:
+          type: string
+          description: The type of the device pool.
+          example: BASIC
+          enum:
+          - BASIC
+          - MAC_OS
+    DevicePoolRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "ID of the pool, required only for updating a pool"
+          example: 8
+        name:
+          type: string
+          description: Name of the device pool you want to create
+          example: My_device_pool
+        description:
+          type: string
+          description: Description of the pool
+          example: Group of unattended Bot machines
+        automationScheme:
+          type: string
+          description: Automation scheme associated with the pool. ROUND_ROBIN runs
+            your automations at equal time intervals. PRIORITY automations run based
+            on a priority defined in the priority table.
+          default: AUTOMATION_SCHEME_UNKNOWN
+          enum:
+          - AUTOMATION_SCHEME_UNKNOWN
+          - ROUND_ROBIN
+          - PRIORITY
+        timeSlice:
+          type: integer
+          description: Time interval specified for running the Bots in ROUND_ROBIN
+            scheme
+          example: 5
+        timeSliceUnit:
+          type: string
+          description: "Time slice specified in SECONDS, MINUTES, or HOURS"
+          default: TIME_SLICE_UNIT_UNKNOWN
+          enum:
+          - TIME_SLICE_UNIT_UNKNOWN
+          - SECONDS
+          - MINUTES
+          - HOURS
+        deviceIds:
+          type: array
+          description: Array of integers indicating the devices in the pool
+          example:
+          - 37471
+          items:
+            type: integer
+        ownerIds:
+          type: array
+          description: Array of integers indicating the owners of the pool
+          example: 
+          - 50649507
+          - 89992671
+          items:
+            type: integer
+        consumerIds:
+          type: array
+          description: Array of integers indicating the consumer roles associated
+            with the pool
+          example: []
+          items:
+            type: integer
+        poolType:
+          type: string
+          description: The type of the device pool.
+          example: BASIC
+          enum:
+            - BASIC
+            - MAC_OS
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error Message
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

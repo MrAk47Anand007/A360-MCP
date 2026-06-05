@@ -1,0 +1,511 @@
+openapi: 3.0.1
+info:
+  title: Bot Lifecycle Management API
+  description: |-
+    Use the Bot Lifecycle Management API to export and import bots with dependent files and command packages for comprehensive automation lifecycle management. You can export bots from public workspace and import to a private or public workspace in another Control Room and check into a public workspace.<br>
+    To export bots from the Control Room, you must have the following permissions: <li>Export bot and View packages feature permissions.</li> <li>Check in or Check out folder permissions.</li> <li>View and manage global values permission to include global values when exporting.</li><br> To import bots to the Control Room, you must have the following permissions:
+    <li>Import bot and Manage package feature permissions.</li> <li>Check in folder permission.</li> <li>View and manage global values permission to create global values when importing.</li> <li>Bot Creator license</li><br> All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+
+    **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`
+  version: 2.0.0
+servers:
+- url: /v2/blm
+security:
+- AccessToken: []
+paths:
+  /export:
+    post:
+      tags:
+      - BLM
+      summary: Export repository bots
+      description: "Use this API to export bots with their dependent files to an archived\
+        \ file. You must have Export bots, View package, and Check in or Check out\
+        \ permissions to the required folders."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportImportResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /export/version:
+    post:
+      tags:
+      - BLM
+      summary: Export repository bots by label or version
+      description: Use this API to export repository bots by specifying the label
+        or version of the files. These bots are exported to an archived file.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportVersionRequest'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportImportResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /promoteBot:
+    post:
+      tags:
+      - BLM
+      summary: Promote repository bots to the another Control Room
+      description: Use this API to promote repository bots. These bots are imported
+        to another Control Room.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoteBotRequest'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportImportResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /import:
+    post:
+      tags:
+      - BLM
+      summary: Import repository bots
+      description: |-
+        Use this API to import bots with their dependent files from an archived file. You must have following permissions and licenses. <li>Import bots</li> <li>Manage package</li> <li>Check in permissions to the necessary folders to import bots in the public workspace</li> <li>Bot Creator license to import bots in the private workspace</li> <li>View and manage global values permission to create global values during the import process</li>
+        **Note:** To import the Enterprise 11 bots into your Control Room, you must have the required aapkg package that you created using the Bot Lifecycle Management Export API in the Enterprise 11 Control Room instance. The aapkg package must be present in the same Automation 360 machine where you want to import the Enterprise 11 bots. You can import the password-protected aapkg packages using the Import API only.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - actionIfExisting
+              - publicWorkspace
+              - upload
+              type: object
+              properties:
+                upload:
+                  type: string
+                  description: The file to upload.
+                  format: binary
+                actionIfExisting:
+                  type: string
+                  enum:
+                  - SKIP
+                  - OVERWRITE
+                publicWorkspace:
+                  type: boolean
+                  description: true if need to import to public workspace
+                archivePassword:
+                  type: string
+                  description: Export archive password
+                email:
+                  type: string
+                  description: Developer user's email address
+                includeGlobalValues:
+                  type: boolean
+                  description: If true then global values will be created
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportImportResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /status/{requestId}:
+    get:
+      tags:
+      - BLM
+      summary: Get Import/Export Status
+      description: Use this API to get import or export status by specifying the request
+        ID.
+      parameters:
+      - name: requestId
+        in: path
+        description: Request ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /status/{requestId}/timeout/{timeout}:
+    get:
+      tags:
+      - BLM
+      summary: Get Import/Export status by request ID with a timeout delay
+      description: Use this API to get import or export status by specifying the request
+        ID with a time out delay.
+      parameters:
+      - name: requestId
+        in: path
+        description: Request ID
+        required: true
+        schema:
+          type: string
+      - name: timeout
+        in: path
+        description: Timeout in milliseconds
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /download/{downloadFileId}:
+    get:
+      tags:
+      - BLM
+      summary: Download exported bots
+      description: Use this API to download exported bots by specifying the downloaded
+        file ID.
+      parameters:
+      - name: downloadFileId
+        in: path
+        description: Download fileId should be used from blm/status API
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success. Download file.
+          content: {}
+        "403":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ExportRequest:
+      required:
+      - fileIds
+      - includePackages
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Export file name.
+          example: Export.20221205_145708.botcreator
+        fileIds:
+          type: array
+          description: Bot ids to export. No need to include dependency ids.
+          items:
+            type: integer
+        includePackages:
+          type: boolean
+          description: True if export file should contain packages required for bots.
+        archivePassword:
+          type: string
+          description: Export archive password.
+          example: Password12
+        includeGlobalValues:
+          type: boolean
+          description: If true the export file will include global values.
+    ExportVersionRequest:
+      required:
+      - files
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Export file name.
+          example: Export.20221205_145708.botcreator
+        files:
+          type: array
+          description: Files and their dependencies to include in the export.
+          items:
+            $ref: '#/components/schemas/FileIdentity'
+        packageIds:
+          type: array
+          items:
+            type: integer
+            description: Package ids to export.
+        skipDashboard:
+          type: boolean
+          description: Skip sending dashboard request to Bot Insight for export request.
+        label:
+          type: string
+          description: Export files having this label.
+          example: PRODUCTION
+        archivePassword:
+          type: string
+          description: Export archive password. This is an optional parameter.
+          example: Password12
+        includeGlobalValues:
+          type: boolean
+          description: If true the export file will include global values.
+    PromoteBotRequest:
+      required:
+      - files
+      - name
+      - targetControlRoom
+      type: object
+      properties:
+        name:
+          type: string
+          description: Export file name.
+          example: PromoteBot.20221205_145708.botcreator1
+        files:
+          type: array
+          description: Files and their dependencies to include in the promote bot.
+          items:
+            $ref: '#/components/schemas/FileIdentity'
+        packageIds:
+          type: array
+          items:
+            type: integer
+            description: Package ids to export.
+        targetControlRoom:
+          $ref: '#/components/schemas/TargetControlRoom'
+        label:
+          type: string
+          description: Promote files having this label.
+          example: PRODUCTION
+    TargetControlRoom:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Target Control Room URL. The URL should be included in the
+            list of the allowed URLs defined in the security settings.
+          example: https://my-control-room/
+        username:
+          type: string
+          description: Target Control Room username.
+          example: bot-creator1
+        apiKey:
+          type: string
+          description: Target Control Room API-Key.
+          example: 12OJG1ry
+        skipExistingFiles:
+          type: boolean
+          description: true if existing file on the Target Control Room should be
+            skipped.
+          example: true
+    FileIdentity:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the file.
+          example: 1366
+        version:
+          type: integer
+          description: Version number of the file.
+          example: 1
+    ExportImportResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: UUID that can be used to get status of import/export request.
+          example: c73f5322-522e-45f3-9b67-85a1aa4af3e1
+    StatusResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Request id.
+          example: c73f5322-522e-45f3-9b67-85a1aa4af3e1
+        type:
+          type: string
+          enum:
+          - IMPORT
+          - EXPORT
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - FAILED
+        downloadFileName:
+          type: string
+          description: file name that is same as  downloaded exported file
+          example: Export.20221205_145708.botcreator
+        downloadFileId:
+          type: string
+          description: file identifier  that can be used to download exported file
+          example: c73f5322-522e-45f3-9b67-85a1aa4af3e1
+        errorMessage:
+          type: string
+          description: Shows error in case of failed operation.
+          example: The operation failed due to an error
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Error code
+        message:
+          type: string
+          description: Message describing error
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "201":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "202":
+      description: Accepted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExportImportResponse'
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "401":
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "403":
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    "500":
+      description: Internal Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

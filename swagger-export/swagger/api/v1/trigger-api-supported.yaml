@@ -1,0 +1,197 @@
+swagger: '2.0'
+info:
+  title: Trigger API
+  description: Map triggers to users or roles for an attended Bot Runner user by using the Trigger API. With the Trigger API, you can also create and delete event triggers. <br>
+  
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: 1.0.0
+basePath: /v1
+schemes:
+  - http
+  - https
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /triggers/triggermapping:
+    post:
+      summary: Creates event trigger
+      description: Create an event trigger for a Bot Runner user, role, or bot file. Ensure that the associated users and roles have a Bot Runner license. Provide either users or roles. Do not provide both.
+      consumes:
+        - application/json
+      tags:
+        - triggers
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TriggerMappingRequest'
+      responses:
+        '201':
+          description: The event trigger is created.
+          schema:
+            $ref: '#/definitions/TriggerMappingResponse'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '500':
+          $ref: '#/responses/500'
+  /triggers/triggermapping/{id}:
+    delete:
+      summary: Deletes existing event trigger
+      description: Delete an event trigger that is associated with a user, role, or bot.
+      tags:
+        - triggers
+      parameters:
+        - name: id
+          in: path
+          type: integer
+          required: true
+          description: Event trigger identifier that you want to delete
+      responses:
+        '204':
+          description: The event trigger is deleted.
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '500':
+          $ref: '#/responses/500'
+
+definitions:
+  TriggerMappingRequest:
+    type: object
+    properties:
+      botFileId:
+        type: number
+        description: Unique identifier of the bot file.
+        example: 106587
+      botFileLabel:
+        type: string
+        description: Bot file label. It can be PRODUCTION or empty for the latest version.**NOTE**-The user associated with these userIds must have a Bot Runner license to run the API.
+        example: PRODUCTION
+      users:
+        $ref: '#/definitions/Users'
+      roles:
+        $ref: '#/definitions/Roles'
+  Users:
+    type: object
+    properties:
+      userIds:
+        type: array
+        items:
+          $ref: '#/definitions/User'
+        example: [985, 212]
+  User:
+    type: number
+    description: Enter the IDs of the user. Only the users listed here will be associated with the trigger.
+
+  Roles:
+    type: object
+    properties:
+      roleIds:
+        type: array
+        items:
+          $ref: '#/definitions/Role'
+        example: [721, 645]
+  Role:
+    type: number
+    description: Enter the IDs of the role. Only the roles listed here will be associated with the trigger.**Note** - The users associated with these roleIds must have a Bot Runner license to run the API.
+  TriggerMappingResponse:
+    type: object
+    description: Trigger mapping response
+    properties:
+      triggerMappings:
+        type: array
+        description: List of trigger mapping object. The triggerMappings array returns with all the details of the triggerMapping created. Each array element contains the following values.
+        items:
+          $ref: '#/definitions/TriggerMapping'
+  TriggerMapping:
+    type: object
+    description: trigger mapping object
+    properties:
+      id:
+        type: number
+        description: ID of the trigger mapping
+        example: 31
+      userId:
+        type: number
+        description: ID of the user
+        example: 985
+      roleId:
+        type: number
+        description: ID of the role
+        example: 721
+      botPath:
+        type: string
+        description: The path of the bot
+        example: "Automation Anywhere\\Bots\\botA"
+      modifierBy:
+        type: number
+        description: The ID of the user that did the triggerMapping
+        example: 187
+      lastModified:
+        type: string
+        description: The timestamp of the triggerMapping
+        example: "2022-11-28T20:21:39.586090Z"
+      botName:
+        type: string
+        description:  The name of the bot that got the triggerMapping.
+        example: "botWithAllModifiers\u0026CharacterKey8TriggerEvent--1663186087103"
+      botId:
+        type: number
+        description: The Id of the bot that got the triggerMapping
+        example: 427
+      botLabel:
+        type: string
+        description: The label of the bot that got the triggerMapping
+        example: PRODUCTION
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+      details:
+        type: string
+        description: More details of the error message
+
+responses:
+  '201':
+    description: Created
+  '204':
+    description: Deleted
+  '400':
+    description: Bad Rquest
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

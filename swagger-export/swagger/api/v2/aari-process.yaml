@@ -1,0 +1,849 @@
+swagger: "2.0"
+info:
+  description: "Use the Processor Composer APIs to create a new request from processes, retrieve initial form, and request by reference ID. 
+    You can enter the required information in an initial form and complete tasks.<br>
+      
+      <b>Prerequisites:</b><br>
+      Ensure you have completed the following: <br>
+      - Provided a system-created AAE_Robotic_Interface User role for the Automation Co-Pilot user.<br>
+      - Assigned the Automation Co-Pilot Business user license.<br>
+      - Have access to the web interface.<br>
+      
+      All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+      
+      
+      **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`"
+  version: "2.0.0"
+  title: "Process Composer API"
+schemes:
+  - "http"
+  - "https"
+basePath: /aari/v2
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /requests/create:
+    post:
+      summary: Create a request
+      description: "Use this endpoint to create a new request from processes that is assigned to the Automation Co-Pilot team.<br>
+        
+        <b>Important:</b>  You must specify any one attribute among proccess ID, process path, and repository reference.
+        <p>Request can be created with any input fields required for the bot. Example value specified below is for Dictionary Input. You can view the other input types in the <b>Models</b> section at the end of the swagger."
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateRequest'
+      tags:
+        - Requests
+      responses:
+        '201':
+          description: >-
+            Create request response.
+          schema:
+            $ref: '#/definitions/CreateRequestResponse'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+  /processes/{id}/form:
+    get:
+      summary: Retrieve initial form from a particular process
+      description: Use this endpoint to retrieve the initial form associated with the process by specifying the process ID.
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: Process ID
+      tags:
+        - Initial Form
+      responses:
+        '200':
+          description: >-
+            Process form response.
+          schema:
+            $ref: '#/definitions/FormResponse'
+        '403':
+          $ref: '#/responses/403'
+        '500':
+          $ref: '#/responses/500'        
+  /requests/ref/{refId}:
+    get:
+      summary: Retrieve a request
+      description: Use this endpoint to retrieve a request by specifying the request reference ID. The reference ID is generated when a request is created using the '/requests/create' endpoint.
+      parameters:
+        - in: path
+          name: refId
+          type: string
+          required: true
+          description: ref id
+      tags:
+        - Requests
+      responses:
+        '200':
+          description: >-
+           Request by ref id response.
+          schema:
+            $ref: '#/definitions/RequestDto'
+        '403':
+          $ref: '#/responses/403'
+        '500':
+          $ref: '#/responses/500'
+
+definitions:
+  AttributeType:
+    type: string
+    enum:
+      - STRING
+      - NUMBER
+      - BOOLEAN
+      - FILE
+      - ITERATOR
+      - LIST
+      - DICTIONARY
+      - TABLE
+      - VARIABLE
+      - CONDITIONAL
+      - WINDOW
+      - TASKBOT
+      - DATETIME
+      - UIOBJECT
+      - RECORD
+      - EXCEPTION
+      - CREDENTIAL
+      - COORDINATE
+      - IMAGE
+      - REGION
+      - PROPERTIES
+      - TRIGGER
+      - CONDITIONALGROUP
+      - FORM
+      - FORMELEMENT
+      - HOTKEY
+      - WORKITEM
+    default: STRING
+    example: DICTIONARY
+  Value:
+    type: object
+    properties:
+        type:
+          $ref: '#/definitions/AttributeType'
+        dictionary:
+          type: array
+          items:
+            $ref: '#/definitions/Dictionary'
+  Dictionary:
+    type: object
+    $ref: '#/definitions/Dictprop'
+   
+  Dictprop:
+    type: object
+    properties:  
+      key:
+        type: string
+        example: key1
+      value:
+        $ref: '#/definitions/BotValue'
+
+  BotValue:
+    type: object
+    properties: 
+      type: 
+        type: string
+        example: STRING
+      string:
+        type: string
+        example: value1
+  Table:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/Schema"
+        rows:
+          type: array
+          items:
+            $ref: "#/definitions/Row"
+  Row:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: "#/definitions/Value"
+  Schema:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/definitions/AttributeType"
+  TaskbotFile:
+      type: object
+      properties:
+        type:
+          $ref: "#/definitions/AttributeType"
+        string:
+          type: string
+        repository:
+          type: boolean
+          format: boolean
+        expression:
+          type: string
+  TaskbotInput:
+      type: object
+      properties:
+        type:
+          $ref: "#/definitions/AttributeType"
+        dictionary:
+          type: array
+          items:
+            $ref: "#/definitions/Dictionary"
+  TaskbotOutput:
+      type: object
+      properties:
+        type:
+          $ref: "#/definitions/AttributeType"
+        dictionary:
+          $ref: "#/definitions/Dictionary"
+  Window:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        class:
+          type: string
+        handle:
+          type: integer
+          format: int64
+        isChild:
+          type: boolean
+          format: boolean
+        location:
+          $ref: "#/definitions/WindowLocation"
+        size:
+          $ref: "#/definitions/WindowSize"
+        presetType:
+          $ref: "#/definitions/WindowPreset"
+  WindowLocation:
+      type: object
+      properties:
+        top:
+          type: integer
+          format: int32
+        left:
+          type: integer
+          format: int32
+  WindowSize:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+  WindowPreset:
+      type: string
+      enum:
+        - NONE
+        - CURRENTLY_ACTIVE
+        - DESKTOP
+        - TASKBAR
+      default: NONE
+  UIObject:
+      type: object
+      properties:
+        blob:
+          type: string
+          format: byte
+        controlType:
+          $ref: "#/definitions/UIObjectControlType"
+        technologyType:
+          $ref: "#/definitions/UIObjectTechnologyType"
+        criteria:
+          type: object
+          additionalProperties:
+            $ref: "#/definitions/UIObjectSelectionCriterion"
+        capture:
+          $ref: "#/definitions/RectangleImageCapture"
+  UIObjectControlType:
+      type: string
+      enum:
+        - UNKNOWN_CONTROL
+        - BUTTON
+        - TEXTBOX
+        - LINK
+        - RADIO
+        - CHECKBOX
+        - COMBOBOX
+        - MENUBAR
+        - LISTVIEW
+        - TABLE
+        - CALENDAR
+        - DATEPICKER
+        - SLIDER
+        - TREE
+        - PAGETAB
+        - LABEL
+        - SCROLLBAR_HORIZONTAL
+        - DROPDOWN
+        - CLIENT
+        - IMAGE_BUTTON
+        - ANY_CONTROL
+        - PAGETABITEM
+        - SCROLLBAR_VERTICAL
+      default: UNKNOWN_CONTROL
+  UIObjectTechnologyType:
+      type: string
+      enum:
+        - UNKNOWN
+        - MS_ACTIVE_ACCESSIBILITY
+        - MS_UI_AUTOMATION
+        - JAVA
+        - SILVERLIGHT
+        - FLASH
+        - HTML
+        - AISENSE
+        - SAP
+        - ANY_TECHNOLOGY
+      default: UNKNOWN
+  UIObjectSelectionCriterion:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          format: boolean
+        value:
+          $ref: "#/definitions/Value"
+  RectangleImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotRectangle:
+          $ref: "#/definitions/Rectangle"
+        thumbnailRectangle:
+          $ref: "#/definitions/Rectangle"
+        securelyRecorded:
+          type: boolean
+          format: boolean
+  Record:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/Schema"
+        values:
+          type: array
+          items:
+            $ref: "#/definitions/Value"
+  CredentialObject:
+      type: object
+      properties:
+        name:
+          type: string
+        lockerName:
+          type: string
+        attributeName:
+          type: string
+  WindowValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/definitions/AttributeType"
+        window:
+          $ref: "#/definitions/Window"
+        expression:
+          type: string
+  Coordinate:
+      type: object
+      properties:
+        x:
+          $ref: "#/definitions/Value"
+        y:
+          $ref: "#/definitions/Value"
+        capture:
+          $ref: "#/definitions/PointImageCapture"
+  PointImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotPoint:
+          $ref: "#/definitions/Point"
+        screenshotX:
+          type: integer
+          format: int32
+        screenshotY:
+          type: integer
+          format: int32
+        screenshotWidth:
+          type: integer
+          format: int32
+        screenshotHeight:
+          type: integer
+          format: int32
+        securelyRecorded:
+          type: boolean
+          format: boolean
+  Point:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+  Region:
+      type: object
+      properties:
+        x:
+          $ref: "#/definitions/Value"
+        y:
+          $ref: "#/definitions/Value"
+        width:
+          $ref: "#/definitions/Value"
+        height:
+          $ref: "#/definitions/Value"
+        capture:
+          $ref: "#/definitions/RectangleImageCapture"
+  NestedStringValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/definitions/AttributeType"
+        string:
+          type: string
+        expression:
+          type: string
+  HotKey:
+      type: object
+      properties:
+        key:
+          type: string
+        modifierKeys:
+          type: array
+          items:
+            $ref: "#/definitions/HotKeyModifierKey"
+  HotKeyModifierKey:
+      type: string
+      enum:
+        - CONTROL
+        - SHIFT
+        - ALT
+        - WINDOWS
+        - ALT_GRAPH
+      default: CONTROL
+  Property:
+      type: object
+      properties:
+        name:
+          $ref: "#/definitions/Value"
+        value:
+          $ref: "#/definitions/Value"
+        enabled:
+          type: boolean
+          format: boolean
+  Rectangle:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer 
+  ValueMap1:
+    type: object
+    description: This is key value objects, collection of value objects  with key and value.
+    properties:
+      value:
+        $ref: "#/definitions/iTestList"
+  ValueMap:
+    type: object
+    properties:
+      type:
+        "$ref": "#/definitions/AttributeType"
+      dictionary:
+        type: array
+        items:
+          "$ref": "#/definitions/Dictionary"
+
+  iTestList:
+    type: object
+    properties:
+      type:
+        "$ref": "#/definitions/AttributeType"
+      dictionary:
+        type: array
+        items:
+          "$ref": "#/definitions/Dictionary"
+
+  Value1:
+    type: object
+    properties:
+      type:
+        "$ref": "#/definitions/AttributeType"
+      dictionary:
+        type: array
+        items:
+          "$ref": "#/definitions/Dictionary"   
+  FormResponse:
+    type: object
+    properties:
+        id:
+          type: integer
+          description: Unique ID of the form.
+          example: 50
+        title:
+          type: string
+          description: Form title.
+          example: Automation_Co_pilot_Process
+        form:
+          type: string
+          description: Form attribute defintions.
+          example: "\"form\":{\"properties\":{\"title\":\"Form title\",\"dimension\":{\"height\":600,\"width\":450,\"displayHeight\":600},\"font\":{\"fontType\":\"System\",\"fontSize\":\"MEDIUM\"},\"closeOnEndMachine\":false,\"minimizeOnEndMachine\":false,\"hiddenElements\":[],\"brandLogos\":[],\"logoCount\":\"Zero\"},\"position\":{\"isFormPreviewCentered\":false,\"startX\":650,\"startY\":10},\"meta\":{\"version\":\"2.1\"},\"rows\":[{\"columns\":[{\"width\":50},{\"width\":50}]}],\"rules\":[],\"documentElement\":{}}}"
+        aaFileStorage:
+          type: string
+          description: Type of file storage
+          enum: [aari, iqbot]  
+        values:
+          type: object
+          $ref: '#/definitions/ValueMap'
+        dynamicFormSchema:
+          type: object
+          $ref: '#/definitions/ValueMap'   
+  CreateRequest:
+    type: object
+    properties:
+      processId:
+        type: integer
+        description: Specify the process ID. 
+        example: 4
+      processPath: 
+        type: string
+        description: Specify the path for the process. 
+        example: 4
+      repositoryReference:
+          type: string
+          enum: [PUBLIC,PRIVATE]
+      teamId:
+        type: integer
+        description: Specify the Automation Co-Pilot team ID. 
+        example: 12
+      inputs: 
+        type: object
+        $ref: '#/definitions/ValueMap' 
+      initiatorType: 
+        type: string
+        enum: [BOT, USER]
+        description: Specify the process initiator as Bot or User.
+      callbackInfo:  
+        type: object
+        $ref: '#/definitions/CallbackInfo' 
+  HeaderMap:
+    description: This is key value objects, collection of headers with key and value.
+    type: object
+    properties:
+      key:
+        type: string
+        example: "X-Authorization"
+      value:
+        type: string
+        example: "eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiI0Ii"        
+  CallbackInfo:
+    type: object
+    properties:
+      url:
+        type: string
+        description: Callback API URL.
+        example: 'https://callbackserver.com/storeBotExecutionStatus'
+      headers:
+        type: object
+        description: >-
+            Callback API headers. Headers may contain authentication token, content type etc. Both key & value are of type string.
+        $ref: '#/definitions/HeaderMap' 
+  CreateRequestResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: ID of the request created
+        example: 5
+      ref:
+        type: string
+        description: Request reference ID for the created form.
+        example: 47-13
+  RequestDto:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Request ID
+        example: 2
+      title:
+        type: string
+        description: Title specified for the request
+        example: Automation Co-Pilot process
+      info: 
+        type: string
+        description: Details of information message
+        example: "System Error: Default Scheduler configuration missing scheduler"
+      process:
+        $ref: '#/definitions/ProcessInfoBasicDto' 
+      inputs:
+        type: object
+        $ref: '#/definitions/ValueMap' 
+      outputs:
+        type: object
+        $ref: '#/definitions/ValueMap' 
+      steps:
+        type: array
+        items: 
+          $ref: '#/definitions/StepRecordDto'
+      status:
+        type: string
+        description: Status of the request
+        enum: [OPENED,SUCCESS,ERROR,CANCELLED]
+      initiatorType:
+        type: string
+        description: Initiator of the request
+        enum: [UNKNOWN,BOT,USER]
+      createdOn:
+        description: Date the request was created
+        type: string
+        example: "2023-02-01T09:27:58.128875Z"
+      updatedOn: 
+        type: string
+        description: Date the request was last updated
+        example: "2023-02-01T09:27:58.292445Z"
+      createdBy:
+        type: integer
+        description: ID of the user who created the request
+        example: 160
+      initialStepTitle:
+        type: string
+        description: Initial Title 
+        example: Request Created
+      initialStepInfo:
+        type: string
+        example: []
+      hasHiddenSteps:
+        type: boolean
+      createdByTeamId:
+        type: integer
+        example: 2
+      workspaceType:
+        type: string
+        enum: [PUBLIC,PRIVATE]
+      recoveredBy:
+        type: integer
+        example: 0
+      recoveredOn:
+        type: string
+        example: "2023-02-01T09:27:58.292445Z"
+      recycleSchedule:
+        type: string
+        example: []
+      ref:
+        type: string
+        example: 47-13
+  ProcessInfoBasicDto:
+    type: object
+    properties:
+      id: 
+        type: integer
+        description: Process ID.
+        example: 4
+      title: 
+        type: string
+        description: Process Title
+        example: automation_co_pilot_process
+      tags:
+        type: array
+        items:
+          type: string
+          description: Tags specified for the processes
+          example: automation_co_pilot_team, team4
+      creationMode:
+        type: array
+        description: Mode in which the process is created.
+        items: 
+          type: string
+          enum: [USER,BOI,PROCESS,NONE]
+  StepRecordDto:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 3
+      title:
+        type: string
+        example: automation_co_pilot_process
+      formContent:
+        type: string
+      inputs:
+        type: object
+        $ref: '#/definitions/ValueMap' 
+      outputs:
+        type: object
+        $ref: '#/definitions/ValueMap'
+      controls:
+        type: object
+        $ref: '#/definitions/KeyValueItem'
+      status:
+        type: string
+      info:
+        type: string
+        description: Details of information message
+        example: "System Error: Default Scheduler configuration missing scheduler"
+      processStepUuid:
+        type: string
+      type: 
+        type: string
+        enum: [INIT,BOT,FORM,STREAM,PROCESS,IFRAME,API_BOT]
+      stepState:
+        type: string
+        enum: [IN_PROGRESS,COMPLETED]
+      createdOn:
+        description: Date the request was created
+        type: string
+        example: "2023-02-01T09:27:58.128875Z"
+      updatedOn:
+        description: Date the request was last updated
+        type: string
+        example: "2023-02-01T09:27:58.128875Z"
+      updatedBy:
+        type: integer
+        example: 160
+        description: ID of the user who updated the request.
+      assigneeId: 
+        type: integer
+      progressStatus:
+        type: string
+        enum: [UNKNOWN,DEPLOYED,RUNNING,RUN_PAUSED,UPDATE,COMPLETED,RUN_FAILED,RUN_ABORTED,RUN_TIMED_OUT,DEPLOY_FAILED,PENDING_EXECUTION,QUEUED,BOT_PRE_PROCESSING_SUCCESSFUL,BOT_PRE_PROCESSING_FAILED]
+      activityUniqueId:
+        type: string
+      dynamicFormSchema:
+        type: object
+        $ref: '#/definitions/ValueMap'
+      dynamicControls:  
+        type: object  
+        $ref: '#/definitions/Value'
+      nonExecStatus:
+        type: object
+        enum: [UNKNOWN,ORCHESTRATION_RUN_BOT_ERROR,DEPLOYBOT_CALL_ERROR,FILE_NOT_FOUND,DEVICE_CRED_NOT_SET]
+      subType:
+        type: object
+        enum: [NONE,LOOP,FILTER,IQBOT]
+      sourceUri: 
+        type: string
+      workspaceType:
+        type: string
+        enum: [PUBLIC,PRIVATE]
+      assignmentSource:
+        type: string
+        enum : [UNKNOWN_ASSIGNMENT_SOURCE,UNASSIGNED,MANUAL_ASSIGN,AUTO_ASSIGN,AUTO_ASSIGN_ON_VIEW]
+      assignmentRuleType:
+        type: string
+        enum: [NO_AUTO_ASSIGN_RULE,AUTO_ASSIGN_TO_CREATOR_RULE,AUTO_ASSIGN_TO_CREATOR_MANAGER_RULE,AUTO_ASSIGN_ON_VIEW_RULE]
+      teamRequestVisibility:
+        type: string
+        enum: [PRIVATE,SHARED]
+      stepSubState:
+        type: string
+        enum: [NO_SUB_STATE,HUMAN_PENDING,HUMAN_SUBMITTED,HUMAN_CANCELED,HUMAN_EXPIRED,BOT_INITIATED,BOT_QUEUED,BOT_RUNNING,BOT_FAILED,BOT_SUCCESS,PROCESS_OPEN,PROCESS_FINISH_CANCELED,PROCESS_FINISH_ERROR,PROCESS_FINISH_SUCCESS,PROCESS_NOT_CREATED,SYSTEM_EXPIRED]
+      aaFileStorage:
+        type: string
+        enum: [aari,iqbot]
+      expiresOn:
+        type: string
+        
+  KeyValueItem:
+    type: object
+    properties:
+      key: 
+        type: string
+      value:
+        $ref: '#/definitions/Value'  
+      
+  FileIdentity:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique ID of the file.
+      version:
+        type: integer
+        description: Version number of the file.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+
+responses:
+  '200':
+    description: OK
+    schema:
+      $ref: '#/definitions/Error'
+  '201':
+    description: Created
+    schema:
+      $ref: '#/definitions/Error'
+  '400':
+    description: Bad Request
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

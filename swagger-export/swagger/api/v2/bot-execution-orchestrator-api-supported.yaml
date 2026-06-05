@@ -1,0 +1,359 @@
+openapi: 3.0.1
+info:
+  title: Bot Execution Orchestrator API
+  description: |-
+    The V2 Bot Execution Orchestrator API is used to monitor devices. The searchable fields for monitoring devices includes&#58; <br>
+    <b>Searchable fields for devices:</b> <ul> <li><b>hostName&#58;</b> The host name of the device configured as a Bot Runner. If a naming convention is used for host names, searching on a unique substring in the host name is an effective way to identify Bot Runner devices</li> <li><b>userId&#58;</b> The unique numeric identification for a specific user also identifies the Bot Runner device. Unique user naming conventions can be used to identify users and devices that are licensed and configured as Bot Runners.</li></ul>
+    <b>Prerequisites</b> <br> <ul><li>Control Room administrator or a user with **View and Manage Scheduled Activity** feature permissions, you can monitor the bot progress using a set of Control Room APIs.</li></ul> All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br> **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: 1.0.0
+servers:
+- url: /v2
+security:
+- AccessToken: []
+paths:
+  /devices/list:
+    post:
+      tags:
+      - automations
+      summary: Lists devices
+      description: "Use this API to retrieve a list of devices that are available\
+        \ for bot deployment. The device ids retreieved from it can be passed to the\
+        \ deployment API. Additional filtering, ordering and pagination rules can\
+        \ be requested."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+        required: true
+      responses:
+        "200":
+          description: Returns a list of devices or a blank list as per filter conditions
+            specified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    FilterRequest:
+      type: object
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting and pagination\
+        \ rules"
+    SearchFileFilterRequest:
+      type: object
+      properties:
+        fields:
+          type: array
+          description: Fields to be returned
+          items:
+            type: string
+            description: Field name
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+        page:
+          $ref: '#/components/schemas/PageRequest'
+      description: "Filter request, which includes filtering, sorting and pagination\
+        \ rules"
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+          example: name
+        direction:
+          type: string
+          description: Sorting direction
+          example: asc
+          enum:
+          - asc
+          - desc
+      description: "By default, search results are sorted in descending order with\
+        \ respect to their IDs. An alternative sorting is specified by using the sort\
+        \ query parameter."
+    Ops:
+        type: object
+        description: Operands rules
+        properties:
+          operator:
+            type: string
+            description: Operator
+            enum:
+             - gt
+              - lt
+              - le
+              - eq
+              - ne
+              - ge
+              - and
+              - substring
+              - NONE
+              - or
+              - not
+          field:
+            type: string
+            description: "Filtering field could be either hostName, DeviceType, Lifespan, Status\
+              \ or hostType."
+          value:
+            type: string
+            description: "Filter rules (Status can have the following values: CONNECTED, DISCONNECTED, OFFLINE, CONNECTED_HAS_UPDATE, CONNECTED_NEEDS_UPDATE,\
+              \ WAITING_FOR_UPDATE, UPDATING,  DISCONNECTED_FOR_UPDATE, CONFIGURING,  UPDATE_FAILED, INITIALIZING, READY_TO_PURGE, or MARKED_FOR_DELETION - \
+              \ HostType can have the following values:  CUSTOMER_WINDOWS, AAE_WINDOWS_VM - \
+              \ Lifespan can have the following values: PERSISTENT, TEMPORARY - \
+              \ DeviceType can have the following values: SINGLE_USER, MULTI_USERS."
+    PageRequest:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+          example: 0
+        length:
+          type: integer
+          description: Total number of items to display
+          example: 1000
+      description: "Pagination rules, allows you to filter based on desired page"
+    Filter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          example: and
+          enum:
+          - and
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - NONE
+          - or
+          - not
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ops'
+          example:
+            - operator: eq
+              field: updatedBy
+              value: "10"
+            - operator: eq
+              field: status
+              value: "CONNECTED"            
+
+    SearchFileFilter:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: Operator
+          enum:
+          - NONE
+          - lt
+          - le
+          - eq
+          - ne
+          - ge
+          - gt
+          - substring
+          - and
+          - or
+          - not
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchFileFilter'
+        field:
+          type: string
+          description: "Filtering field could be either name,directory,lastModified,createdOn\
+            \ or path."
+        value:
+          type: string
+          description: Filter value
+      description: Filter rules
+    PageResponse:
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+          example: 0
+        total:
+          type: integer
+          description: Total number of items
+          example: 4
+        totalFilter:
+          type: integer
+          description: Total number of items matching filter
+          example: 1
+      description: Pagingation response
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the device
+          example: "33"
+        type:
+          type: string
+          description: Device type
+          enum:
+          - SINGLE_USER
+          - MULTIPLE_USERS
+        hostName:
+          type: string
+          description: Host name of the machine where the device is logged in
+          example: ABLL01238
+        poolName:
+          type: string
+          description: Name of the device pool
+          example: DevicePool1
+        updatedBy:
+          type: string
+          description: Id of the user who made a latest update on the object
+          example: "21"
+        updatedOn:
+          type: string
+          description: The latest update of the object
+          example: 2025-06-15T03:09:04.279786Z
+        status:
+          type: string
+          description: Status of the device
+          example: CONNECTED
+          enum:
+          - CONNECTED
+          - DISCONNECTED
+          - OFFLINE
+        defaultUsers:
+          type: array
+          description: Users that have access to the device
+          items:
+            $ref: '#/components/schemas/defaultUsers'
+        lifespan:
+          type: string
+          description: Lifespan of the device
+          enum:
+          - PERSISTENT
+          - TEMPORARY
+        installationType:
+          type: string
+          description: The installation type
+          enum:
+          - SYSTEM_WIDE
+          - USER_SPECIFIC
+        logConfiguration:
+          $ref: '#/components/schemas/logConfiguration'
+    defaultUsers:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of default user to the device
+          example: "916"
+        username:
+          type: string
+          description: Username of the default user
+          example: joedoe
+        domain:
+          type: string
+          description: Domain name of the user
+          example: SampleDomain
+    logConfiguration:
+      type: object
+      properties:
+        logLevel:
+          type: string
+          description: Different log levels.
+          enum:
+          - INFO
+          - DEBUG
+          - TRACE
+        logFileSize:
+          type: string
+          description: Size of the log file
+          example: "10"
+        numberOfLogFile:
+          type: string
+          description: Number of log files
+          example: "10"
+        logCollectorEnabled:
+          type: boolean
+          description: A flag to indicate if the log collector is enabled or not
+          example: false
+        level:
+          type: string
+          description: Shows the log levels
+          enum:
+          - INFO
+          - DEBUG
+          - TRACE
+    DeviceResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          description: list of devices.
+          items:
+            $ref: '#/components/schemas/Device'
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error Message
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: |
+        **X-Authorization: _token_**
+      name: X-Authorization
+      in: header

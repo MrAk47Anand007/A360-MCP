@@ -1,0 +1,296 @@
+swagger: "2.0"
+info:
+  description: "Use the Team Management APIs to create teams, add or remove team members, and manage team configurations. 
+    You can manage team roles, request visibility settings, and team member assignments.<br>
+      
+      <b>Prerequisites:</b><br>
+      Ensure you have completed the following: <br>
+      - Provided a system-created AAE_Robotic_Interface Admin role for the Co-Pilot Admin.<br>
+      - Have access to Automation Co-Pilot.<br>
+      
+      All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.
+      
+      
+      **Header:** `X-Authorization: <<authentication token>> or Authorization: Bearer <<bearer token>>`"
+  version: "2.0.0"
+  title: "Team Management API"
+schemes:
+  - "http"
+  - "https"
+basePath: /aari/v2
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    description: >
+      **X-Authorization: _token_**
+    name: X-Authorization
+    in: header
+security:
+  - AccessToken: []
+paths:
+  /teams:
+    post:
+      summary: Create a team
+      description: "Use this endpoint to create a new Automation Co-Pilot team with specified members and roles.<br>
+        
+        <b>Important:</b> You must specify the team name, request visibility and team admins while creating a team."
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTeamRequest'
+      tags:
+        - Teams
+      responses:
+        '201':
+          description: >-
+            Create team response.
+          schema:
+            $ref: '#/definitions/CreateTeamResponse'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+  /teams/{teamId}:
+    delete:
+      summary: Delete a team
+      description: Use this endpoint to delete a team by specifying the team ID.
+      parameters:
+        - in: path
+          name: teamId
+          type: integer
+          required: true
+          description: Team ID
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: >-
+            Team deleted successfully.
+          schema:
+            type: string
+            example: "OK"
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+  /teams/{teamId}/members/add:
+    put:
+      summary: Add members to a team
+      description: Use this endpoint to add users and roles to an existing team by specifying the team ID.
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: teamId
+          type: integer
+          required: true
+          description: Team ID
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AddTeamMembersRequest'
+      tags:
+        - Team Members
+      responses:
+        '200':
+          description: >-
+            Members added successfully.
+          schema:
+            type: string
+            example: "OK"
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+  /teams/{teamId}/members/remove:
+    put:
+      summary: Remove members from a team
+      description: Use this endpoint to remove users and roles from an existing team by specifying the team ID.
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: teamId
+          type: integer
+          required: true
+          description: Team ID
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RemoveTeamMembersRequest'
+      tags:
+        - Team Members
+      responses:
+        '200':
+          description: >-
+            Members removed successfully.
+          schema:
+            type: string
+            example: "OK"
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '403':
+          $ref: '#/responses/403'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+
+definitions:
+  TeamRole:
+    type: string
+    enum:
+      - ADMIN
+      - OWNER
+      - MEMBER
+    description: Role of the user in the team
+  RequestVisibility:
+    type: string
+    enum:
+      - PRIVATE
+      - SHARED
+    default: SHARED
+    description: Request visibility setting for the team
+  CreateTeamRequest:
+    type: object
+    required:
+      - name
+      - requestVisibility
+      - users
+    properties:
+      name:
+        type: string
+        description: Name of the team
+        example: "Team API"
+      description:
+        type: string
+        description: Description of the team
+        example: "A team created through API"
+      requestVisibility:
+        $ref: '#/definitions/RequestVisibility'
+      users:
+        type: array
+        description: Admin users to be added to the team
+        items:
+          $ref: '#/definitions/TeamUserRequest'
+  TeamUserRequest:
+    type: object
+    required:
+      - userId
+      - teamRole
+    properties:
+      userId:
+        type: integer
+        description: User ID
+        example: 124
+      teamRole:
+        $ref: '#/definitions/TeamRole'
+  CreateTeamResponse:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: ID of the team created
+        example: 10
+      ref:
+        type: string
+        description: Reference ID of the team
+        example: "9"
+  AddTeamMembersRequest:
+    type: object
+    properties:
+      users:
+        type: array
+        description: List of users to add to the team
+        items:
+          $ref: '#/definitions/TeamUserRequest'
+      roles:
+        type: array
+        description: List of system roles to add to the team
+        items:
+          type: object
+          properties:
+            roleId:
+              type: integer
+              description: Role ID to add to the team
+              example: 272
+  RemoveTeamMembersRequest:
+    type: object
+    properties:
+      userIds:
+        type: array
+        description: List of user IDs to remove from the team
+        items:
+          type: integer
+          example: 124
+      roleIds:
+        type: array
+        description: List of role IDs to remove from the team
+        items:
+          type: integer
+          example: 272
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: Error code
+      message:
+        type: string
+        description: Message describing error
+
+responses:
+  '200':
+    description: OK
+    schema:
+      $ref: '#/definitions/Error'
+  '201':
+    description: Created
+    schema:
+      $ref: '#/definitions/Error'
+  '400':
+    description: Bad Request
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: Authentication required
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Unauthorized access
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Not found
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server error
+    schema:
+      $ref: '#/definitions/Error'

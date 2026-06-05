@@ -1,0 +1,1260 @@
+openapi: 3.0.1
+info:
+  title: Bot Execution Orchestrator API
+  description: The V3 Bot Execution Orchestrator APIs are used to monitor automation activity progress. The searchable fields for monitoring activity includes&#58; <br>
+
+    <b>Searchable fields for bots activity:</b> <ul>
+    <li><b>name&#58;</b> The unique name of a bot. You can search on the exact name (eq) or a text string (substring) that is contained in the bots name.</li>
+    <li><b>path&#58;</b> The relative path of a folder in the Control Room. You can search on a full path or a substring contained in the path.</li></ul>
+
+    <b>Prerequisites</b> <br>
+    <ul><li>Control Room administrator or a user with **View and Manage Scheduled Activity** feature permissions, you can monitor the automation progress using a set of Control Room APIs.</li></ul>
+    All API calls must contain either an authentication token from Authentication API (generates JSON Web token) or a bearer token from OAuth services. You cannot use both together in an API.<br>
+    **Header file example:** `-H X-Authorization <authentication token>` or `Authorization:Bearer <bearer token>`
+  version: 1.0.0
+
+servers:
+  - url: /v3
+    description: Base URL
+
+security:
+  - AccessToken: []
+
+paths:
+
+  /activity/list:
+    post:
+      summary: Searches automation executions
+      description: >-
+        Returns a list of automation executions based on filtering, ordering and
+        pagination rules, with a max page length of 10,000. Fetches execution details
+        for specific automation id as returned by the deployment API, with the exception
+        of automation output variables and callback info.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterRequest'
+      tags:
+        - automations
+      responses:
+        '200':
+          description: >-
+            Returns a list of executions or a blank list as per filter
+            conditions specified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /activity/execution/{id}:
+    get:
+      summary: Gets job execution
+      description: Fetch the execution details for a specific execution ID.
+      parameters:
+        - name: "id"
+          description: "id of execution"
+          required: true
+          in: "path"
+          schema:
+            type: string
+      tags:
+        - automations
+      responses:
+        '200':
+          description: >-
+            Returns details of the specific execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Execution'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /activity/manage:
+    post:
+      summary: Manage executions
+      description: Use the manage execution endpoint to stop, pause, or resume an execution by specifying the execution ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageExecutionsRequest'
+      tags:
+        - automations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageExecutionsResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /activity/metrics:
+    post:
+      summary: View metrics
+      description: Use the activity metrics endpoint to retrieve activity metrics data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobExecutionStatusMetricsRequest'
+      tags:
+        - automations
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobExecutionStatusMetricsResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      description: 'X-Authorization: _token_'
+      name: X-Authorization
+      in: header
+
+  schemas:
+    FilterRequest:
+      type: object
+      description: 'Filter request, which includes filtering, sorting and pagination rules'
+      properties:
+        filter:
+          $ref: '#/components/schemas/Filter'
+        sort:
+          type: array
+          description: Sort directions
+          items:
+            $ref: '#/components/schemas/Sort'
+          example: [{"field":"endDateTime","direction":"desc"}]
+        page:
+          $ref: '#/components/schemas/PageRequest'
+
+    Sort:
+      type: object
+      description: Sorting rules
+      properties:
+        field:
+          type: string
+          description: Field name to sort by
+        direction:
+          type: string
+          description: Sorting direction
+          enum:
+            - asc
+            - desc
+
+    PageRequest:
+      type: object
+      description: Pagination rules
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+        length:
+          type: integer
+          description: Page lengh
+          example: 1
+
+    Filter:
+      type: object
+      description: Filter rules
+      example: {"operator":"eq","value":"COMPLETED","field":"status"}
+      properties:
+        operator:
+          type: string
+          description: Operator
+          enum:
+            - NONE
+            - lt
+            - le
+            - eq
+            - ne
+            - ge
+            - gt
+            - substring
+            - and
+            - or
+            - not
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        field:
+          type: string
+          description: Filter field could be either name,lastModified,path or directory.
+        value:
+          type: string
+          description: Filter value
+
+    PageResponse:
+      type: object
+      description: Pagination response
+      properties:
+        offset:
+          type: integer
+          description: Page starting index
+          example: 0
+        total:
+          type: integer
+          description: Total number of items
+          example: 2
+        totalFilter:
+          type: integer
+          description: Total number of items matching filter
+          example: 1
+
+    JobExecutionStatusMetricsRequest:
+      type: object
+      properties:
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+
+    JobExecutionStatusMetricsResponse:
+      type: object
+      properties:
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobExecutionStatusMetric'
+
+    TimeRange:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - CUSTOM
+            - LAST30MINUTES
+            - LAST1HOURS
+            - LAST3HOURS
+            - LAST6HOURS
+            - LAST12HOURS
+            - LAST24HOURS
+          example: CUSTOM
+          description: The period of time for the requested activity metrics
+            <ul>
+              <li>CUSTOM - Specify a custom start (from) and end (to) date and time</li>
+              <li>LAST30MINUTES - The last thirty minutes</li>
+              <li>LAST1HOURS - The last one hour</li>
+              <li>LAST3HOURS - The last three hours</li>
+              <li>LAST6HOURS - The last six hours</li>
+              <li>LAST12HOURS - The last twelve hours</li>
+              <li>LAST24HOURS - The last twenty four hours</li>
+            </ul>
+        from:
+          type: string
+          description: Date and time at the beginning of the CUSTOM time range
+          example: "2025-10-14T06:35:24.773187700Z"
+        to:
+          type: string
+          description: Date and time at the end of the CUSTOM time range
+          example: "2025-10-14T06:39:27.438843100Z"
+    JobExecutionStatusMetric:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - UNKNOWN
+            - DEPLOYED
+            - RUNNING
+            - RUN_PAUSED
+            - UPDATE
+            - COMPLETED
+            - RUN_FAILED
+            - RUN_ABORTED
+            - RUN_TIMED_OUT
+            - DEPLOY_FAILED
+            - PENDING_EXECUTION
+            - QUEUED
+            - BOT_PRE_PROCESSING_SUCCESSFUL
+            - BOT_PRE_PROCESSING_FAILED
+          description: The status of the activity
+          example: DEPLOYED
+        count:
+          type: integer
+          description: The number of times that the status occurred
+          example: 1
+
+    Execution:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique execution id
+          example: 972f41ee-90e7-4a62-8d1-055dc9c3b59c_668b1db6649c43da
+        automationName:
+          type: string
+          description: Name of the automation to which the execution is associated
+          example: testbot.2025.10.14.06.35.24.john_creator
+        fileName:
+          type: string
+          description: Name of the automation that is deployed to execute
+          example: testbot
+        type:
+          type: string
+          enum:
+            - WORKORDER
+            - WLM_TASK
+            - EXPORT
+            - API
+            - AARI
+            - RUN_NOW
+            - SCHEDULED
+            - TRIGGER
+            - AUDIT_EXPORT
+            - QUEUE_EXPORT
+            - QUEUE_IMPORT
+            - WORKITEM_EXPORT
+          example: TRIGGER
+          deprecated: true
+          description: Old Activity Type (deprecated in favor of activityType & initiationType)
+            <ul>
+            <li>WORKORDER - Depicts the status of the workitems uploaded from the CSV file</li>
+            <li>WLM_TASK - A Work load management bot</li>
+            <li>EXPORT - Automation export</li>
+            <li>API - An automation that is run from an API</li>
+            <li>AARI - A process bot</li>
+            <li>RUN_NOW -  A regular run as a users automation</li>
+            <li>SCHEDULED - A scheduled automation</li>
+            <li>TRIGGER - A triggered automation</li>
+            <li>AUDIT_EXPORT - Audit export</li>
+            <li>QUEUE_EXPORT - Queue export</li>
+            <li>QUEUE_IMPORT - Queue import</li>
+            <li>WORKITEM_EXPORT - List of Workitem export in CSV</li></ul>
+
+        startDateTime:
+          type: string
+          description: Date and time when the execution started
+          example: "2025-10-21T18:26:11.175246Z"
+        endDateTime:
+          type: string
+          description: Date and time when the execution ended
+          example: "2025-10-21T18:26:27.438843100Z"
+        command:
+          type: string
+          description: Current command of the execution
+          example: "messageBox"
+        status:
+          type: string
+          enum:
+            - COMPLETED
+            - DEPLOYED
+            - RUNNING
+            - RUN_PAUSED
+            - UNKNOWN
+            - RUN_FAILED
+            - RUN_ABORTED
+            - RUN_TIMED_OUT
+            - DEPLOY_FAILED
+            - QUEUED
+            - UPDATE
+            - PENDING_EXECUTION
+          description: Current status of the execution
+            <li>COMPLETED - Automation successfully completed execution</li>
+            <li>DEPLOYED - Autologin is successful, and automation is deployed to a device</li>
+            <li>DEPLOY_FAILED - Automation failed to deploy to the device because, for example, autologin failed</li>
+            <li>QUEUED - Requested user or device is busy running another execution</li>
+            <li>PENDING_EXECUTION - Device has been selected, but automation has not yet been deployed to that device</li>
+            <li>RUNNING -  Automation started execution</li>
+            <li>UPDATE -  Automation is in progress</li>
+            <li>RUN_FAILED - Automation failed after being deployed to a device</li>
+            <li>RUN_PAUSED - User paused the automation</li>
+            <li>RUN_ABORTED - User aborted the automation</li>
+            <li>RUN_TIMED_OUT - Automation failed to complete tasks within a specific time period</li>
+            <li>UNKNOWN - Connection between the service and the device was lost</li>
+            </ul>
+        progress:
+          type: integer
+          description: Current progress of the execution in percentage
+          example: 100
+        automationId:
+          type: string
+          description: Schedule id of the automation
+          example: "0"
+        userId:
+          type: string
+          description: Corresponding User id of the device where the automation is deployed
+          example: 100000009
+        deviceId:
+          type: string
+          description: Device id where the automation is deployed
+          example: 1
+        currentLine:
+          type: integer
+          description: Current line of automation that is deployed to execute
+          example: 1
+        totalLines:
+          type: integer
+          description: Total lines of the automation that is deployed to execute
+          example: 1
+        fileId:
+          type: string
+          description: Id of the automation that is deployed to execute
+          example: 100000007
+        modifiedBy:
+          type: string
+          description: Id of the user who last updated the execution
+          example: 100000009
+        createdBy:
+          type: string
+          description: Id of the user who created the automation associated with the execution
+          example: 100000009
+        modifiedOn:
+          type: string
+          description: Date and time when the execution was last updated
+          example: "2025-10-22T04:18:56.826201Z"
+        createdOn:
+          type: string
+          description: Date and time when the execution was created
+          example: "2025-10-22T04:18:52.422888Z"
+        deploymentId:
+          type: string
+          description: Deployment id to which the execution is associated
+          example: 494562cb-7c24-41d2-ae0e-8b8c5084ae90
+        queueName:
+          type: string
+          description: Queue name (deprecated)
+          example: ""
+          deprecated: true
+        queueId:
+          type: string
+          description: Queue id (deprecated)
+          example: ""
+          deprecated: true
+        usingRdp:
+          type: boolean
+          enum:
+            - true
+            - false
+          description: A flag that shows whether or not the automation is using remote deployment protocol
+        message:
+          type: string
+          description: Error message that describes the state of the execution
+          example: "There was a problem at line 1\n This may be due to the following reason:\n\n    Expected RecordValue with schema but missing, given: com.automationanywhere.botcommand.data.impl.RecordValue@4f10d90a\n\n To continue, edit the bot and fix the error. Then, try again.\n\n\nIf you continue to see this message, please contact your system administrator."
+        canManage:
+          type: boolean
+          enum:
+            - true
+            - false
+          description: A flag that shows if the current logged in user has rights to manage the execution
+        deviceName:
+          type: string
+          description: The name of the device the automation is designated to run on
+          example: AAUS34NS3RM
+        userName:
+          type: string
+          description: The username of the user the automation is designated to run from
+          example: john_unattended
+        tenantUuid:
+          type: string
+          description: The UUID code of the tenant the automation is being run from
+          example: e135e92d-27dd-405e-bc52-b8fad270476f
+        automationPriority:
+          type: string
+          description: The automation priority used when it is in queue
+          default: PRIORITY_MEDIUM
+          enum:
+            - PRIORITY_LOW
+            - PRIORITY_MEDIUM
+            - PRIORITY_HIGH
+        runElevated:
+          type: boolean
+          description: A flag showing whether the automation deployed using elevated permissions or not
+          example: false
+        botLabel:
+          type: string
+          description: Label for the automation. It can be used to distinguish automations from categories like production and testing
+          example: PRODUCTION
+        currentBotName:
+          type: string
+          description: The automation's current bot name. It can change during the execution
+          example: testbot
+        callbackInfo:
+          type: string
+          description: No value is returned for this parameter in the list API. Use the fetch execution API with specific id to retrieve that information
+          example: ""
+        rolesWithAccess:
+          type: array
+          description: List of roles that have access to the execution.
+          items:
+            type: string
+          example: []
+        workspaceType:
+          type: string
+          description: The type of workspace where the automation is stored.
+          enum:
+            - PRIVATE
+            - PUBLIC
+          example: PRIVATE
+        parentId:
+          type: string
+          description: Only returned for child executions that are spawned by a parent execution. Will be the same as the parent execution's unique ID.
+          example: 8f1d7270-3ca7-4c51-b412-2c214c6550cf
+
+        initiationType:
+          type: string
+          enum:
+            - API
+            - RUN_NOW
+            - SCHEDULED
+            - TRIGGER
+            - EXPORT
+            - IMPORT
+            - AARI
+            - WLM
+            - MIGRATION
+            - CREATOR
+            - DEBUG
+            - RECORDER
+          example: API
+          description: Initiation type for the activity.
+            <ul>
+            <li>API - Activity initiated by API or backend.</li>
+            <li>RUN_NOW - Activity initiated from Run Now option.</li>
+            <li>SCHEDULED -Activity initiated from schedule.</li>
+            <li>TRIGGER - Activity initiated by trigger.</li>
+            <li>EXPORT - Activity initiated by an export of data.</li>
+            <li>IMPORT - Activity initiated by an import of data.</li>
+            <li>AARI - Activity initiated by Automation Anywhere Robotic Interface (AARI).</li>
+            <li>WLM - Activity initiation by Workload Management (WLM).</li>
+            <li>MIGRATION - Activity created by internal migration.</li>
+            <li>CREATOR - Activity run from the bot creator editor page.</li>
+            <li>DEBUG - Activity run from the debug mode of the bot creator editor page.</li>
+            <li>RECORDER - Activity initiated by bot recorder.</li>
+            </ul>
+        activityType:
+          type: string
+          enum:
+            - BOT
+            - AUDIT_EXPORT
+            - QUEUE_EXPORT
+            - QUEUE_IMPORT
+            - WORKITEM_EXPORT
+            - BLM_EXPORT
+            - ROLE_EXPORT
+            - WORK_ORDER
+            - PROCESS
+            - FORM
+            - APPROVAL
+            - DOCUMENT_VALIDATION
+            - TASK_PROCESS
+            - TASK_APPROVAL
+            - TASK_DOCUMENT_VALIDATION
+            - TASK_BOT
+            - TASK_API
+            - API_TASK
+          example: BOT
+          description: The type of activity.
+            <ul>
+            <li>BOT - Bot for robotic process automation.</li>
+            <li>AUDIT_EXPORT - Export of a csv of Control Room audit logs.</li>
+            <li>QUEUE_EXPORT - Export of a queue from workload management (WLM) in zip format.</li>
+            <li>QUEUE_IMPORT - Import of a queue from workload management (WLM).</li>
+            <li>WORKITEM_EXPORT - Export of a work item from workload management (WLM) in CSV format.</li>
+            <li>ROLE_EXPORT - Export of assigned user and runasuser to a CSV file.</li>
+            <li>BLM_EXPORT - Export of a single bot with its dependent files.</li>
+            </ul>
+        deviceHostType:
+          type: string
+          description: Type of host where the device is running.
+          example: ""
+        refId:
+          type: string
+          example: 4-0
+          description: Reference id only for process related executions.
+        error:
+          $ref: '#/components/schemas/DetailedError'
+          description: Detailed, structured error information if the execution 'status' is 'RUN_FAILED'. The nested fields will be empty if the execution completed successfully.
+        userGroupName:
+          type: string
+          description: The user group name associated with the execution.
+          example: ""
+    ExecutionResponse:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageResponse'
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+          description: list of automation executions.
+
+    ValueMap:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Value'
+
+    AttributeType:
+      type: string
+      enum:
+        - STRING
+        - NUMBER
+        - BOOLEAN
+        - FILE
+        - ITERATOR
+        - LIST
+        - DICTIONARY
+        - TABLE
+        - VARIABLE
+        - CONDITIONAL
+        - WINDOW
+        - TASKBOT
+        - DATETIME
+        - UIOBJECT
+        - RECORD
+        - EXCEPTION
+        - CREDENTIAL
+        - COORDINATE
+        - IMAGE
+        - REGION
+        - PROPERTIES
+        - TRIGGER
+        - CONDITIONALGROUP
+        - FORM
+        - FORMELEMENT
+        - HOTKEY
+        - WORKITEM
+      default: STRING
+
+    Value:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        expression:
+          type: string
+        string:
+          type: string
+        number:
+          type: string
+        boolean:
+          type: string
+        repository:
+          type: string
+        variableName:
+          type: string
+        packageId:
+          type: string
+        packageName:
+          type: string
+        iteratorId:
+          type: string
+        iteratorName:
+          type: string
+        conditionalId:
+          type: string
+        conditionalName:
+          type: string
+        table:
+          $ref: "#/components/schemas/Table"
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/Value"
+        dictionary:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dictionary"
+        taskbotFile:
+          $ref: "#/components/schemas/TaskbotFile"
+        taskbotInput:
+          $ref: "#/components/schemas/TaskbotInput"
+        taskbotOutput:
+          $ref: "#/components/schemas/TaskbotOutput"
+        window:
+          $ref: "#/components/schemas/Window"
+        uiObject:
+          $ref: "#/components/schemas/UIObject"
+        record:
+          $ref: "#/components/schemas/Record"
+        exceptionName:
+          type: string
+        credential:
+          $ref: "#/components/schemas/CredentialObject"
+        uiObjectWindow:
+          $ref: "#/components/schemas/WindowValue"
+        coordinate:
+          $ref: "#/components/schemas/Coordinate"
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        triggerName:
+          type: string
+        file:
+          $ref: "#/components/schemas/NestedStringValue"
+        formElementId:
+          type: string
+        formElementType:
+          type: string
+        formInstanceId:
+          type: string
+        hotKey:
+          $ref: "#/components/schemas/HotKey"
+        queueName:
+          type: string
+        taskbotSelf:
+          type: boolean
+          format: boolean
+
+    Dictionary:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          $ref: "#/components/schemas/Value"
+
+    Table:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/components/schemas/Schema"
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Row"
+
+    Row:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/Value"
+
+    Schema:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/AttributeType"
+
+    TaskbotFile:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        string:
+          type: string
+        repository:
+          type: boolean
+          format: boolean
+        expression:
+          type: string
+
+    TaskbotInput:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        dictionary:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dictionary"
+
+    TaskbotOutput:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        dictionary:
+          $ref: "#/components/schemas/Dictionary"
+
+    Window:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        class:
+          type: string
+        handle:
+          type: integer
+          format: int64
+        isChild:
+          type: boolean
+          format: boolean
+        location:
+          $ref: "#/components/schemas/WindowLocation"
+        size:
+          $ref: "#/components/schemas/WindowSize"
+        presetType:
+          $ref: "#/components/schemas/WindowPreset"
+
+    WindowLocation:
+      type: object
+      properties:
+        top:
+          type: integer
+          format: int32
+        left:
+          type: integer
+          format: int32
+
+    WindowSize:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+
+    WindowPreset:
+      type: string
+      enum:
+        - NONE
+        - CURRENTLY_ACTIVE
+        - DESKTOP
+        - TASKBAR
+      default: NONE
+
+    UIObject:
+      type: object
+      properties:
+        blob:
+          type: string
+          format: byte
+        controlType:
+          $ref: "#/components/schemas/UIObjectControlType"
+        technologyType:
+          $ref: "#/components/schemas/UIObjectTechnologyType"
+        criteria:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/UIObjectSelectionCriterion"
+        capture:
+          $ref: "#/components/schemas/RectangleImageCapture"
+
+    UIObjectControlType:
+      type: string
+      enum:
+        - UNKNOWN_CONTROL
+        - BUTTON
+        - TEXTBOX
+        - LINK
+        - RADIO
+        - CHECKBOX
+        - COMBOBOX
+        - MENUBAR
+        - LISTVIEW
+        - TABLE
+        - CALENDAR
+        - DATEPICKER
+        - SLIDER
+        - TREE
+        - PAGETAB
+        - LABEL
+        - SCROLLBAR_HORIZONTAL
+        - DROPDOWN
+        - CLIENT
+        - IMAGE_BUTTON
+        - ANY_CONTROL
+        - PAGETABITEM
+        - SCROLLBAR_VERTICAL
+      default: UNKNOWN_CONTROL
+
+    UIObjectTechnologyType:
+      type: string
+      enum:
+        - UNKNOWN
+        - MS_ACTIVE_ACCESSIBILITY
+        - MS_UI_AUTOMATION
+        - JAVA
+        - SILVERLIGHT
+        - FLASH
+        - HTML
+        - AISENSE
+        - SAP
+        - ANY_TECHNOLOGY
+      default: UNKNOWN
+
+    UIObjectSelectionCriterion:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          format: boolean
+        value:
+          $ref: "#/components/schemas/Value"
+
+    RectangleImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotRectangle:
+          $ref: "#/components/schemas/Rectangle"
+        thumbnailRectangle:
+          $ref: "#/components/schemas/Rectangle"
+        securelyRecorded:
+          type: boolean
+          format: boolean
+
+    Record:
+      type: object
+      properties:
+        schema:
+          type: array
+          items:
+            $ref: "#/components/schemas/Schema"
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/Value"
+
+    CredentialObject:
+      type: object
+      properties:
+        name:
+          type: string
+        lockerName:
+          type: string
+        attributeName:
+          type: string
+
+    WindowValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        window:
+          $ref: "#/components/schemas/Window"
+        expression:
+          type: string
+
+    Coordinate:
+      type: object
+      properties:
+        x:
+          $ref: "#/components/schemas/Value"
+        y:
+          $ref: "#/components/schemas/Value"
+        capture:
+          $ref: "#/components/schemas/PointImageCapture"
+
+    PointImageCapture:
+      type: object
+      properties:
+        thumbnailMetadataPath:
+          type: string
+        screenshotMetadataPath:
+          type: string
+        screenshotPoint:
+          $ref: "#/components/schemas/Point"
+        screenshotX:
+          type: integer
+          format: int32
+        screenshotY:
+          type: integer
+          format: int32
+        screenshotWidth:
+          type: integer
+          format: int32
+        screenshotHeight:
+          type: integer
+          format: int32
+        securelyRecorded:
+          type: boolean
+          format: boolean
+
+    Point:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+
+    Region:
+      type: object
+      properties:
+        x:
+          $ref: "#/components/schemas/Value"
+        y:
+          $ref: "#/components/schemas/Value"
+        width:
+          $ref: "#/components/schemas/Value"
+        height:
+          $ref: "#/components/schemas/Value"
+        capture:
+          $ref: "#/components/schemas/RectangleImageCapture"
+
+    NestedStringValue:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AttributeType"
+        string:
+          type: string
+        expression:
+          type: string
+
+    HotKey:
+      type: object
+      properties:
+        key:
+          type: string
+        modifierKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/HotKeyModifierKey"
+
+    HotKeyModifierKey:
+      type: string
+      enum:
+        - CONTROL
+        - SHIFT
+        - ALT
+        - WINDOWS
+        - ALT_GRAPH
+      default: CONTROL
+
+    Property:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/Value"
+        value:
+          $ref: "#/components/schemas/Value"
+        enabled:
+          type: boolean
+          format: boolean
+
+    Rectangle:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error Message
+      example: Bad Request
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error Message
+
+    StopExecutions:
+      type: object
+      description: Stop an execution by providing the execution ID. This object is an array and you can provide multiple execution IDs.
+      properties:
+        execution_ids:
+          type: array
+          items:
+            type: string
+          example: [e5c8a404-0804-4448-ba89-56433db062c0, 3a19281a-5484-43c2-922e-e06be87f99d1, e5c8a404-0804-4448-ba89-56433db062c0]
+
+    PauseExecutions:
+      type: object
+      description: Pause an execution by providing the execution ID. This object is an array and you can provide multiple execution IDs.
+      properties:
+        execution_ids:
+          type: array
+          items:
+            type: string
+          example: [e5c8a404-0804-4448-ba89-56433db062c0, 3a19281a-5484-43c2-922e-e06be87f99d1, e5c8a404-0804-4448-ba89-56433db062c0]
+
+    ResumeExecutions:
+      type: object
+      description: Resume an execution by providing the execution ID. This object is an array and you can provide multiple execution IDs.
+      properties:
+        execution_ids:
+          type: array
+          items:
+            type: string
+          example: [e5c8a404-0804-4448-ba89-56433db062c0, 3a19281a-5484-43c2-922e-e06be87f99d1, e5c8a404-0804-4448-ba89-56433db062c0]
+
+    ManageExecutionsRequest:
+      type: object
+      description: Manage your execution requests by providing one or more execution IDs. You can stop, resume, or pause an execution one at a time and cannot perform these operations simultaneously.
+      properties:
+        stop_executions:
+          $ref: '#/components/schemas/StopExecutions'
+        pause_executions:
+          $ref: '#/components/schemas/PauseExecutions'
+        resume_executions:
+          $ref: '#/components/schemas/ResumeExecutions'
+      oneOf:
+        - required:
+            - stop_executions
+        - required:
+            - pause_executions
+        - required:
+            - resume_executions
+
+    ManageActionError:
+      type: object
+      properties:
+        execution_id:
+          type: string
+          description: Execution ID of the job.
+          example: "e5c8a404-0804-4448-ba89-56433db062c0"
+        error_response:
+          type: string
+          description: Displays an error if the execution could not be stopped, paused, or resumed.
+          example: "You do not have permission to view this execution or it is already terminated"
+
+    ManageExecutionsResponse:
+      type: object
+      properties:
+        requests_sent_to_device:
+          type: array
+          description: Device ID to which the execution request is sent to. This object is an array and you can provide multiple device IDs.
+          items:
+            type: string
+          example: [d3c5d67e-cd45-4a50-9c7f-b2cefad9507c, 3a19281a-5484-43c2-922e-e06be87f99d1, e5c8a404-0804-4448-ba89-56433db062c0]
+        manage_action_errors:
+          type: array
+          description: Displays information if there is an error during execution.
+          items:
+            $ref: '#/components/schemas/ManageActionError'
+          
+    DetailedError:
+      type: object
+      description: A detailed structure for error reporting, including localized message templates and parameters. This object provides a structured breakdown of the execution 'message' field for better parsing.
+      properties:
+        message:
+          type: string
+          description: A high-level, human-readable message, often indicating what caused the bot failure.
+        details:
+          type: string
+          description: Specific, technical details about the cause of the error, such as the exact reason for the bot failure.
+        correctiveAction:
+          type: string
+          description: Suggested steps the user can take to fix the error in future deployments.
+        code:
+          type: string
+          description: Bot failure Error code.
+        messageValues:
+          type: array
+          items:
+            type: string
+          description: A list of values used to populate variables in the message template (if applicable).
+        detailsValues:
+          type: array
+          items:
+            type: string
+          description: A list of values used to populate variables in the details template (if applicable).
+        correctiveActionValues:
+          type: array
+          items:
+            type: string
+          description: A list of values used to populate variables in the corrective action template (if applicable).
+      example:
+        message: "There was a problem at line 1\n"
+        details: "This may be due to the following reason:\n\n    Expected RecordValue with schema but missing, given: com.automationanywhere.botcommand.data.impl.RecordValue@65d364ff\n\n"
+        correctiveAction: "To continue, edit the bot and fix the error. Then, try again.\n\n\nIf you continue to see this message, please contact your system administrator."
+        code: "bot.execution.error"
+        messageValues: []
+        detailsValues: []
+        correctiveActionValues: []

@@ -1,0 +1,54 @@
+{
+  "name": "a360-mcp",
+  "version": "0.1.0",
+  "description": "A package-first MCP server for Automation Anywhere A360 Control Room.",
+  "keywords": [
+    "automation-anywhere",
+    "a360",
+    "control-room",
+    "mcp",
+    "model-context-protocol",
+    "rpa"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    ".env.example",
+    "docs",
+    "swagger-export"
+  ],
+  "bin": {
+    "a360-mcp": "dist/src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "init": "tsx src/index.ts init",
+    "doctor": "tsx src/index.ts doctor",
+    "login": "tsx src/index.ts login",
+    "whoami": "tsx src/index.ts whoami",
+    "serve": "tsx src/index.ts serve",
+    "logout": "tsx src/index.ts logout",
+    "extract:swagger": "node scripts/extract-a360-swagger-inventory.mjs",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^17.2.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "nock": "^14.0.15",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
+}
