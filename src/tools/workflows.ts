@@ -29,6 +29,7 @@ type WorkflowDeps = {
     validateBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
     previewBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
     fixBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
+    normalizeBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
     listAvailablePackages: (options?: {
       filterRequest?: {
         fields?: string[];
@@ -78,10 +79,48 @@ type WorkflowDeps = {
       dependencies: string[] | Record<string, unknown>;
       hasErrors?: boolean;
     }) => Promise<unknown>;
+    saveBotBundle: (input: {
+      fileId: string;
+      content: Record<string, unknown>;
+      dependencies?: string[] | Record<string, unknown>;
+      hasErrors?: boolean;
+    }) => Promise<unknown>;
   };
 };
 
 export function registerWorkflowTools(server: McpServer, deps: WorkflowDeps) {
+  server.registerTool(
+    'a360_save_bot_bundle',
+    {
+      description: 'Normalize taskbot content and save content plus dependencies using the Control Room-style split persistence flow.',
+      inputSchema: z.object({
+        fileId: z.string().min(1),
+        content: z.record(z.string(), z.unknown()),
+        dependencies: z
+          .union([z.array(z.string()), z.record(z.string(), z.unknown())])
+          .optional(),
+        hasErrors: z.boolean().optional(),
+      }),
+    },
+    async ({ fileId, content, dependencies, hasErrors }) => ({
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            await deps.workflowApi.saveBotBundle({
+              fileId,
+              content,
+              dependencies,
+              hasErrors,
+            }),
+            null,
+            2,
+          ),
+        },
+      ],
+    }),
+  );
+
   server.registerTool(
     'a360_validate_bot_json',
     {
@@ -113,6 +152,24 @@ export function registerWorkflowTools(server: McpServer, deps: WorkflowDeps) {
         {
           type: 'text',
           text: JSON.stringify(await deps.workflowApi.previewBotJson(botJson), null, 2),
+        },
+      ],
+    }),
+  );
+
+  server.registerTool(
+    'a360_normalize_bot_json',
+    {
+      description: 'Normalize A360 bot JSON using Control Room-style structural rules plus resolved package and command metadata.',
+      inputSchema: z.object({
+        botJson: z.record(z.string(), z.unknown()),
+      }),
+    },
+    async ({ botJson }) => ({
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(await deps.workflowApi.normalizeBotJson(botJson), null, 2),
         },
       ],
     }),

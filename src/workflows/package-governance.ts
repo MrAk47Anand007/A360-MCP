@@ -7,6 +7,7 @@ import {
   updateFileContent,
   updateFileDependencies,
 } from '../a360/repository.js';
+import { saveBotBundle } from './repository-save.js';
 
 type RepositoryItem = {
   id: string;
@@ -203,8 +204,20 @@ export async function applyPackageVersionUpdate(
       .map(String)
       .filter((id) => id !== item.fileId);
 
-    await updateFileContent(request, item.fileId, content, false);
-    await updateFileDependencies(request, item.fileId, childFileIds);
+    await saveBotBundle(
+      {
+        updateFileContent: (fileId, nextContent, hasErrors) =>
+          updateFileContent(request, fileId, nextContent, hasErrors),
+        updateFileDependencies: (fileId, nextChildFileIds) =>
+          updateFileDependencies(request, fileId, nextChildFileIds),
+      },
+      {
+        fileId: item.fileId,
+        content,
+        dependencies: childFileIds,
+        hasErrors: false,
+      },
+    );
     updated.push(item.name);
   }
 

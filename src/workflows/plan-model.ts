@@ -4,8 +4,31 @@ export type PlannedScalarType =
   | 'BOOLEAN'
   | 'FILE'
   | 'DATETIME'
+  | 'IMAGE'
+  | 'UIOBJECT'
   | 'VARIABLE'
+  | 'ITERATOR'
+  | 'CONDITIONAL'
+  | 'AUTOMATION'
   | 'DICTIONARY';
+
+export type PlannedAutomationInputEntry = {
+  name: string;
+  value: PlannedValue;
+};
+
+export type PlannedUiObjectCriteriaEntry = {
+  enabled: boolean;
+  securelyRecordedRemoveDisabled?: boolean;
+  value: PlannedValue;
+};
+
+export type PlannedUiObjectShape = {
+  capture?: {
+    securelyRecorded: boolean;
+  };
+  criteria?: Record<string, PlannedUiObjectCriteriaEntry>;
+};
 
 export type PlannedValue =
   | { type: 'STRING'; string: string }
@@ -16,7 +39,28 @@ export type PlannedValue =
   | { type: 'FILE'; string: string }
   | { type: 'FILE'; expression: string }
   | { type: 'DATETIME'; expression: string }
+  | { type: 'IMAGE'; securelyRecorded?: boolean; unsavedSecurelyRecorded?: boolean }
+  | {
+      type: 'UIOBJECT';
+      uiObject?: PlannedUiObjectShape;
+      uiObjectAnchor?: {
+        uiObject?: PlannedUiObjectShape;
+      };
+    }
   | { type: 'VARIABLE'; variableName: string }
+  | { type: 'VARIABLE'; variableName: string; packageName?: string }
+  | { type: 'ITERATOR'; iteratorName: string; packageName: string }
+  | { type: 'CONDITIONAL'; conditionalName: string; packageName: string }
+  | {
+      type: 'AUTOMATION';
+      automation: {
+        file?: PlannedValue;
+        filePath?: PlannedValue;
+        inputVariables?: PlannedAutomationInputEntry[];
+        inputOptions?: PlannedAutomationInputEntry[];
+        inputData?: PlannedAutomationInputEntry[];
+      };
+    }
   | { type: 'DICTIONARY'; dictionary: Array<{ key: string; value: PlannedValue }> };
 
 export type PlannedAttribute = {

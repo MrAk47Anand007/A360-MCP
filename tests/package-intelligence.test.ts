@@ -10,6 +10,14 @@ describe('package intelligence', () => {
       name: 'Database',
       label: 'Database',
       packageVersion: '5.5.3',
+      settingsAttributes: [
+        {
+          name: 'retryCount',
+          label: 'Retry count',
+          type: 'NUMBER',
+          rules: [{ name: 'NOT_EMPTY' }],
+        },
+      ],
       commands: [
         {
           name: 'connect',
@@ -51,6 +59,7 @@ describe('package intelligence', () => {
 
     expect(normalized.packageName).toBe('Database');
     expect(normalized.commandCount).toBe(1);
+    expect(normalized.settingsAttributes[0]?.name).toBe('retryCount');
     expect(normalized.commands[0]?.requiredFields).toEqual(['server']);
     expect(normalized.commands[0]?.attributes[1]?.availableOptions).toEqual(['Default']);
     expect(normalized.commands[0]?.returns[0]?.type).toBe('SESSION');

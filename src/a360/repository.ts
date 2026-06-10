@@ -52,7 +52,7 @@ export async function updateFileContent(
 ) {
   return request(`/v2/repository/files/${fileId}/content?hasErrors=${String(hasErrors)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/vnd.aa.taskbot' },
     body: JSON.stringify(content),
   });
 }

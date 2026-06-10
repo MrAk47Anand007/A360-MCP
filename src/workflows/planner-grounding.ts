@@ -4,7 +4,13 @@ import type {
   NormalizedCommandMetadata,
   NormalizedPackageMetadata,
 } from './package-intelligence.js';
-import type { PlannedPackage, PlannedStep, PlannedVariable } from './plan-model.js';
+import type { PlannedPackage, PlannedStep, PlannedValue, PlannedVariable } from './plan-model.js';
+import {
+  loadMigrationGrounding,
+  scoreMigrationCommand,
+  scoreMigrationPackage,
+  type MigrationGroundingSnapshot,
+} from './migration-grounding.js';
 import {
   listAvailablePackagesForWorkflow,
   resolvePackageMetadataForWorkflow,
@@ -103,6 +109,14 @@ const PACKAGE_DOMAIN_LEXICON: Record<string, DomainLexicon> = {
     packageTags: ['browser', 'web', 'url', 'page', 'click', 'type', 'javascript'],
     commandTags: ['browser', 'url', 'page', 'click', 'type', 'javascript', 'tab'],
   },
+  recorder: {
+    packageTags: ['recorder', 'application', 'window', 'ui', 'element', 'click', 'type', 'capture'],
+    commandTags: ['recorder', 'application', 'window', 'ui', 'element', 'click', 'type', 'capture'],
+  },
+  application: {
+    packageTags: ['application', 'window', 'desktop', 'ui', 'element'],
+    commandTags: ['application', 'window', 'desktop', 'ui', 'element'],
+  },
   loop: {
     packageTags: ['loop', 'iterate', 'each', 'foreach', 'repeat', 'rows', 'items'],
     commandTags: ['loop', 'iterate', 'repeat', 'break', 'continue'],
@@ -123,8 +137,22 @@ const PACKAGE_DOMAIN_LEXICON: Record<string, DomainLexicon> = {
 
 const BASELINE_PACKAGES = ['Comment', 'ErrorHandler'];
 
+type ArithmeticIntent = {
+  operator: '+' | '-' | '*' | '/';
+  operationLabel: 'addition' | 'subtraction' | 'multiplication' | 'division';
+};
+
+type AutomationIntent = {
+  includeMessageInput: boolean;
+};
+
 function normalizePrompt(prompt: string) {
   return prompt.replace(/\s+/g, ' ').trim();
+}
+
+function extractQuotedText(prompt: string) {
+  const match = prompt.match(/"([^"]+)"|'([^']+)'/);
+  return (match?.[1] ?? match?.[2] ?? '').trim() || null;
 }
 
 function splitInstructions(prompt: string) {
@@ -169,6 +197,13 @@ function scoreTokens(tokens: string[], expected: string[]) {
 function derivePackageTags(name: string, label: string) {
   const combined = `${name} ${label}`.toLowerCase();
   const tags = new Set<string>(tokenize(combined));
+  const canonicalKey = slugify(name);
+  const canonicalLexicon = PACKAGE_DOMAIN_LEXICON[canonicalKey];
+  if (canonicalLexicon) {
+    for (const tag of canonicalLexicon.packageTags) {
+      tags.add(tag);
+    }
+  }
   for (const [key, lexicon] of Object.entries(PACKAGE_DOMAIN_LEXICON)) {
     if (combined.includes(key)) {
       for (const tag of lexicon.packageTags) {
@@ -246,7 +281,12 @@ function buildCommandCatalog(packages: NormalizedPackageMetadata[]) {
   return commands;
 }
 
-function findBestCommand(catalog: GroundedCommand[], instruction: string, intentTags: string[]) {
+function findBestCommand(
+  catalog: GroundedCommand[],
+  instruction: string,
+  intentTags: string[],
+  migrationGrounding: MigrationGroundingSnapshot | null,
+) {
   const tokens = tokenize(instruction);
   let best: InstructionMatch = {
     instruction,
@@ -260,8 +300,12 @@ function findBestCommand(catalog: GroundedCommand[], instruction: string, intent
       const matchedTags = command.semanticTags.filter(
         (tag) => tokens.includes(tag) || intentTags.includes(tag),
       );
+      const migrationBoost = migrationGrounding
+        ? scoreMigrationCommand(tokens, command.packageName, command.commandName, migrationGrounding)
+        : 0;
       const score =
         matchedTags.length * 2 +
+        migrationBoost * 2 +
         (command.requiredFields.length === 0 ? 1 : 0) +
         (command.commandType === 'command' ? 1 : 0);
 
@@ -279,23 +323,211 @@ function findBestCommand(catalog: GroundedCommand[], instruction: string, intent
   return best.command ? best : null;
 }
 
-function createAttributeValue(attribute: NormalizedAttributeMetadata, instruction: string) {
+function inferVariableTypeFromName(name: string): PlannedVariable['type'] {
+  const normalized = name.toLowerCase();
+  if (normalized.includes('path') || normalized.includes('file')) {
+    return 'FILE';
+  }
+  if (normalized.includes('count') || normalized.includes('number') || normalized.includes('index') || normalized.includes('row')) {
+    return 'NUMBER';
+  }
+  if (normalized.startsWith('is') || normalized.startsWith('has') || normalized.includes('flag')) {
+    return 'BOOLEAN';
+  }
+  return 'STRING';
+}
+
+function toFileExpression(variableName: string) {
+  return `file://$${variableName}$`;
+}
+
+function buildUiObjectValue(instruction: string): PlannedValue {
+  const quotedTarget = extractQuotedText(instruction);
+
+  return {
+    type: 'UIOBJECT',
+    uiObject: {
+      capture: {
+        securelyRecorded: true,
+      },
+      criteria: {
+        title: {
+          enabled: true,
+          value: quotedTarget
+            ? { type: 'STRING', string: quotedTarget }
+            : { type: 'STRING', expression: '$uiTargetTitle$' },
+        },
+        role: {
+          enabled: false,
+          securelyRecordedRemoveDisabled: true,
+          value: { type: 'STRING', string: '' },
+        },
+      },
+    },
+  };
+}
+
+function buildAnchorDictionaryValue(instruction: string): PlannedValue {
+  const quotedTarget = extractQuotedText(instruction) ?? 'UiTarget';
+  return {
+    type: 'DICTIONARY',
+    dictionary: [
+      {
+        key: 'name',
+        value: { type: 'STRING', string: quotedTarget.replace(/\s+/g, '') },
+      },
+    ],
+  };
+}
+
+function chooseStringVariableName(command: GroundedCommand, attribute: NormalizedAttributeMetadata) {
+  const packageName = command.packageName.toLowerCase();
+  const commandName = command.commandName.toLowerCase();
+  const attributeName = attribute.name.toLowerCase();
+  const attributeLabel = attribute.label.toLowerCase();
+  const combined = `${attributeName} ${attributeLabel}`;
+
+  if (packageName === 'email') {
+    if (combined.includes('recipient') || combined.includes('to')) {
+      return 'emailRecipient';
+    }
+    if (combined.includes('subject')) {
+      return 'emailSubject';
+    }
+    if (combined.includes('body') || combined.includes('message') || combined.includes('content')) {
+      return 'emailBody';
+    }
+  }
+
+  if (packageName.includes('excel')) {
+    if (combined.includes('worksheet') || combined.includes('sheet')) {
+      return 'worksheetName';
+    }
+    if (combined.includes('cell')) {
+      return 'cellReference';
+    }
+  }
+
+  if (packageName === 'browser' || packageName === 'recorder') {
+    if (combined.includes('url') || combined.includes('website') || combined.includes('address')) {
+      return 'targetUrl';
+    }
+    if (combined.includes('text') || combined.includes('value') || combined.includes('content')) {
+      return 'inputText';
+    }
+  }
+
+  if (combined.includes('message') || combined.includes('content') || combined.includes('body')) {
+    return commandName.includes('log') ? 'logMessage' : 'inputMessage';
+  }
+
+  if (combined.includes('subject')) {
+    return 'subjectText';
+  }
+
+  if (combined.includes('name')) {
+    return attribute.name;
+  }
+
+  return attribute.name;
+}
+
+function chooseFileVariableName(command: GroundedCommand, attribute: NormalizedAttributeMetadata) {
+  const packageName = command.packageName.toLowerCase();
+  const attributeName = attribute.name.toLowerCase();
+  const attributeLabel = attribute.label.toLowerCase();
+  const combined = `${attributeName} ${attributeLabel}`;
+
+  if (packageName === 'logtofile') {
+    return 'logFilePath';
+  }
+
+  if (packageName.includes('excel')) {
+    return 'excelFilePath';
+  }
+
+  if (combined.includes('destination') || combined.includes('target') || combined.includes('output')) {
+    return 'targetFilePath';
+  }
+
+  if (combined.includes('source') || combined.includes('input')) {
+    return 'sourceFilePath';
+  }
+
+  return 'filePath';
+}
+
+function createAttributeValue(
+  command: GroundedCommand,
+  attribute: NormalizedAttributeMetadata,
+  instruction: string,
+) {
+  const normalizedAttributeName = attribute.name.toLowerCase();
+  const normalizedAttributeLabel = attribute.label.toLowerCase();
+  const combined = `${normalizedAttributeName} ${normalizedAttributeLabel}`;
+
   switch (attribute.type) {
     case 'BOOLEAN':
       return { type: 'BOOLEAN' as const, boolean: true };
     case 'NUMBER':
+      if (combined.includes('row')) {
+        return { type: 'NUMBER' as const, expression: '$rowNumber$' };
+      }
       return { type: 'NUMBER' as const, number: '0' };
     case 'FILE':
-      if (attribute.name.toLowerCase().includes('path')) {
-        return { type: 'FILE' as const, expression: 'file://$logFilePath$' };
+      if (normalizedAttributeName.includes('path') || normalizedAttributeName.includes('file')) {
+        return {
+          type: 'FILE' as const,
+          expression: toFileExpression(chooseFileVariableName(command, attribute)),
+        };
       }
       return { type: 'FILE' as const, string: '' };
+    case 'IMAGE':
+      return { type: 'IMAGE' as const, unsavedSecurelyRecorded: true };
+    case 'UIOBJECT':
+      return buildUiObjectValue(instruction);
+    case 'ANCHOR':
+      return buildAnchorDictionaryValue(instruction);
+    case 'AUTOMATION':
+      return {
+        type: 'AUTOMATION' as const,
+        automation: {
+          filePath: {
+            type: 'FILE' as const,
+            expression: '$childAutomationPath$',
+          },
+        },
+      };
     default:
-      if (attribute.name.toLowerCase().includes('comment')) {
+      if (normalizedAttributeName.includes('comment')) {
         return { type: 'STRING' as const, string: instruction };
       }
-      if (attribute.name.toLowerCase().includes('logcontent')) {
+      if (normalizedAttributeName.includes('logcontent')) {
         return { type: 'STRING' as const, string: instruction };
+      }
+      if (combined.includes('url') || combined.includes('website') || combined.includes('address')) {
+        return { type: 'STRING' as const, expression: '$targetUrl$' };
+      }
+      if (combined.includes('worksheet') || combined.includes('sheet')) {
+        return { type: 'STRING' as const, expression: '$worksheetName$' };
+      }
+      if (combined.includes('subject')) {
+        return { type: 'STRING' as const, expression: '$emailSubject$' };
+      }
+      if (combined.includes('recipient') || combined.includes('to')) {
+        return { type: 'STRING' as const, expression: '$emailRecipient$' };
+      }
+      if (combined.includes('body') || combined.includes('message') || combined.includes('content')) {
+        return {
+          type: 'STRING' as const,
+          expression: `$${chooseStringVariableName(command, attribute)}$`,
+        };
+      }
+      if (combined.includes('session')) {
+        return { type: 'STRING' as const, string: 'Default' };
+      }
+      if (combined.includes('cell')) {
+        return { type: 'STRING' as const, expression: '$cellReference$' };
       }
       if (attribute.availableOptions.length > 0) {
         return {
@@ -312,7 +544,7 @@ function buildStepFromCommand(command: GroundedCommand, instruction: string): Pl
     .filter((attribute) => attribute.required)
     .map((attribute) => ({
       name: attribute.name,
-      value: createAttributeValue(attribute, instruction),
+      value: createAttributeValue(command, attribute, instruction),
     }));
 
   return {
@@ -322,7 +554,128 @@ function buildStepFromCommand(command: GroundedCommand, instruction: string): Pl
   };
 }
 
-function inferVariables(prompt: string, commands: GroundedCommand[]) {
+function detectArithmeticIntent(prompt: string): ArithmeticIntent | null {
+  const normalized = prompt.toLowerCase();
+  const calculatorContext =
+    normalized.includes('calculator') ||
+    normalized.includes('calculate') ||
+    normalized.includes('math') ||
+    normalized.includes('number');
+
+  if (
+    calculatorContext &&
+    (normalized.includes('subtract') || normalized.includes('difference') || normalized.includes('minus'))
+  ) {
+    return { operator: '-', operationLabel: 'subtraction' };
+  }
+
+  if (
+    calculatorContext &&
+    (normalized.includes('multiply') || normalized.includes('product') || normalized.includes('times'))
+  ) {
+    return { operator: '*', operationLabel: 'multiplication' };
+  }
+
+  if (calculatorContext && (normalized.includes('divide') || normalized.includes('quotient'))) {
+    return { operator: '/', operationLabel: 'division' };
+  }
+
+  if (
+    normalized.includes('calculator') ||
+    normalized.includes('calculate') ||
+    normalized.includes('sum two numbers') ||
+    normalized.includes('add two numbers') ||
+    normalized.includes('sum of two numbers')
+  ) {
+    return { operator: '+', operationLabel: 'addition' };
+  }
+
+  return null;
+}
+
+function detectAutomationIntent(prompt: string): AutomationIntent | null {
+  const normalized = prompt.toLowerCase();
+  const actionMatch =
+    normalized.includes('run ') ||
+    normalized.includes('call ') ||
+    normalized.includes('invoke ') ||
+    normalized.includes('execute ') ||
+    normalized.includes('launch ') ||
+    normalized.includes('trigger ') ||
+    normalized.includes('reuse ');
+  const targetMatch =
+    normalized.includes('bot') ||
+    normalized.includes('automation') ||
+    normalized.includes('task bot') ||
+    normalized.includes('workflow') ||
+    normalized.includes('subtask') ||
+    normalized.includes('child');
+
+  if (!actionMatch || !targetMatch) {
+    return null;
+  }
+
+  return {
+    includeMessageInput:
+      normalized.includes('message') ||
+      normalized.includes('input') ||
+      normalized.includes('parameter') ||
+      normalized.includes('pass'),
+  };
+}
+
+function extractVariableNamesFromValue(value: PlannedValue, bucket = new Set<string>()) {
+  if ('expression' in value && typeof value.expression === 'string') {
+    for (const match of value.expression.matchAll(/\$([A-Za-z0-9_]+)\$/g)) {
+      if (match[1]) {
+        bucket.add(match[1]);
+      }
+    }
+  }
+
+  if (value.type === 'VARIABLE') {
+    bucket.add(value.variableName);
+  }
+
+  if (value.type === 'AUTOMATION') {
+    if (value.automation.file) {
+      extractVariableNamesFromValue(value.automation.file, bucket);
+    }
+    if (value.automation.filePath) {
+      extractVariableNamesFromValue(value.automation.filePath, bucket);
+    }
+    for (const collection of [
+      value.automation.inputVariables,
+      value.automation.inputOptions,
+      value.automation.inputData,
+    ]) {
+      for (const entry of collection ?? []) {
+        extractVariableNamesFromValue(entry.value, bucket);
+      }
+    }
+  }
+
+  if (value.type === 'UIOBJECT') {
+    for (const criteria of [
+      value.uiObject?.criteria,
+      value.uiObjectAnchor?.uiObject?.criteria,
+    ]) {
+      for (const entry of Object.values(criteria ?? {})) {
+        extractVariableNamesFromValue(entry.value, bucket);
+      }
+    }
+  }
+
+  if (value.type === 'DICTIONARY') {
+    for (const entry of value.dictionary) {
+      extractVariableNamesFromValue(entry.value, bucket);
+    }
+  }
+
+  return bucket;
+}
+
+function inferVariables(prompt: string, commands: GroundedCommand[], steps: PlannedStep[]) {
   const variables = new Map<string, PlannedVariable>();
   const normalizedPrompt = prompt.toLowerCase();
 
@@ -379,7 +732,7 @@ function inferVariables(prompt: string, commands: GroundedCommand[]) {
       });
     }
 
-    if (command.packageName.toLowerCase() === 'excel') {
+    if (command.packageName.toLowerCase().includes('excel')) {
       ensureVariable({
         name: 'excelFilePath',
         type: 'FILE',
@@ -390,6 +743,22 @@ function inferVariables(prompt: string, commands: GroundedCommand[]) {
         type: 'STRING',
         input: true,
       });
+    }
+  }
+
+  for (const step of steps) {
+    for (const attribute of step.attributes ?? []) {
+      const referencedVariables = extractVariableNamesFromValue(attribute.value);
+      for (const variableName of referencedVariables) {
+        if (variables.has(variableName)) {
+          continue;
+        }
+        ensureVariable({
+          name: variableName,
+          type: inferVariableTypeFromName(variableName),
+          input: true,
+        });
+      }
     }
   }
 
@@ -417,16 +786,248 @@ function makeCommentFallback(text: string): PlannedStep {
   };
 }
 
+function buildCalculatorPlan(
+  metadata: NormalizedPackageMetadata[],
+  prompt: string,
+  arithmeticIntent: ArithmeticIntent,
+) {
+  const commentPackage = metadata.find((item) => item.packageName.toLowerCase() === 'comment');
+  const numberPackage = metadata.find((item) => item.packageName.toLowerCase() === 'number');
+  const logToFilePackage = metadata.find((item) => item.packageName.toLowerCase() === 'logtofile');
+
+  if (!numberPackage) {
+    return null;
+  }
+
+  const steps: PlannedStep[] = [];
+  steps.push(
+    makeCommentFallback(
+      `Generated calculator bot for ${arithmeticIntent.operationLabel} from prompt: ${prompt}`,
+    ),
+  );
+  steps.push({
+    packageName: 'Number',
+    commandName: 'assignToNumber',
+    returnTo: { type: 'VARIABLE', variableName: 'numberResult' },
+    attributes: [
+      {
+        name: 'input',
+        value: {
+          type: 'NUMBER',
+          expression: `$numberInputA$ ${arithmeticIntent.operator} $numberInputB$`,
+        },
+      },
+    ],
+  });
+
+  if (logToFilePackage) {
+    steps.push({
+      packageName: 'LogToFile',
+      commandName: 'logToFile',
+      attributes: [
+        {
+          name: 'filePath',
+          value: { type: 'FILE', expression: 'file://$logFilePath$' },
+        },
+        {
+          name: 'logContent',
+          value: { type: 'STRING', expression: '$numberResult$' },
+        },
+        {
+          name: 'appendTimestamp',
+          value: { type: 'BOOLEAN', boolean: true },
+        },
+        {
+          name: 'logOption',
+          value: { type: 'STRING', string: 'APPEND_FILE' },
+        },
+        {
+          name: 'encodingValue',
+          value: { type: 'STRING', string: 'ANSI' },
+        },
+      ],
+    });
+  }
+
+  const packages: PlannedPackage[] = [
+    { name: numberPackage.packageName, version: numberPackage.packageVersion, settingsAttributes: [] },
+  ];
+
+  if (commentPackage) {
+    packages.push({
+      name: commentPackage.packageName,
+      version: commentPackage.packageVersion,
+      settingsAttributes: [],
+    });
+  }
+
+  if (logToFilePackage) {
+    packages.push({
+      name: logToFilePackage.packageName,
+      version: logToFilePackage.packageVersion,
+      settingsAttributes: [],
+    });
+  }
+
+  const variables: PlannedVariable[] = [
+    { name: 'numberInputA', type: 'NUMBER', input: true, description: 'First numeric input' },
+    { name: 'numberInputB', type: 'NUMBER', input: true, description: 'Second numeric input' },
+    { name: 'numberResult', type: 'NUMBER', output: true, description: 'Calculated result' },
+  ];
+
+  if (logToFilePackage) {
+    variables.push({
+      name: 'logFilePath',
+      type: 'STRING',
+      input: true,
+      description: 'Log output file path',
+      defaultValue: { type: 'STRING', string: '' },
+    });
+  }
+
+  return {
+    steps,
+    packages,
+    variables,
+    unsupportedInstructions: [] as string[],
+    reasoning: [
+      `Applied dedicated calculator planner using Number.assignToNumber for ${arithmeticIntent.operationLabel}.`,
+    ],
+  };
+}
+
+function buildAutomationPlan(
+  metadata: NormalizedPackageMetadata[],
+  prompt: string,
+  commandCatalog: GroundedCommand[],
+  automationIntent: AutomationIntent,
+) {
+  const automationCommand = commandCatalog
+    .filter((command) =>
+      command.attributes.some((attribute) => attribute.type === 'AUTOMATION' && attribute.required),
+    )
+    .sort((left, right) => {
+      const leftScore =
+        left.semanticTags.filter((tag) =>
+          ['automation', 'bot', 'run', 'call', 'invoke', 'execute', 'workflow'].includes(tag),
+        ).length + (left.commandType === 'command' ? 2 : 0);
+      const rightScore =
+        right.semanticTags.filter((tag) =>
+          ['automation', 'bot', 'run', 'call', 'invoke', 'execute', 'workflow'].includes(tag),
+        ).length + (right.commandType === 'command' ? 2 : 0);
+      return rightScore - leftScore;
+    })[0];
+
+  if (!automationCommand) {
+    return null;
+  }
+
+  const commentPackage = metadata.find((item) => item.packageName.toLowerCase() === 'comment');
+  const automationAttribute = automationCommand.attributes.find(
+    (attribute) => attribute.type === 'AUTOMATION' && attribute.required,
+  );
+  if (!automationAttribute) {
+    return null;
+  }
+
+  const automationValue: PlannedValue = {
+    type: 'AUTOMATION',
+    automation: {
+      filePath: {
+        type: 'FILE',
+        expression: '$childAutomationPath$',
+      },
+      ...(automationIntent.includeMessageInput
+        ? {
+            inputVariables: [
+              {
+                name: 'message',
+                value: { type: 'VARIABLE', variableName: 'automationInputMessage' },
+              },
+            ],
+          }
+        : {}),
+    },
+  };
+
+  const attributes = automationCommand.attributes
+    .filter((attribute) => attribute.required)
+    .map((attribute) => ({
+      name: attribute.name,
+      value:
+        attribute.name === automationAttribute.name
+          ? automationValue
+          : createAttributeValue(automationCommand, attribute, prompt),
+    }));
+
+  const steps: PlannedStep[] = [
+    makeCommentFallback(`Generated child automation call from prompt: ${prompt}`),
+    {
+      packageName: automationCommand.packageName,
+      commandName: automationCommand.commandName,
+      attributes,
+    },
+  ];
+
+  const packages: PlannedPackage[] = [
+    {
+      name: automationCommand.packageName,
+      version: automationCommand.packageVersion,
+      settingsAttributes: [],
+    },
+  ];
+
+  if (commentPackage) {
+    packages.push({
+      name: commentPackage.packageName,
+      version: commentPackage.packageVersion,
+      settingsAttributes: [],
+    });
+  }
+
+  const variables: PlannedVariable[] = [
+    {
+      name: 'childAutomationPath',
+      type: 'FILE',
+      input: true,
+      description: 'Repository path for the child automation to run',
+      defaultValue: { type: 'FILE', string: '' },
+    },
+  ];
+
+  if (automationIntent.includeMessageInput) {
+    variables.push({
+      name: 'automationInputMessage',
+      type: 'STRING',
+      input: true,
+      description: 'Input message passed into the child automation',
+      defaultValue: { type: 'STRING', string: '' },
+    });
+  }
+
+  return {
+    steps,
+    packages,
+    variables,
+    unsupportedInstructions: [] as string[],
+    reasoning: [
+      `Applied child automation planner using ${automationCommand.packageName}.${automationCommand.commandName}.`,
+    ],
+  };
+}
+
 async function shortlistPackageMetadata(
   request: A360Request,
   input: PromptPlanningInput,
 ): Promise<{
   candidatePackages: PackageCandidate[];
   metadata: NormalizedPackageMetadata[];
+  migrationGrounding: MigrationGroundingSnapshot | null;
 }> {
   const normalizedPrompt = normalizePrompt(input.prompt);
   const tokens = tokenize(normalizedPrompt);
   const packageList = await listAvailablePackagesForWorkflow(request);
+  const migrationGrounding = loadMigrationGrounding();
   const rawPackages = ensureArray(
     (packageList as { packages?: Array<{ name: string; label: string; versions?: string[] }> }).packages,
   );
@@ -434,6 +1035,13 @@ async function shortlistPackageMetadata(
   const preferred = new Set(
     (input.preferredPackages ?? []).map((name) => name.trim().toLowerCase()).filter(Boolean),
   );
+  const arithmeticIntent = detectArithmeticIntent(normalizedPrompt);
+  const automationIntent = detectAutomationIntent(normalizedPrompt);
+  if (arithmeticIntent) {
+    preferred.add('number');
+    preferred.add('comment');
+    preferred.add('logtofile');
+  }
 
   const candidates: PackageCandidate[] = rawPackages
     .map((item) => {
@@ -445,12 +1053,19 @@ async function shortlistPackageMetadata(
       )
         ? 2
         : 0;
+      const automationBoost =
+        automationIntent && /(flow|automation|bot|workflow|task)/i.test(`${item.name} ${item.label}`)
+          ? 3
+          : 0;
+      const migrationBoost = migrationGrounding
+        ? scoreMigrationPackage(tokens, item.name, migrationGrounding)
+        : 0;
 
       return {
         name: item.name,
         label: item.label,
         version: item.versions?.[0],
-        score: matched.length + preferredBoost + baselineBoost,
+        score: matched.length + preferredBoost + baselineBoost + automationBoost + migrationBoost,
         matchedTags: matched,
       };
     })
@@ -482,6 +1097,7 @@ async function shortlistPackageMetadata(
   return {
     candidatePackages: selected,
     metadata: resolved.packages,
+    migrationGrounding,
   };
 }
 
@@ -491,21 +1107,102 @@ export async function groundPromptToPlan(
 ): Promise<PromptGroundingResult> {
   const normalizedPrompt = normalizePrompt(input.prompt);
   const instructions = splitInstructions(normalizedPrompt);
-  const { candidatePackages, metadata } = await shortlistPackageMetadata(request, input);
+  const { candidatePackages, metadata, migrationGrounding } = await shortlistPackageMetadata(request, input);
   const commandCatalog = buildCommandCatalog(metadata);
   const reasoning: string[] = [
     `Ranked ${candidatePackages.length} candidate packages from live Control Room package metadata.`,
     `Built command context with ${commandCatalog.length} grounded commands, iterators, conditionals, triggers, and exceptions.`,
   ];
+  if (migrationGrounding) {
+    reasoning.push(
+      `Applied nearby migration grounding from ${migrationGrounding.commandHints.length} local command hints.`,
+    );
+  }
+
+  const arithmeticIntent = detectArithmeticIntent(normalizedPrompt);
+  if (arithmeticIntent) {
+    const calculatorPlan = buildCalculatorPlan(metadata, normalizedPrompt, arithmeticIntent);
+    if (calculatorPlan) {
+      const usedPackageNames = new Set(calculatorPlan.packages.map((item) => item.name.toLowerCase()));
+      const errorHandlerPackage = metadata.find(
+        (item) => item.packageName.toLowerCase() === 'errorhandler',
+      );
+      if (errorHandlerPackage && !usedPackageNames.has('errorhandler')) {
+        calculatorPlan.packages.push({
+          name: errorHandlerPackage.packageName,
+          version: errorHandlerPackage.packageVersion,
+          settingsAttributes: [],
+        });
+      }
+
+      return {
+        packages: calculatorPlan.packages,
+        variables: calculatorPlan.variables,
+        steps: calculatorPlan.steps,
+        unsupportedInstructions: calculatorPlan.unsupportedInstructions,
+        candidatePackages,
+        commandContext: commandCatalog.map((command) => ({
+          packageName: command.packageName,
+          packageVersion: command.packageVersion,
+          commandName: command.commandName,
+          commandType: command.commandType,
+          semanticTags: command.semanticTags,
+          requiredFields: command.requiredFields,
+        })),
+        reasoning: [...reasoning, ...calculatorPlan.reasoning],
+      };
+    }
+  }
+
+  const automationIntent = detectAutomationIntent(normalizedPrompt);
+  if (automationIntent) {
+    const automationPlan = buildAutomationPlan(
+      metadata,
+      normalizedPrompt,
+      commandCatalog,
+      automationIntent,
+    );
+    if (automationPlan) {
+      const usedPackageNames = new Set(automationPlan.packages.map((item) => item.name.toLowerCase()));
+      const errorHandlerPackage = metadata.find(
+        (item) => item.packageName.toLowerCase() === 'errorhandler',
+      );
+      if (errorHandlerPackage && !usedPackageNames.has('errorhandler')) {
+        automationPlan.packages.push({
+          name: errorHandlerPackage.packageName,
+          version: errorHandlerPackage.packageVersion,
+          settingsAttributes: [],
+        });
+      }
+
+      return {
+        packages: automationPlan.packages,
+        variables: automationPlan.variables,
+        steps: automationPlan.steps,
+        unsupportedInstructions: automationPlan.unsupportedInstructions,
+        candidatePackages,
+        commandContext: commandCatalog.map((command) => ({
+          packageName: command.packageName,
+          packageVersion: command.packageVersion,
+          commandName: command.commandName,
+          commandType: command.commandType,
+          semanticTags: command.semanticTags,
+          requiredFields: command.requiredFields,
+        })),
+        reasoning: [...reasoning, ...automationPlan.reasoning],
+      };
+    }
+  }
 
   const intentMap: Record<string, string[]> = {
     log: ['log', 'logging', 'audit', 'trace'],
     comment: ['comment', 'note', 'describe', 'documentation'],
+    automation: ['automation', 'bot', 'workflow', 'run', 'call', 'invoke', 'execute'],
     math: ['calculate', 'calculation', 'add', 'sum', 'subtract', 'multiply', 'divide', 'number', 'math'],
     email: ['email', 'mail', 'outlook', 'message', 'attachment'],
     excel: ['excel', 'worksheet', 'sheet', 'spreadsheet', 'row', 'column', 'cell'],
     file: ['file', 'folder', 'directory', 'copy', 'move', 'delete', 'rename', 'read', 'write'],
-    browser: ['browser', 'page', 'url', 'click', 'type', 'javascript'],
+    browser: ['browser', 'page', 'url', 'click', 'type', 'javascript', 'application', 'window', 'ui', 'element'],
   };
 
   const steps: PlannedStep[] = [];
@@ -520,7 +1217,7 @@ export async function groundPromptToPlan(
       .filter((tag) => instructionTokens.includes(tag));
     const bestMatch =
       candidateIntentTags.length > 0
-        ? findBestCommand(commandCatalog, instruction, candidateIntentTags)
+        ? findBestCommand(commandCatalog, instruction, candidateIntentTags, migrationGrounding)
         : null;
 
     if (!bestMatch?.command) {
@@ -576,7 +1273,7 @@ export async function groundPromptToPlan(
 
   return {
     packages: Array.from(usedPackages.values()),
-    variables: inferVariables(normalizedPrompt, matchedCommands),
+    variables: inferVariables(normalizedPrompt, matchedCommands, steps),
     steps,
     unsupportedInstructions,
     candidatePackages,

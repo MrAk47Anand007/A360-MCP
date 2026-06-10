@@ -5,6 +5,7 @@ import {
   updateFileDependencies,
 } from '../a360/repository.js';
 import type { JsonObject } from '../types.js';
+import { saveBotBundle } from './repository-save.js';
 
 export async function importBots(
   request: A360Request,
@@ -26,18 +27,29 @@ export async function importBots(
       bot.description ?? '',
     )) as { id?: string; name?: string; path?: string };
     const createdId = created.id ? String(created.id) : '';
-    const contentResult = createdId
-      ? await updateFileContent(request, createdId, bot.content, false)
-      : null;
-    const dependencyResult = createdId
-      ? await updateFileDependencies(request, createdId, bot.dependencies ?? [])
+    const saveResult = createdId
+      ? await saveBotBundle(
+          {
+            updateFileContent: (fileId, content, hasErrors) =>
+              updateFileContent(request, fileId, content, hasErrors),
+            updateFileDependencies: (fileId, childFileIds) =>
+              updateFileDependencies(request, fileId, childFileIds),
+          },
+          {
+            fileId: createdId,
+            content: bot.content,
+            dependencies: bot.dependencies ?? [],
+            hasErrors: false,
+          },
+        )
       : null;
 
     results.push({
       name: bot.name,
       created,
-      contentResult,
-      dependencyResult,
+      contentResult: saveResult?.contentResult ?? null,
+      dependencyResult: saveResult?.dependencyResult ?? null,
+      childFileIds: saveResult?.childFileIds ?? [],
     });
   }
 

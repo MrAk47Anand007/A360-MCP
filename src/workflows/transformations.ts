@@ -7,6 +7,7 @@ import {
   updateFileContent,
   updateFileDependencies,
 } from '../a360/repository.js';
+import { saveBotBundle } from './repository-save.js';
 
 type BotContent = Record<string, unknown> & {
   nodes?: Array<Record<string, unknown>>;
@@ -238,8 +239,20 @@ export async function applyLogToFileFix(
         .map(String)
         .filter((id) => id !== item.id);
 
-      await updateFileContent(request, item.id, updatedContent, false);
-      await updateFileDependencies(request, item.id, childFileIds);
+      await saveBotBundle(
+        {
+          updateFileContent: (fileId, nextContent, hasErrors) =>
+            updateFileContent(request, fileId, nextContent, hasErrors),
+          updateFileDependencies: (fileId, nextChildFileIds) =>
+            updateFileDependencies(request, fileId, nextChildFileIds),
+        },
+        {
+          fileId: item.id,
+          content: updatedContent,
+          dependencies: childFileIds,
+          hasErrors: false,
+        },
+      );
       updated.push(item.name);
     }
   }

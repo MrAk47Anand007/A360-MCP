@@ -1,4 +1,5 @@
 import type { JsonObject } from '../types.js';
+import { normalizeDependencyIdsForSave, normalizeTaskBotContentForSave } from './repository-save.js';
 
 async function parseResponseBody(response: Response) {
   const text = await response.text();
@@ -21,6 +22,8 @@ export async function silentSaveBot(input: {
   dependencies: string[] | JsonObject;
   hasErrors?: boolean;
 }) {
+  const normalizedContent = normalizeTaskBotContentForSave(input.content);
+  const childFileIds = normalizeDependencyIdsForSave(input.dependencies, input.fileId);
   const contentUrl = `${input.baseUrl}/v2/repository/files/${input.fileId}/content?hasErrors=${String(
     input.hasErrors ?? false,
   )}`;
@@ -32,7 +35,7 @@ export async function silentSaveBot(input: {
       Accept: '*/*',
       'X-Authorization': input.token,
     },
-    body: JSON.stringify(input.content),
+    body: JSON.stringify(normalizedContent),
   });
 
   const contentPayload = await parseResponseBody(contentResponse);
@@ -40,9 +43,6 @@ export async function silentSaveBot(input: {
     throw new Error(`Silent content save failed with ${contentResponse.status}`);
   }
 
-  const dependencyPayload = Array.isArray(input.dependencies)
-    ? { childFileIds: input.dependencies }
-    : input.dependencies;
   const dependencyResponse = await fetch(
     `${input.baseUrl}/v2/repository/files/${input.fileId}/dependencies`,
     {
@@ -52,7 +52,7 @@ export async function silentSaveBot(input: {
         Accept: 'application/json',
         'X-Authorization': input.token,
       },
-      body: JSON.stringify(dependencyPayload),
+      body: JSON.stringify({ childFileIds }),
     },
   );
 
@@ -62,6 +62,7 @@ export async function silentSaveBot(input: {
   }
 
   return {
+    childFileIds,
     content: contentPayload,
     dependencies: dependencyResult,
   };

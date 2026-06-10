@@ -15,6 +15,7 @@ type PackageListItem = {
   group?: string;
   artifactName?: string;
   codeVersion?: string;
+  settingsAttributes?: unknown[];
   commands?: unknown[];
   iterators?: unknown[];
   conditionals?: unknown[];
@@ -114,6 +115,7 @@ export type NormalizedPackageMetadata = {
   group?: string;
   artifactName?: string;
   codeVersion?: string;
+  settingsAttributes: NormalizedAttributeMetadata[];
   commandCount: number;
   iteratorCount: number;
   conditionalCount: number;
@@ -272,6 +274,12 @@ export function normalizePackageMetadata(packageValue: PackageListItem): Normali
   const conditionals = normalizeCommandGroup(packageValue.conditionals);
   const triggers = normalizeCommandGroup(packageValue.triggers);
   const exceptions = normalizeCommandGroup(packageValue.exceptions);
+  const settingsAttributes = Array.isArray(packageValue.settingsAttributes)
+    ? packageValue.settingsAttributes
+        .map((item) => asRecord(item) as AttributeLike | null)
+        .filter((item): item is AttributeLike => item !== null)
+        .map(normalizeAttribute)
+    : [];
 
   return {
     packageName,
@@ -286,6 +294,7 @@ export function normalizePackageMetadata(packageValue: PackageListItem): Normali
       typeof packageValue.artifactName === 'string' ? packageValue.artifactName : undefined,
     codeVersion:
       typeof packageValue.codeVersion === 'string' ? packageValue.codeVersion : undefined,
+    settingsAttributes,
     commandCount: commands.length,
     iteratorCount: iterators.length,
     conditionalCount: conditionals.length,

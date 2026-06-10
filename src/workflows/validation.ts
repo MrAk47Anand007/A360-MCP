@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { A360Request } from '../a360/client.js';
 import type { NormalizedCommandMetadata, NormalizedPackageMetadata } from './package-intelligence.js';
 import { resolvePackageMetadataForWorkflow } from './package-intelligence.js';
+import { normalizeTaskBotContentDraft } from './repository-save.js';
 
 type ValidationIssue = {
   severity: 'error' | 'warning';
@@ -40,6 +41,17 @@ type FixBotResult = {
   changes: string[];
   botJson: Record<string, unknown>;
   validation: BotJsonValidationResult;
+};
+
+type NormalizeBotResult = {
+  changed: boolean;
+  changes: string[];
+  botJson: Record<string, unknown>;
+  resolvedPackages: Array<{
+    packageName: string;
+    packageVersion: string;
+    commandCount: number;
+  }>;
 };
 
 type NodeLike = Record<string, unknown>;
@@ -110,6 +122,40 @@ function findCommandMetadata(
     ...foundPackage.triggers,
     ...foundPackage.exceptions,
   ].find((item) => normalizeName(item.name) === normalizeName(commandName));
+}
+
+function findIteratorMetadata(
+  packageMetadata: NormalizedPackageMetadata[],
+  packageName: string,
+  iteratorName: string,
+): NormalizedCommandMetadata | undefined {
+  const foundPackage = packageMetadata.find(
+    (item) => normalizeName(item.packageName) === normalizeName(packageName),
+  );
+  if (!foundPackage) {
+    return undefined;
+  }
+
+  return foundPackage.iterators.find(
+    (item) => normalizeName(item.name) === normalizeName(iteratorName),
+  );
+}
+
+function findConditionalMetadata(
+  packageMetadata: NormalizedPackageMetadata[],
+  packageName: string,
+  conditionalName: string,
+): NormalizedCommandMetadata | undefined {
+  const foundPackage = packageMetadata.find(
+    (item) => normalizeName(item.packageName) === normalizeName(packageName),
+  );
+  if (!foundPackage) {
+    return undefined;
+  }
+
+  return foundPackage.conditionals.find(
+    (item) => normalizeName(item.name) === normalizeName(conditionalName),
+  );
 }
 
 function collectNodePackages(nodes: unknown[], bucket = new Set<string>()) {
@@ -285,6 +331,438 @@ async function resolveBotPackages(
   return resolvePackageMetadataForWorkflow(request, combined);
 }
 
+function canonicalizeAttributesWithMetadata(
+  attributes: unknown[],
+  metadataAttributes:
+    | NormalizedCommandMetadata['attributes']
+    | NormalizedPackageMetadata['settingsAttributes'],
+  changes: string[],
+  pathPrefix: string,
+  context: {
+    packageMetadata: NormalizedPackageMetadata[];
+    variableNameMap: Map<string, string>;
+  },
+) {
+  function normalizeAnchorDictionaryValue(value: unknown) {
+    const record = asRecord(value);
+    if (!record || record.type !== 'DICTIONARY' || !Array.isArray(record.dictionary)) {
+      return value;
+    }
+
+    const entries = record.dictionary
+      .map((item) => asRecord(item))
+      .filter((item): item is Record<string, unknown> => item !== null);
+    const byKey = new Map(
+      entries
+        .map((entry) => {
+          const key = typeof entry.key === 'string' ? entry.key : '';
+          return key ? ([key, entry] as const) : null;
+        })
+        .filter((entry): entry is readonly [string, Record<string, unknown>] => entry !== null),
+    );
+
+    const orderedKeys = ['name', 'overrides', 'options', 'types', 'elementTypes'];
+    const consumed = new Set<string>();
+    const dictionary: Array<Record<string, unknown>> = [];
+
+    for (const key of orderedKeys) {
+      const entry = byKey.get(key);
+      if (!entry) {
+        continue;
+      }
+      consumed.add(key);
+      if (key === 'name') {
+        dictionary.push(entry);
+        continue;
+      }
+      const nestedValue = asRecord(entry.value);
+      if (nestedValue?.type === 'DICTIONARY' && Array.isArray(nestedValue.dictionary) && nestedValue.dictionary.length > 0) {
+        dictionary.push({
+          ...entry,
+          value: {
+            ...nestedValue,
+            dictionary: nestedValue.dictionary,
+          },
+        });
+      }
+    }
+
+    const extraEntries = entries
+      .filter((entry) => {
+        const key = typeof entry.key === 'string' ? entry.key : '';
+        return key.length > 0 && !consumed.has(key);
+      })
+      .sort((left, right) =>
+        String(left.key ?? '').localeCompare(String(right.key ?? '')),
+      );
+
+    return {
+      ...record,
+      dictionary: [...dictionary, ...extraEntries],
+    };
+  }
+
+  const attributeList = attributes
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null);
+
+  function canonicalizeTypedValueWithMetadata(value: unknown, valuePath: string): unknown {
+    if (Array.isArray(value)) {
+      return value.map((entry, index) =>
+        canonicalizeTypedValueWithMetadata(entry, `${valuePath}[${index}]`),
+      );
+    }
+
+    const record = asRecord(value);
+    if (!record) {
+      return value;
+    }
+
+    const nextValue: Record<string, unknown> = { ...record };
+
+    switch (nextValue.type) {
+      case 'VARIABLE': {
+        const variableName =
+          typeof nextValue.variableName === 'string' ? nextValue.variableName : '';
+        const canonicalVariableName = context.variableNameMap.get(normalizeName(variableName));
+        if (canonicalVariableName && canonicalVariableName !== variableName) {
+          nextValue.variableName = canonicalVariableName;
+          changes.push(
+            `Canonicalized variable reference ${variableName} -> ${canonicalVariableName} at ${valuePath}`,
+          );
+        }
+        if (typeof nextValue.packageName === 'string') {
+          const canonicalPackage = context.packageMetadata.find(
+            (item) => normalizeName(item.packageName) === normalizeName(nextValue.packageName as string),
+          );
+          if (canonicalPackage && canonicalPackage.packageName !== nextValue.packageName) {
+            changes.push(`Canonicalized variable packageName at ${valuePath}`);
+            nextValue.packageName = canonicalPackage.packageName;
+          }
+        }
+        break;
+      }
+      case 'ITERATOR': {
+        const packageName =
+          typeof nextValue.packageName === 'string' ? nextValue.packageName : '';
+        const iteratorName =
+          typeof nextValue.iteratorName === 'string' ? nextValue.iteratorName : '';
+        const iterator = packageName && iteratorName
+          ? findIteratorMetadata(context.packageMetadata, packageName, iteratorName)
+          : undefined;
+        if (iterator) {
+          if (iterator.packageName !== nextValue.packageName) {
+            nextValue.packageName = iterator.packageName;
+            changes.push(`Canonicalized iterator packageName at ${valuePath}`);
+          }
+          if (iterator.name !== nextValue.iteratorName) {
+            nextValue.iteratorName = iterator.name;
+            changes.push(`Canonicalized iteratorName at ${valuePath}`);
+          }
+        }
+        break;
+      }
+      case 'CONDITIONAL': {
+        const packageName =
+          typeof nextValue.packageName === 'string' ? nextValue.packageName : '';
+        const conditionalName =
+          typeof nextValue.conditionalName === 'string' ? nextValue.conditionalName : '';
+        const conditional = packageName && conditionalName
+          ? findConditionalMetadata(context.packageMetadata, packageName, conditionalName)
+          : undefined;
+        if (conditional) {
+          if (conditional.packageName !== nextValue.packageName) {
+            nextValue.packageName = conditional.packageName;
+            changes.push(`Canonicalized conditional packageName at ${valuePath}`);
+          }
+          if (conditional.name !== nextValue.conditionalName) {
+            nextValue.conditionalName = conditional.name;
+            changes.push(`Canonicalized conditionalName at ${valuePath}`);
+          }
+        }
+        break;
+      }
+    }
+
+    for (const [key, nestedValue] of Object.entries(nextValue)) {
+      if (key === 'type') {
+        continue;
+      }
+      if (Array.isArray(nestedValue)) {
+        nextValue[key] = nestedValue.map((entry, index) =>
+          canonicalizeTypedValueWithMetadata(entry, `${valuePath}.${key}[${index}]`),
+        );
+        continue;
+      }
+      const nestedRecord = asRecord(nestedValue);
+      if (nestedRecord) {
+        nextValue[key] = canonicalizeTypedValueWithMetadata(
+          nestedRecord,
+          `${valuePath}.${key}`,
+        );
+      }
+    }
+
+    return nextValue;
+  }
+
+  const mapped = attributeList.map((attribute, index) => {
+    const attributeName = typeof attribute.name === 'string' ? attribute.name : '';
+    const canonical = metadataAttributes.find(
+      (entry) => normalizeName(entry.name) === normalizeName(attributeName),
+    );
+    if (canonical && attribute.name !== canonical.name) {
+      changes.push(
+        `Canonicalized attribute name ${attributeName} -> ${canonical.name} at ${pathPrefix}[${index}]`,
+      );
+      attribute = {
+        ...attribute,
+        name: canonical.name,
+      };
+    }
+
+    if (canonical?.type && normalizeName(canonical.type) === 'anchor' && 'value' in attribute) {
+      const nextValue = normalizeAnchorDictionaryValue(attribute.value);
+      if (JSON.stringify(nextValue) !== JSON.stringify(attribute.value)) {
+        changes.push(`Normalized anchor dictionary at ${pathPrefix}[${index}]`);
+        attribute = {
+          ...attribute,
+          value: nextValue,
+        };
+      }
+    }
+    return attribute;
+  }).map((attribute, index) => {
+    if (!('value' in attribute)) {
+      return attribute;
+    }
+    const nextValue = canonicalizeTypedValueWithMetadata(
+      attribute.value,
+      `${pathPrefix}[${index}].value`,
+    );
+    if (JSON.stringify(nextValue) !== JSON.stringify(attribute.value)) {
+      return {
+        ...attribute,
+        value: nextValue,
+      };
+    }
+    return attribute;
+  });
+
+  const orderMap = new Map(
+    metadataAttributes.map((attribute, index) => [normalizeName(attribute.name), index] as const),
+  );
+
+  return mapped.sort((left, right) => {
+    const leftName = normalizeName(String(left.name ?? ''));
+    const rightName = normalizeName(String(right.name ?? ''));
+    const leftIndex = orderMap.get(leftName);
+    const rightIndex = orderMap.get(rightName);
+
+    if (leftIndex === undefined && rightIndex === undefined) {
+      return leftName.localeCompare(rightName);
+    }
+    if (leftIndex === undefined) {
+      return 1;
+    }
+    if (rightIndex === undefined) {
+      return -1;
+    }
+    return leftIndex - rightIndex;
+  });
+}
+
+function normalizeNodeTreeWithMetadata(
+  nodes: unknown[],
+  packageMetadata: NormalizedPackageMetadata[],
+  changes: string[],
+  pathPrefix: string,
+  context: {
+    packageMetadata: NormalizedPackageMetadata[];
+    variableNameMap: Map<string, string>;
+  },
+) {
+  nodes.forEach((nodeValue, index) => {
+    const nodePath = `${pathPrefix}[${index}]`;
+    const node = asRecord(nodeValue);
+    if (!node) {
+      return;
+    }
+
+    const packageName = typeof node.packageName === 'string' ? node.packageName : '';
+    const commandName = typeof node.commandName === 'string' ? node.commandName : '';
+    const commandMetadata =
+      packageName && commandName
+        ? findCommandMetadata(packageMetadata, packageName, commandName)
+        : undefined;
+
+    if (commandMetadata) {
+      if (node.packageName !== commandMetadata.packageName) {
+        node.packageName = commandMetadata.packageName;
+        changes.push(`Canonicalized packageName at ${nodePath}`);
+      }
+      if (node.commandName !== commandMetadata.name) {
+        node.commandName = commandMetadata.name;
+        changes.push(`Canonicalized commandName at ${nodePath}`);
+      }
+
+      const attributes = asArray(node.attributes)
+        .map((item) => asRecord(item))
+        .filter((item): item is Record<string, unknown> => item !== null);
+      node.attributes = canonicalizeAttributesWithMetadata(
+        attributes,
+        commandMetadata.attributes,
+        changes,
+        `${nodePath}.attributes`,
+        context,
+      );
+
+      if (commandMetadata.returns.length > 0) {
+        if ('returnTo' in node && node.returnTo !== undefined) {
+          delete node.returnTo;
+          changes.push(`Removed returnTo for multi-return command at ${nodePath}`);
+        }
+      } else if (commandMetadata.returnType && commandMetadata.returnType !== 'UNDEFINED') {
+        if ('returns' in node && node.returns !== undefined) {
+          delete node.returns;
+          changes.push(`Removed returns for single-return command at ${nodePath}`);
+        }
+      } else {
+        if ('returnTo' in node && node.returnTo !== undefined) {
+          delete node.returnTo;
+          changes.push(`Removed unsupported returnTo at ${nodePath}`);
+        }
+        if ('returns' in node && node.returns !== undefined) {
+          delete node.returns;
+          changes.push(`Removed unsupported returns at ${nodePath}`);
+        }
+      }
+    }
+
+    normalizeNodeTreeWithMetadata(asArray(node.children), packageMetadata, changes, `${nodePath}.children`, context);
+    normalizeNodeTreeWithMetadata(asArray(node.branches), packageMetadata, changes, `${nodePath}.branches`, context);
+  });
+}
+
+export async function normalizeBotJson(
+  request: A360Request,
+  botJson: Record<string, unknown>,
+): Promise<NormalizeBotResult> {
+  const workingCopy = normalizeTaskBotContentDraft(structuredClone(botJson));
+  const changes: string[] = [];
+  const resolved = await resolveBotPackages(request, workingCopy);
+  const packageMetadata = resolved.packages as NormalizedPackageMetadata[];
+  const resolvedPackages = packageMetadata.map((item) => ({
+    packageName: item.packageName,
+    packageVersion: item.packageVersion,
+    commandCount: item.commandCount,
+  }));
+  const variableNameMap = new Map(
+    asArray(workingCopy.variables)
+      .map((item) => asRecord(item))
+      .filter((item): item is Record<string, unknown> => item !== null)
+      .map((item) => String(item.name ?? ''))
+      .filter((name) => name.length > 0)
+      .map((name) => [normalizeName(name), name] as const),
+  );
+  const context = {
+    packageMetadata,
+    variableNameMap,
+  };
+
+  normalizeNodeTreeWithMetadata(asArray(workingCopy.triggers), packageMetadata, changes, 'triggers', context);
+  normalizeNodeTreeWithMetadata(asArray(workingCopy.nodes), packageMetadata, changes, 'nodes', context);
+
+  workingCopy.variables = asArray(workingCopy.variables)
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null)
+    .map((variable, index) => {
+      if (!('defaultValue' in variable)) {
+        return variable;
+      }
+      const nextValue = canonicalizeAttributesWithMetadata(
+        [{ name: 'defaultValue', value: variable.defaultValue }],
+        [{ name: 'defaultValue', label: 'Default Value', type: 'ANY', description: undefined, required: false, hidden: false, readOnly: false, defaultValue: undefined, rules: [], availableOptions: [], nestedAttributes: [] }],
+        changes,
+        `variables[${index}].defaultValue`,
+        context,
+      )[0];
+      return nextValue && 'value' in nextValue
+        ? {
+            ...variable,
+            defaultValue: nextValue.value,
+          }
+        : variable;
+    });
+
+  const existingPackages = new Map(
+    asArray(workingCopy.packages)
+      .map((item) => asRecord(item))
+      .filter((item): item is Record<string, unknown> => item !== null)
+      .map((item) => [normalizeName(String(item.name ?? '')), item] as const),
+  );
+
+  const usedPackageNames = Array.from(
+    new Set([
+      ...collectNodePackages(asArray(workingCopy.triggers)),
+      ...collectNodePackages(asArray(workingCopy.nodes)),
+    ]),
+  );
+
+  const normalizedPackages = usedPackageNames
+    .map((packageName) => {
+      const existing = existingPackages.get(normalizeName(packageName));
+      const foundMetadata = packageMetadata.find(
+        (item) => normalizeName(item.packageName) === normalizeName(packageName),
+      );
+      if (!existing) {
+        changes.push(`Added package entry for ${foundMetadata?.packageName ?? packageName}.`);
+      } else if (
+        (typeof existing.version !== 'string' || existing.version.length === 0) &&
+        foundMetadata?.packageVersion
+      ) {
+        changes.push(`Filled package version for ${foundMetadata.packageName}.`);
+      }
+      const nextPackage = {
+        ...(existing ?? {}),
+        name: foundMetadata?.packageName ?? String(existing?.name ?? packageName),
+        version:
+          foundMetadata?.packageVersion ??
+          (typeof existing?.version === 'string' ? existing.version : ''),
+        settingsAttributes:
+          foundMetadata && Array.isArray(existing?.settingsAttributes)
+            ? canonicalizeAttributesWithMetadata(
+                existing.settingsAttributes,
+                foundMetadata.settingsAttributes,
+                changes,
+                `packages.${foundMetadata.packageName}.settingsAttributes`,
+                context,
+              )
+            : Array.isArray(existing?.settingsAttributes)
+              ? existing.settingsAttributes
+              : [],
+      };
+      return nextPackage;
+    })
+    .sort((left, right) => String(left.name).localeCompare(String(right.name)));
+
+  if (JSON.stringify(workingCopy.packages) !== JSON.stringify(normalizedPackages)) {
+    if (asArray(workingCopy.packages).length > normalizedPackages.length) {
+      changes.push('Removed unused package entries from package list.');
+    } else {
+      changes.push('Rebuilt package list from used packages and resolved metadata.');
+    }
+    workingCopy.packages = normalizedPackages;
+  }
+
+  return {
+    changed: changes.length > 0,
+    changes,
+    botJson: workingCopy,
+    resolvedPackages,
+  };
+}
+
 export async function validateBotJson(
   request: A360Request,
   botJson: Record<string, unknown>,
@@ -447,7 +925,8 @@ export async function fixBotJson(
   request: A360Request,
   botJson: Record<string, unknown>,
 ): Promise<FixBotResult> {
-  const workingCopy = structuredClone(botJson);
+  const normalized = await normalizeBotJson(request, botJson);
+  const workingCopy = structuredClone(normalized.botJson);
   const changes: string[] = [];
 
   if (!Array.isArray(workingCopy.nodes)) {
@@ -506,8 +985,8 @@ export async function fixBotJson(
 
   const validation = await validateBotJson(request, workingCopy);
   return {
-    changed: changes.length > 0,
-    changes,
+    changed: normalized.changed || changes.length > 0,
+    changes: [...normalized.changes, ...changes],
     botJson: workingCopy,
     validation,
   };

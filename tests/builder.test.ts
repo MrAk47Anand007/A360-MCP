@@ -8,6 +8,7 @@ const metadata: NormalizedPackageMetadata[] = [
     packageName: 'Comment',
     packageLabel: 'Comment',
     packageVersion: '2.17.0',
+    settingsAttributes: [],
     commandCount: 1,
     iteratorCount: 0,
     conditionalCount: 0,
@@ -50,6 +51,7 @@ const metadata: NormalizedPackageMetadata[] = [
     packageName: 'LogToFile',
     packageLabel: 'Log To File',
     packageVersion: '3.11.1',
+    settingsAttributes: [],
     commandCount: 1,
     iteratorCount: 0,
     conditionalCount: 0,
@@ -103,6 +105,7 @@ const metadata: NormalizedPackageMetadata[] = [
     packageName: 'ErrorHandler',
     packageLabel: 'ErrorHandler',
     packageVersion: '2.12.1',
+    settingsAttributes: [],
     commandCount: 1,
     iteratorCount: 0,
     conditionalCount: 0,
@@ -121,6 +124,136 @@ const metadata: NormalizedPackageMetadata[] = [
         returnRequired: false,
         attributes: [],
         requiredFields: [],
+        returns: [],
+      },
+    ],
+    iterators: [],
+    conditionals: [],
+    triggers: [],
+    exceptions: [],
+  },
+  {
+    packageName: 'FlowControl',
+    packageLabel: 'Flow Control',
+    packageVersion: '1.0.0',
+    settingsAttributes: [],
+    commandCount: 1,
+    iteratorCount: 0,
+    conditionalCount: 0,
+    triggerCount: 0,
+    exceptionCount: 0,
+    commands: [
+      {
+        packageName: 'FlowControl',
+        packageVersion: '1.0.0',
+        name: 'useReferences',
+        label: 'Use references',
+        nestable: false,
+        branchable: false,
+        returnType: 'UNDEFINED',
+        returnSubtype: 'UNDEFINED',
+        returnRequired: false,
+        attributes: [
+          {
+            name: 'iteratorRef',
+            label: 'Iterator ref',
+            type: 'ITERATOR',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+          {
+            name: 'conditionalRef',
+            label: 'Conditional ref',
+            type: 'CONDITIONAL',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+          {
+            name: 'automationRef',
+            label: 'Automation ref',
+            type: 'AUTOMATION',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+        ],
+        requiredFields: ['iteratorRef', 'conditionalRef', 'automationRef'],
+        returns: [],
+      },
+    ],
+    iterators: [],
+    conditionals: [],
+    triggers: [],
+    exceptions: [],
+  },
+  {
+    packageName: 'Recorder',
+    packageLabel: 'Recorder',
+    packageVersion: '5.0.6',
+    settingsAttributes: [],
+    commandCount: 1,
+    iteratorCount: 0,
+    conditionalCount: 0,
+    triggerCount: 0,
+    exceptionCount: 0,
+    commands: [
+      {
+        packageName: 'Recorder',
+        packageVersion: '5.0.6',
+        name: 'click',
+        label: 'Click',
+        nestable: false,
+        branchable: false,
+        returnType: 'UNDEFINED',
+        returnSubtype: 'UNDEFINED',
+        returnRequired: false,
+        attributes: [
+          {
+            name: 'target',
+            label: 'Target',
+            type: 'UIOBJECT',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+          {
+            name: 'anchorData',
+            label: 'Anchor',
+            type: 'ANCHOR',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+          {
+            name: 'snapshot',
+            label: 'Snapshot',
+            type: 'IMAGE',
+            required: true,
+            hidden: false,
+            readOnly: false,
+            rules: ['NOT_EMPTY'],
+            availableOptions: [],
+            nestedAttributes: [],
+          },
+        ],
+        requiredFields: ['target', 'anchorData', 'snapshot'],
         returns: [],
       },
     ],
@@ -240,13 +373,186 @@ describe('builder', () => {
     };
 
     const built = buildBotFromPlan(plan, metadata);
-    expect(built.nodes[0]?.returnTo).toEqual({
+    const firstNode = built.nodes[0] as
+      | {
+          returnTo?: unknown;
+          attributes?: Array<{ value?: unknown }>;
+        }
+      | undefined;
+
+    expect(firstNode?.returnTo).toEqual({
       type: 'VARIABLE',
       variableName: 'message',
     });
-    expect(built.nodes[0]?.attributes[0]?.value).toEqual({
+    expect(firstNode?.attributes?.[0]?.value).toEqual({
       type: 'STRING',
       expression: '$message$',
+    });
+  });
+
+  it('builds richer typed reference values directly from the plan model', () => {
+    const plan: PlannedBot = {
+      botName: 'ReferenceBot',
+      goal: 'Exercise typed references',
+      variables: [{ name: 'inputMessage', type: 'STRING' }],
+      packages: [{ name: 'FlowControl' }],
+      steps: [
+        {
+          packageName: 'FlowControl',
+          commandName: 'useReferences',
+          attributes: [
+            {
+              name: 'iteratorRef',
+              value: {
+                type: 'ITERATOR',
+                iteratorName: 'EachRow',
+                packageName: 'Loop',
+              },
+            },
+            {
+              name: 'conditionalRef',
+              value: {
+                type: 'CONDITIONAL',
+                conditionalName: 'Equals',
+                packageName: 'If',
+              },
+            },
+            {
+              name: 'automationRef',
+              value: {
+                type: 'AUTOMATION',
+                automation: {
+                  filePath: { type: 'FILE', string: 'repository://private/bots/sample' },
+                  inputVariables: [
+                    {
+                      name: 'message',
+                      value: { type: 'VARIABLE', variableName: 'inputMessage' },
+                    },
+                  ],
+                  inputOptions: [
+                    {
+                      name: 'dryRun',
+                      value: { type: 'BOOLEAN', boolean: true },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const built = buildBotFromPlan(plan, metadata);
+    const attrs = (built.nodes[0] as { attributes?: Array<{ value?: unknown }> }).attributes ?? [];
+
+    expect(attrs[0]?.value).toEqual({
+      type: 'ITERATOR',
+      iteratorName: 'EachRow',
+      packageName: 'Loop',
+    });
+    expect(attrs[1]?.value).toEqual({
+      type: 'CONDITIONAL',
+      conditionalName: 'Equals',
+      packageName: 'If',
+    });
+    expect(attrs[2]?.value).toEqual({
+      type: 'AUTOMATION',
+      automation: {
+        filePath: { type: 'FILE', string: 'repository://private/bots/sample' },
+        inputVariables: [
+          {
+            name: 'message',
+            value: { type: 'VARIABLE', variableName: 'inputMessage' },
+          },
+        ],
+        inputOptions: [
+          {
+            name: 'dryRun',
+            value: { type: 'BOOLEAN', boolean: true },
+          },
+        ],
+      },
+    });
+  });
+
+  it('builds uiobject, anchor dictionary, and image values directly from the plan model', () => {
+    const plan: PlannedBot = {
+      botName: 'UiRecorderBot',
+      goal: 'Exercise recorder payloads',
+      variables: [{ name: 'uiTargetTitle', type: 'STRING', input: true }],
+      packages: [{ name: 'Recorder' }],
+      steps: [
+        {
+          packageName: 'Recorder',
+          commandName: 'click',
+          attributes: [
+            {
+              name: 'target',
+              value: {
+                type: 'UIOBJECT',
+                uiObject: {
+                  capture: { securelyRecorded: true },
+                  criteria: {
+                    title: {
+                      enabled: true,
+                      value: { type: 'STRING', expression: '$uiTargetTitle$' },
+                    },
+                    role: {
+                      enabled: false,
+                      securelyRecordedRemoveDisabled: true,
+                      value: { type: 'STRING', string: '' },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              name: 'anchorData',
+              value: {
+                type: 'DICTIONARY',
+                dictionary: [{ key: 'name', value: { type: 'STRING', string: 'UiTarget' } }],
+              },
+            },
+            {
+              name: 'snapshot',
+              value: {
+                type: 'IMAGE',
+                unsavedSecurelyRecorded: true,
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const built = buildBotFromPlan(plan, metadata);
+    const attrs = (built.nodes[0] as { attributes?: Array<{ value?: unknown }> }).attributes ?? [];
+
+    expect(attrs[0]?.value).toEqual({
+      type: 'UIOBJECT',
+      uiObject: {
+        capture: { securelyRecorded: true },
+        criteria: {
+          title: {
+            enabled: true,
+            value: { type: 'STRING', expression: '$uiTargetTitle$' },
+          },
+          role: {
+            enabled: false,
+            securelyRecordedRemoveDisabled: true,
+            value: { type: 'STRING', string: '' },
+          },
+        },
+      },
+    });
+    expect(attrs[1]?.value).toEqual({
+      type: 'DICTIONARY',
+      dictionary: [{ key: 'name', value: { type: 'STRING', string: 'UiTarget' } }],
+    });
+    expect(attrs[2]?.value).toEqual({
+      type: 'IMAGE',
+      unsavedSecurelyRecorded: true,
     });
   });
 });

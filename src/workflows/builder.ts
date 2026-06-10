@@ -8,60 +8,70 @@ import type {
   PlannedValue,
   PlannedVariable,
 } from './plan-model.js';
-
-type A360TypedValue = Record<string, unknown>;
+import {
+  a360TaskBotContentSchema,
+  type A360Node,
+  type A360Package,
+  type A360TaskBotContent,
+  type A360TypedValue,
+  type A360Variable,
+} from './control-room-schema.js';
 
 type BuiltAttribute = {
   name: string;
   value: A360TypedValue;
 };
 
-type BuiltNode = {
-  uid: string;
-  commandName: string;
-  packageName: string;
-  disabled: boolean;
-  attributes: BuiltAttribute[];
-  returnTo?: A360TypedValue;
-  returns?: Record<string, A360TypedValue>;
-  children?: BuiltNode[];
-  branches?: BuiltNode[];
-};
+type BuiltNode = A360Node;
+type BuiltVariable = A360Variable;
+type BuiltPackage = A360Package;
 
-type BuiltVariable = {
-  name: string;
-  description: string;
-  type: string;
-  readOnly: boolean;
-  input: boolean;
-  output: boolean;
-  defaultValue: A360TypedValue;
-};
-
-type BuiltPackage = {
-  name: string;
-  version: string;
-  settingsAttributes: Array<Record<string, unknown>>;
-};
-
-export type BuiltBot = {
-  triggers: unknown[];
-  nodes: BuiltNode[];
-  variables: BuiltVariable[];
-  packages: BuiltPackage[];
-  properties: {
-    botCodeVersion: string;
-    improvedNumberSupport: boolean;
-    timeout: string;
-    automationPriority: string;
-    runInChildWindow: boolean;
-    runInChildWindowMode: string;
-  };
-  workItemTemplateName: null;
-};
+export type BuiltBot = A360TaskBotContent;
 
 function normalizeName(value: string) {
   return value.trim().toLowerCase();
+}
+
+function toUiObjectShape(
+  value:
+    | {
+        capture?: {
+          securelyRecorded: boolean;
+        };
+        criteria?: Record<
+          string,
+          {
+            enabled: boolean;
+            securelyRecordedRemoveDisabled?: boolean;
+            value: PlannedValue;
+          }
+        >;
+      }
+    | undefined,
+) {
+  if (!value) {
+    return undefined;
+  }
+
+  return {
+    ...(value.capture ? { capture: { securelyRecorded: value.capture.securelyRecorded } } : {}),
+    ...(value.criteria
+      ? {
+          criteria: Object.fromEntries(
+            Object.entries(value.criteria).map(([key, entry]) => [
+              key,
+              {
+                enabled: entry.enabled,
+                ...(entry.securelyRecordedRemoveDisabled !== undefined
+                  ? { securelyRecordedRemoveDisabled: entry.securelyRecordedRemoveDisabled }
+                  : {}),
+                value: toTypedValue(entry.value),
+              },
+            ]),
+          ),
+        }
+      : {}),
+  };
 }
 
 function toTypedValue(value: PlannedValue): A360TypedValue {
@@ -82,8 +92,80 @@ function toTypedValue(value: PlannedValue): A360TypedValue {
         : { type: 'FILE', expression: value.expression };
     case 'DATETIME':
       return { type: 'DATETIME', expression: value.expression };
+    case 'IMAGE':
+      return {
+        type: 'IMAGE',
+        ...(value.securelyRecorded !== undefined ? { securelyRecorded: value.securelyRecorded } : {}),
+        ...(value.unsavedSecurelyRecorded !== undefined
+          ? { unsavedSecurelyRecorded: value.unsavedSecurelyRecorded }
+          : {}),
+      };
+    case 'UIOBJECT':
+      return {
+        type: 'UIOBJECT',
+        ...(value.uiObject ? { uiObject: toUiObjectShape(value.uiObject) } : {}),
+        ...(value.uiObjectAnchor
+          ? {
+              uiObjectAnchor: {
+                ...(value.uiObjectAnchor.uiObject
+                  ? { uiObject: toUiObjectShape(value.uiObjectAnchor.uiObject) }
+                  : {}),
+              },
+            }
+          : {}),
+      };
     case 'VARIABLE':
-      return { type: 'VARIABLE', variableName: value.variableName };
+      return 'packageName' in value && value.packageName
+        ? { type: 'VARIABLE', variableName: value.variableName, packageName: value.packageName }
+        : { type: 'VARIABLE', variableName: value.variableName };
+    case 'ITERATOR':
+      return {
+        type: 'ITERATOR',
+        iteratorName: value.iteratorName,
+        packageName: value.packageName,
+      };
+    case 'CONDITIONAL':
+      return {
+        type: 'CONDITIONAL',
+        conditionalName: value.conditionalName,
+        packageName: value.packageName,
+      };
+    case 'AUTOMATION':
+      return {
+        type: 'AUTOMATION',
+        automation: {
+          ...(value.automation.file
+            ? { file: toTypedValue(value.automation.file) }
+            : {}),
+          ...(value.automation.filePath
+            ? { filePath: toTypedValue(value.automation.filePath) }
+            : {}),
+          ...(value.automation.inputVariables?.length
+            ? {
+                inputVariables: value.automation.inputVariables.map((entry) => ({
+                  name: entry.name,
+                  value: toTypedValue(entry.value),
+                })),
+              }
+            : {}),
+          ...(value.automation.inputOptions?.length
+            ? {
+                inputOptions: value.automation.inputOptions.map((entry) => ({
+                  name: entry.name,
+                  value: toTypedValue(entry.value),
+                })),
+              }
+            : {}),
+          ...(value.automation.inputData?.length
+            ? {
+                inputData: value.automation.inputData.map((entry) => ({
+                  name: entry.name,
+                  value: toTypedValue(entry.value),
+                })),
+              }
+            : {}),
+        },
+      };
     case 'DICTIONARY':
       return {
         type: 'DICTIONARY',
@@ -109,10 +191,20 @@ function defaultValueForVariable(variable: PlannedVariable): A360TypedValue {
       return { type: 'FILE', string: '' };
     case 'DATETIME':
       return { type: 'DATETIME', expression: '' };
+    case 'IMAGE':
+      return { type: 'IMAGE' };
+    case 'UIOBJECT':
+      return { type: 'UIOBJECT' };
     case 'DICTIONARY':
       return { type: 'DICTIONARY', dictionary: [] };
     case 'VARIABLE':
       return { type: 'VARIABLE', variableName: '' };
+    case 'ITERATOR':
+      return { type: 'ITERATOR', iteratorName: '', packageName: '' };
+    case 'CONDITIONAL':
+      return { type: 'CONDITIONAL', conditionalName: '', packageName: '' };
+    case 'AUTOMATION':
+      return { type: 'AUTOMATION', automation: {} };
     case 'STRING':
     default:
       return { type: 'STRING', string: '' };
@@ -262,7 +354,7 @@ export function buildBotFromPlan(
 ): BuiltBot {
   const usedPackageNames = collectUsedPackages(plan.steps);
 
-  return {
+  return a360TaskBotContentSchema.parse({
     triggers: [],
     nodes: plan.steps.map((step) => buildNode(step, packageMetadata)),
     variables: plan.variables.map(buildVariable),
@@ -276,5 +368,5 @@ export function buildBotFromPlan(
       runInChildWindowMode: 'DESKTOP',
     },
     workItemTemplateName: null,
-  };
+  });
 }

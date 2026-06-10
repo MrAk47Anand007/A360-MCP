@@ -25,6 +25,7 @@ describe('silent save workflow', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(result).toEqual({
+      childFileIds: [],
       content: { content: 'ok' },
       dependencies: 'OK',
     });

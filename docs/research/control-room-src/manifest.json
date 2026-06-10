@@ -1,0 +1,63 @@
+{
+  "extractedAt": "2026-06-10T10:10:33.689Z",
+  "sourceMapPath": "C:\\Users\\Anand\\AppData\\Local\\Temp\\aaenterprise.js.map",
+  "outputDir": "C:\\Users\\Anand\\OneDrive - Xalta Technology Services Pvt Ltd\\Desktop\\SelfProjects\\A360 MCPs\\A360-MCP\\docs\\research\\control-room-src",
+  "targetCount": 11,
+  "extractedFiles": [
+    {
+      "source": "webpack://cr-frontend/./src/components/pages/repositories/TaskbotEditPage/TaskbotEditPage.jsx",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/pages/repositories/TaskbotEditPage/TaskbotEditPage.jsx",
+      "bytes": 314641
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/pages/repositories/TaskbotEditPage/TaskbotEditorLoader.jsx",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/pages/repositories/TaskbotEditPage/TaskbotEditorLoader.jsx",
+      "bytes": 9874
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/pages/repositories/TaskbotEditPage/taskbotContent.ts",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/pages/repositories/TaskbotEditPage/taskbotContent.ts",
+      "bytes": 26524
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/pages/repositories/TaskbotEditPage/processContent/v1Content.js",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/pages/repositories/TaskbotEditPage/processContent/v1Content.js",
+      "bytes": 73115
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/pages/repositories/TaskbotEditPage/processContent/v2Content.js",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/pages/repositories/TaskbotEditPage/processContent/v2Content.js",
+      "bytes": 122905
+    },
+    {
+      "source": "webpack://cr-frontend/./src/store/api/repositories.js",
+      "output": "docs/research/control-room-src/cr-frontend/src/store/api/repositories.js",
+      "bytes": 46323
+    },
+    {
+      "source": "webpack://cr-frontend/./src/store/actions/repositories.js",
+      "output": "docs/research/control-room-src/cr-frontend/src/store/actions/repositories.js",
+      "bytes": 9020
+    },
+    {
+      "source": "webpack://cr-frontend/./src/store/sagas/repositories.js",
+      "output": "docs/research/control-room-src/cr-frontend/src/store/sagas/repositories.js",
+      "bytes": 35910
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/editor/TaskbotEditor/TaskbotEditor.jsx",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/editor/TaskbotEditor/TaskbotEditor.jsx",
+      "bytes": 287228
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/editor/TaskbotCanvasList/TaskbotCanvasList.jsx",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/editor/TaskbotCanvasList/TaskbotCanvasList.jsx",
+      "bytes": 38232
+    },
+    {
+      "source": "webpack://cr-frontend/./src/components/editor/TaskbotCanvasFlow/TaskbotCanvasFlow.jsx",
+      "output": "docs/research/control-room-src/cr-frontend/src/components/editor/TaskbotCanvasFlow/TaskbotCanvasFlow.jsx",
+      "bytes": 52494
+    }
+  ]
+}

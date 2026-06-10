@@ -4,6 +4,7 @@ import type { NormalizedPackageMetadata } from './package-intelligence.js';
 import type { PlannedBot } from './plan-model.js';
 import { resolvePackageMetadataForWorkflow } from './package-intelligence.js';
 import { groundPromptToPlan } from './planner-grounding.js';
+import { saveBotBundle } from './repository-save.js';
 
 type PromptPlanningInput = {
   prompt: string;
@@ -262,9 +263,12 @@ export async function createBotFromPrompt(
     input.description ?? build.plan.goal,
   )) as Record<string, unknown>;
   const fileId = String(created.id ?? '');
-
-  await repositoryApi.updateFileContent(fileId, build.botJson ?? {}, false);
-  await repositoryApi.updateFileDependencies(fileId, []);
+  const saveResult = await saveBotBundle(repositoryApi, {
+    fileId,
+    content: (build.botJson ?? {}) as Record<string, unknown>,
+    dependencies: [],
+    hasErrors: false,
+  });
 
   return {
     dryRun: false,
@@ -275,6 +279,9 @@ export async function createBotFromPrompt(
       path: created.path ?? null,
     },
     summary: build.botJsonSummary,
+    saveSummary: {
+      childFileIds: saveResult.childFileIds,
+    },
     plan: build.plan,
     grounding: build.grounding,
   };
