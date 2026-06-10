@@ -69,7 +69,7 @@ export async function insertRecorderSteps(
     if (!input.recorderPackage || input.recorderPackage.name !== packageName) {
       throw new Error(
         `Bot ${input.fileId} does not reference package "${packageName}". ` +
-          'Pass recorderPackage {name, version} so the dependency can be added.',
+          `Pass recorderPackage {name: "${packageName}", version} so the dependency can be added.`,
       );
     }
     packages.push({
@@ -123,7 +123,13 @@ export async function patchStepTarget(api: BotInjectionApi, input: PatchStepTarg
       `attribute "${input.attributeName}" not found on node "${input.nodeUid}".`,
     );
   }
-  attribute.value = input.value;
+
+  const newAttributes = attributes.map((attr) =>
+    attr === attribute ? { ...attr, value: input.value } : attr,
+  );
+  const newNode = { ...node, attributes: newAttributes };
+  const newNodes = nodes.map((n) => (n === node ? newNode : n));
+  content.nodes = newNodes;
 
   const dependencies = (await api.getFileDependencies(input.fileId)) as {
     dependencies?: Array<{ id?: string | number | null }>;
