@@ -23,7 +23,11 @@ import {
   updateFileContent,
   updateFileDependencies,
 } from './a360/repository.js';
-import { registerOperationsTools, registerRepositoryTools, registerWorkflowTools } from './tools/index.js';
+import { registerOperationsTools, registerRepositoryTools, registerWorkflowTools, registerCaptureTools } from './tools/index.js';
+import { insertRecorderSteps, patchStepTarget } from './workflows/bot-injection.js';
+import { recordWebActions } from './workflows/ui-recording.js';
+import { matchElement } from './capture/element-matcher.js';
+import { buildCapturedTargetPayload } from './capture/target-payload.js';
 import {
   buildBotJsonFromPrompt,
   createBotFromPrompt,
@@ -37,9 +41,10 @@ import {
   resolvePackageMetadataForWorkflow,
 } from './workflows/package-intelligence.js';
 import { applyPackageVersionUpdate, planPackageVersionUpdate, scanPackageUsage } from './workflows/package-governance.js';
+import { saveBotBundle } from './workflows/repository-save.js';
 import { silentSaveBot } from './workflows/silent-save.js';
 import { applyLogToFileFix, scanLogToFileIssues } from './workflows/transformations.js';
-import { fixBotJson, previewBotJson, validateBotJson } from './workflows/validation.js';
+import { fixBotJson, normalizeBotJson, previewBotJson, validateBotJson } from './workflows/validation.js';
 
 export type AppDependencies = ReturnType<typeof buildDependenciesFromConfig>;
 
@@ -128,6 +133,8 @@ export function buildDependenciesFromConfig(config: AppConfig) {
         previewBotJson(client, botJson),
       fixBotJson: (botJson: Record<string, unknown>) =>
         fixBotJson(client, botJson),
+      normalizeBotJson: (botJson: Record<string, unknown>) =>
+        normalizeBotJson(client, botJson),
       exportBots: (folderId: string, recursive?: boolean) => exportBots(client, folderId, recursive),
       exportAssets: (folderId: string, recursive?: boolean) => exportAssets(client, folderId, recursive),
       listAvailablePackages: (options?: {
@@ -182,6 +189,134 @@ export function buildDependenciesFromConfig(config: AppConfig) {
             ? input.dependencies
             : (input.dependencies as JsonObject),
         }),
+      saveBotBundle: (input: {
+        fileId: string;
+        content: Record<string, unknown>;
+        dependencies?: string[] | Record<string, unknown>;
+        hasErrors?: boolean;
+      }) =>
+        normalizeBotJson(client, input.content).then((normalized) =>
+          saveBotBundle(
+          {
+            updateFileContent: (
+              fileId: string,
+              content: Record<string, unknown>,
+              hasErrors?: boolean,
+            ) => updateFileContent(client, fileId, content, hasErrors),
+            updateFileDependencies: (fileId: string, childFileIds: string[]) =>
+              updateFileDependencies(client, fileId, childFileIds),
+          },
+          {
+            fileId: input.fileId,
+            content: normalized.botJson,
+            dependencies: Array.isArray(input.dependencies)
+              ? input.dependencies
+              : (input.dependencies as JsonObject | undefined),
+            hasErrors: input.hasErrors,
+          },
+        ).then((saveResult) => ({
+          ...saveResult,
+          normalization: {
+            changed: normalized.changed,
+            changes: normalized.changes,
+            resolvedPackages: normalized.resolvedPackages,
+          },
+        }))),
+    },
+    captureApi: {
+      recordWebActions: async (input: {
+        startUrl: string;
+        steps: Array<Record<string, unknown>>;
+        captureImages?: boolean;
+        includeAnchors?: boolean;
+        recorderCommand?: Record<string, string | undefined>;
+        browserUrl?: string;
+      }) => {
+        const { connectChromeSession } = await import('./capture/chrome-session.js');
+        const browser = await connectChromeSession({ browserUrl: input.browserUrl });
+        try {
+          return await recordWebActions(browser, {
+            startUrl: input.startUrl,
+            steps: input.steps as never,
+            captureImages: input.captureImages,
+            includeAnchors: input.includeAnchors,
+            recorderCommand: input.recorderCommand as never,
+          });
+        } finally {
+          await browser.close();
+        }
+      },
+      captureUiTarget: async (input: {
+        url: string;
+        target: string;
+        hints?: { role?: string; exactText?: string };
+        captureImage?: boolean;
+        includeAnchor?: boolean;
+        browserUrl?: string;
+      }) => {
+        const { connectChromeSession } = await import('./capture/chrome-session.js');
+        const browser = await connectChromeSession({ browserUrl: input.browserUrl });
+        try {
+          await browser.gotoUrl(input.url);
+          const elements = await browser.snapshotElements();
+          const match = matchElement(input.target, elements, input.hints);
+          if (match.status !== 'matched') {
+            return { status: match.status, candidates: match.candidates };
+          }
+          const screenshotBase64 = input.captureImage
+            ? ((await browser.screenshotElement(match.element.elementId)) ?? undefined)
+            : undefined;
+          const payload = buildCapturedTargetPayload(match.element, {
+            screenshotBase64,
+            includeAnchor: input.includeAnchor,
+          });
+          return { status: 'matched', payload };
+        } finally {
+          await browser.close();
+        }
+      },
+      insertRecorderSteps: (input: {
+        fileId: string;
+        nodes: Array<Record<string, unknown>>;
+        afterUid?: string;
+        recorderPackage?: { name: string; version: string };
+        hasErrors?: boolean;
+      }) =>
+        insertRecorderSteps(
+          {
+            getFileContent: (fileId: string) => getFileContent(client, fileId),
+            getFileDependencies: (fileId: string) => getFileDependencies(client, fileId),
+            updateFileContent: (
+              fileId: string,
+              content: Record<string, unknown>,
+              hasErrors?: boolean,
+            ) => updateFileContent(client, fileId, content, hasErrors),
+            updateFileDependencies: (fileId: string, childFileIds: string[]) =>
+              updateFileDependencies(client, fileId, childFileIds),
+          },
+          input,
+        ),
+      patchStepTarget: (input: {
+        fileId: string;
+        nodeUid: string;
+        attributeName: string;
+        value: Record<string, unknown>;
+        hasErrors?: boolean;
+      }) =>
+        patchStepTarget(
+          {
+            getFileContent: (fileId: string) => getFileContent(client, fileId),
+            getFileDependencies: (fileId: string) => getFileDependencies(client, fileId),
+            updateFileContent: (
+              fileId: string,
+              content: Record<string, unknown>,
+              hasErrors?: boolean,
+            ) => updateFileContent(client, fileId, content, hasErrors),
+            updateFileDependencies: (fileId: string, childFileIds: string[]) =>
+              updateFileDependencies(client, fileId, childFileIds),
+          },
+          input,
+        ),
     },
   };
 }
@@ -195,6 +330,7 @@ export function createServer(deps: AppDependencies) {
   registerRepositoryTools(server, deps);
   registerOperationsTools(server, deps);
   registerWorkflowTools(server, deps);
+  registerCaptureTools(server, deps);
 
   return server;
 }
