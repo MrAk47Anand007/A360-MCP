@@ -294,7 +294,11 @@ export function buildDependenciesFromConfig(config: AppConfig) {
             updateFileDependencies: (fileId: string, childFileIds: string[]) =>
               updateFileDependencies(client, fileId, childFileIds),
           },
-          input,
+          {
+            ...input,
+            normalizeContent: (content) =>
+              normalizeBotJson(client, content).then((result) => result.botJson),
+          },
         ),
       patchStepTarget: (input: {
         fileId: string;
@@ -315,7 +319,11 @@ export function buildDependenciesFromConfig(config: AppConfig) {
             updateFileDependencies: (fileId: string, childFileIds: string[]) =>
               updateFileDependencies(client, fileId, childFileIds),
           },
-          input,
+          {
+            ...input,
+            normalizeContent: (content) =>
+              normalizeBotJson(client, content).then((result) => result.botJson),
+          },
         ),
     },
   };

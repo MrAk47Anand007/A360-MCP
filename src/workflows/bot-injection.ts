@@ -32,6 +32,8 @@ export type InsertRecorderStepsInput = {
   /** Required when the bot does not already reference the recorder package. */
   recorderPackage?: { name: string; version: string };
   hasErrors?: boolean;
+  /** Optional hook to run package-aware normalization before saving. */
+  normalizeContent?: (content: Record<string, unknown>) => Promise<Record<string, unknown>>;
 };
 
 export async function insertRecorderSteps(
@@ -83,9 +85,10 @@ export async function insertRecorderSteps(
   const dependencies = (await api.getFileDependencies(input.fileId)) as {
     dependencies?: Array<{ id?: string | number | null }>;
   };
+  const finalContent = input.normalizeContent ? await input.normalizeContent(content) : content;
   const saveResult = await saveBotBundle(api, {
     fileId: input.fileId,
-    content,
+    content: finalContent,
     dependencies,
     hasErrors: input.hasErrors,
   });
@@ -103,6 +106,8 @@ export type PatchStepTargetInput = {
   attributeName: string;
   value: Record<string, unknown>;
   hasErrors?: boolean;
+  /** Optional hook to run package-aware normalization before saving. */
+  normalizeContent?: (content: Record<string, unknown>) => Promise<Record<string, unknown>>;
 };
 
 export async function patchStepTarget(api: BotInjectionApi, input: PatchStepTargetInput) {
@@ -134,9 +139,10 @@ export async function patchStepTarget(api: BotInjectionApi, input: PatchStepTarg
   const dependencies = (await api.getFileDependencies(input.fileId)) as {
     dependencies?: Array<{ id?: string | number | null }>;
   };
+  const finalContent = input.normalizeContent ? await input.normalizeContent(content) : content;
   const saveResult = await saveBotBundle(api, {
     fileId: input.fileId,
-    content,
+    content: finalContent,
     dependencies,
     hasErrors: input.hasErrors,
   });

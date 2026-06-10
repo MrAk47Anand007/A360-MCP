@@ -129,6 +129,31 @@ describe('insertRecorderSteps', () => {
       insertRecorderSteps(api, { fileId: '42', nodes: [RECORDER_NODE] }),
     ).rejects.toThrow(/recorderPackage/);
   });
+
+  it('passes normalized content to saveBotBundle when normalizeContent hook is provided', async () => {
+    const api = fakeApi();
+
+    const normalizeContent = vi.fn(async (content: Record<string, unknown>) => ({
+      ...content,
+      normalizedMarker: true,
+    }));
+
+    await insertRecorderSteps(api, {
+      fileId: '42',
+      nodes: [RECORDER_NODE],
+      recorderPackage: { name: 'Recorder', version: '2.5.0' },
+      normalizeContent,
+    });
+
+    // The hook should have been called exactly once with the modified content (2 nodes)
+    expect(normalizeContent).toHaveBeenCalledTimes(1);
+    const hookArg = normalizeContent.mock.calls[0][0] as Record<string, any>;
+    expect((hookArg.nodes as unknown[]).length).toBe(2);
+
+    // The normalized content (with the extra marker key) should reach updateFileContent
+    const savedContent = api.updateFileContent.mock.calls[0][1] as Record<string, any>;
+    expect(savedContent.normalizedMarker).toBe(true);
+  });
 });
 
 describe('patchStepTarget', () => {
