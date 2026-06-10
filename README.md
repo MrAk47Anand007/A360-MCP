@@ -44,6 +44,8 @@ Primary exported specs:
 Supporting generated inventory:
 
 - `docs/a360-swagger-inventory.json`
+- `docs/control-room-editor-findings.md`
+- `docs/research/control-room-src/manifest.json`
 
 Additional implementation references were mined from:
 
@@ -55,6 +57,7 @@ Additional implementation references were mined from:
 ```bash
 npm install
 npm run extract:swagger
+npm run extract:editor-sources
 npm run login
 npm run doctor
 npm run serve
@@ -98,6 +101,7 @@ Low-level bot and repository operations:
 - `a360_update_bot_content`
 - `a360_get_bot_dependencies`
 - `a360_update_bot_dependencies`
+- `a360_save_bot_bundle`
 
 ### Operations
 
@@ -144,11 +148,34 @@ Preview, validate, and repair generated or edited bot JSON:
 
 - `a360_validate_bot_json`
 - `a360_preview_bot_json`
+- `a360_normalize_bot_json`
 - `a360_fix_bot_json`
+
+### Live UI capture tools
+
+These tools build recorder steps from real Chrome state instead of guessed payloads.
+They connect to your Chrome over the DevTools Protocol. Start Chrome with:
+
+    chrome.exe --remote-debugging-port=9222 --user-data-dir=%TEMP%\a360-capture-profile
+
+or set `A360_MCP_CHROME_ENDPOINT` to an existing DevTools URL.
+
+| Tool | Purpose |
+| --- | --- |
+| `a360_record_web_actions` | Execute structured steps (navigate/click/type/select) live in Chrome; capture each target into canonical `UIOBJECT`/`IMAGE` payloads plus ready recorder nodes. Halts with ranked candidates on ambiguity. |
+| `a360_capture_ui_target` | Capture one element (no action) into canonical payload pieces. |
+| `a360_insert_recorder_step` | Insert captured recorder node(s) into an existing bot and save via the normalized bundle flow. |
+| `a360_patch_step_target` | Replace a node attribute's target payload with a captured one and save. |
+
+The MCP client decomposes a natural-language prompt into structured steps; the
+server matches each target description deterministically against the page's
+elements — no AI guessing inside the server. Recorder command identity
+(`packageName`/`commandName`/attribute names) defaults to `Recorder`/`Capture`
+and is overridable per call; verify against `a360_get_package_command_schema`.
 
 ## Current Tool Count
 
-Current MCP tool count: `29`
+Current MCP tool count: `31`
 
 ## Build Flow For AI-Driven Bots
 
@@ -221,6 +248,8 @@ Useful commands:
 npm test
 npm run check
 npm run build
+npm run extract:swagger
+npm run extract:editor-sources
 ```
 
 ## Status
