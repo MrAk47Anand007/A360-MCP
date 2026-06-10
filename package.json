@@ -36,12 +36,14 @@
     "serve": "tsx src/index.ts serve",
     "logout": "tsx src/index.ts logout",
     "extract:swagger": "node scripts/extract-a360-swagger-inventory.mjs",
+    "extract:editor-sources": "node scripts/extract-control-room-editor-sources.mjs",
     "test": "vitest run",
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^17.2.3",
+    "puppeteer-core": "^25.1.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
