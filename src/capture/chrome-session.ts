@@ -1,5 +1,6 @@
 import puppeteer, { type Browser, type Page, type ElementHandle } from 'puppeteer-core';
 import type { CaptureBrowser, ElementFacts } from './types.js';
+import { buildSurroundingContext } from './surrounding-context.js';
 
 export type ChromeSessionOptions = {
   /** DevTools endpoint, e.g. "http://127.0.0.1:9222". */
@@ -47,6 +48,15 @@ export async function connectChromeSession(
     ?? (await browser.newPage());
 
   let handles = new Map<string, ElementHandle>();
+
+  async function settlePage() {
+    await page
+      .waitForFunction(() => document.readyState === 'interactive' || document.readyState === 'complete', {
+        timeout: 5_000,
+      })
+      .catch(() => {});
+    await page.waitForNetworkIdle({ idleTime: 250, timeout: 5_000 }).catch(() => {});
+  }
 
   async function snapshotElements(): Promise<ElementFacts[]> {
     for (const handle of handles.values()) {
@@ -104,8 +114,84 @@ export async function connectChromeSession(
           htmlElement.labels && htmlElement.labels.length > 0
             ? (htmlElement.labels[0] as HTMLElement).innerText.trim()
             : '';
+        const parentLabel =
+          !labelText && htmlElement.closest
+            ? htmlElement.closest('label')?.innerText.trim() ?? ''
+            : '';
         const name =
-          attributes['aria-label'] ?? labelText ?? '';
+          attributes['aria-label'] ?? labelText ?? parentLabel ?? '';
+
+        let helpText = '';
+        const describedBy = htmlElement.getAttribute('aria-describedby');
+        if (describedBy) {
+          const describedNode = htmlElement.ownerDocument.getElementById(describedBy);
+          const describedText = describedNode?.textContent?.trim();
+          if (describedText) {
+            helpText = describedText.slice(0, 200);
+          }
+        }
+        if (!helpText) {
+          helpText = (
+            htmlElement.getAttribute('title') ??
+            htmlElement.getAttribute('placeholder') ??
+            ''
+          ).trim().slice(0, 200);
+        }
+
+        let stableParentSelector = '';
+        let parentCursor = htmlElement.parentElement;
+        while (parentCursor && parentCursor !== document.body) {
+          const testId =
+            parentCursor.getAttribute('data-testid') ??
+            parentCursor.getAttribute('data-test-id') ??
+            parentCursor.getAttribute('data-qa');
+          if (testId) {
+            stableParentSelector = `[data-testid="${testId}"]`;
+            break;
+          }
+          if (parentCursor.id && !/\d{4,}/.test(parentCursor.id)) {
+            stableParentSelector = `#${parentCursor.id}`;
+            break;
+          }
+          const parentAriaLabel = parentCursor.getAttribute('aria-label');
+          const parentRole = parentCursor.getAttribute('role');
+          if (parentRole && parentAriaLabel) {
+            stableParentSelector = `[role="${parentRole}"][aria-label="${parentAriaLabel}"]`;
+            break;
+          }
+          parentCursor = parentCursor.parentElement;
+        }
+
+        const recommendedSelectors: Array<{ type: string; selector: string; reason: string }> = [];
+        if (attributes.id && !/\d{4,}/.test(attributes.id)) {
+          recommendedSelectors.push({
+            type: 'id',
+            selector: `//${tag}[@id='${attributes.id}']`,
+            reason: 'Stable element id',
+          });
+        }
+        if (attributes.name && !/\d{4,}/.test(attributes.name)) {
+          recommendedSelectors.push({
+            type: 'name',
+            selector: `//${tag}[@name='${attributes.name}']`,
+            reason: 'Stable element name',
+          });
+        }
+        if ((labelText || parentLabel) && (tag === 'input' || tag === 'select' || tag === 'textarea')) {
+          const label = (labelText || parentLabel).replace(/"/g, '\\"');
+          recommendedSelectors.push({
+            type: 'label',
+            selector: `//label[contains(normalize-space(.), "${label}")]/following::${tag}[1]`,
+            reason: 'First matching control after associated label',
+          });
+        }
+        if (stableParentSelector) {
+          recommendedSelectors.push({
+            type: 'stable-parent',
+            selector: stableParentSelector,
+            reason: 'Nearest stable ancestor',
+          });
+        }
 
         const pathParts: string[] = [];
         let current: Element | null = htmlElement;
@@ -136,6 +222,12 @@ export async function connectChromeSession(
           tag,
           domPath: ['body', ...pathParts].join(' > '),
           attributes,
+          pageUrl: window.location.href,
+          pageTitle: document.title,
+          associatedLabel: labelText || parentLabel,
+          helpText,
+          stableParentSelector,
+          recommendedSelectors: recommendedSelectors.slice(0, 4),
           visible,
           bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
         };
@@ -146,7 +238,10 @@ export async function connectChromeSession(
       facts.push({ elementId, ...raw });
     }
 
-    return facts;
+    return facts.map((fact) => ({
+      ...fact,
+      surroundingContext: buildSurroundingContext(fact, facts),
+    }));
   }
 
   function requireHandle(elementId: string): ElementHandle {
@@ -162,20 +257,24 @@ export async function connectChromeSession(
   return {
     gotoUrl: async (url) => {
       await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await settlePage();
     },
     currentUrl: async () => page.url(),
     snapshotElements,
     click: async (elementId) => {
       await requireHandle(elementId).click();
+      await settlePage();
     },
     type: async (elementId, text) => {
       const handle = requireHandle(elementId);
       await handle.click({ count: 3 });
       await handle.type(text);
+      await settlePage();
     },
     select: async (elementId, value) => {
       const handle = requireHandle(elementId);
       await handle.select(value);
+      await settlePage();
     },
     screenshotElement: async (elementId) => {
       try {

@@ -63,6 +63,10 @@ npm run doctor
 npm run serve
 ```
 
+`npm run login` now supports an interactive path. If username, password, API key,
+or access token are missing from env/config, the CLI prompts for them and then
+persists the resulting access token in the package config store.
+
 ## Configuration
 
 Environment variables commonly used:
@@ -85,6 +89,16 @@ A360_DEFAULT_FOLDER_ID=123456
 ```
 
 By default the package stores config under the current user's config directory. You can override the config path with `A360_CONFIG_PATH`.
+
+Recommended auth pattern for MCP-first usage:
+
+1. `npm run init`
+2. `npm run login`
+3. `npm run doctor`
+4. `npm run serve`
+
+This keeps Control Room auth inside the MCP package flow instead of relying on a
+separate browser session token.
 
 ## Capability Areas
 
@@ -132,6 +146,7 @@ Bulk and folder-scoped operational tools:
 - `a360_apply_package_version_update`
 - `a360_scan_logtofile_issues`
 - `a360_apply_logtofile_fix`
+- `a360_apply_best_practice_scaffold`
 - `a360_silent_save_bot`
 
 ### AI Bot Generation
@@ -162,10 +177,13 @@ or set `A360_MCP_CHROME_ENDPOINT` to an existing DevTools URL.
 
 | Tool | Purpose |
 | --- | --- |
-| `a360_record_web_actions` | Execute structured steps (navigate/click/type/select) live in Chrome; capture each target into canonical `UIOBJECT`/`IMAGE` payloads plus ready recorder nodes. Halts with ranked candidates on ambiguity. |
+| `a360_record_web_actions` | Execute structured steps (navigate/click/type/select) live in Chrome; capture each target into canonical `UIOBJECT`/`IMAGE` payloads plus ready recorder nodes and suggested `WINDOW` variable scaffolding. Halts with ranked candidates on ambiguity. |
 | `a360_capture_ui_target` | Capture one element (no action) into canonical payload pieces. |
-| `a360_insert_recorder_step` | Insert captured recorder node(s) into an existing bot and save via the normalized bundle flow. |
+| `a360_validate_ui_target_binding` | Re-capture a live target and compare it with a previously captured surrounding-context snapshot to estimate whether the binding is still reliable. |
+| `a360_repair_ui_target_binding` | Scan the live page for the best current match to a stored surrounding-context snapshot and return a patch-ready replacement payload plus ranked alternates. |
+| `a360_insert_recorder_step` | Insert captured recorder node(s) and optional suggested variables into an existing bot and save via the normalized bundle flow. |
 | `a360_patch_step_target` | Replace a node attribute's target payload with a captured one and save. |
+| `a360_repair_and_patch_ui_target` | Repair a recorded target against the live page, patch the bot node, merge suggested variables, and save in one deterministic flow. If `capturedContext` is omitted, the tool first looks for persisted A360 MCP healing metadata already stored on the saved `UIOBJECT`. |
 
 The MCP client decomposes a natural-language prompt into structured steps; the
 server matches each target description deterministically against the page's
@@ -173,9 +191,26 @@ elements — no AI guessing inside the server. Recorder command identity
 (`packageName`/`commandName`/attribute names) defaults to `Recorder`/`Capture`
 and is overridable per call; verify against `a360_get_package_command_schema`.
 
+Recommended low-AI live capture pattern:
+
+1. Use AI only to reduce the prompt into a short structured action list.
+2. Use `a360_record_web_actions` or `a360_capture_ui_target` to capture real page targets.
+3. Use `a360_get_package_command_schema` to confirm exact Browser/Recorder attribute names.
+4. Use `a360_insert_recorder_step` or `a360_save_bot_bundle` to persist the bot.
+5. Validate with `a360_preview_bot_json` and `a360_validate_bot_json` before run/deploy.
+
+The goal is to keep AI on intent extraction while MCP tools and package metadata
+own target capture, context validation, node shape, variable scaffolding, save, and validation.
+
+Recorder targets captured by this MCP now persist a small `a360Mcp` metadata payload on the saved `UIOBJECT` typed value. That metadata stores the surrounding-context snapshot used for self-healing, so a future repair call can recover from live page drift without requiring the caller to resend the original captured context.
+
+For post-build cleanup and standardization, use:
+
+- `a360_apply_best_practice_scaffold` to deterministically add `Comment` and `LogToFile` scaffolding plus required log path variables.
+
 ## Current Tool Count
 
-Current MCP tool count: `31`
+Current MCP tool count: `35`
 
 ## Build Flow For AI-Driven Bots
 

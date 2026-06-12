@@ -93,7 +93,7 @@ describe('repository save workflow', () => {
       unknown
     >;
     const uiObject = uiObjectValue.uiObject as Record<string, unknown>;
-    const criteria = uiObject.criteria as Array<Record<string, unknown>>;
+    const criteria = uiObject.criteria as Record<string, Record<string, unknown>>;
 
     expect(firstNode.disabled).toBe(false);
     expect(layout).toEqual({ x: 10, y: 20 });
@@ -104,19 +104,19 @@ describe('repository save workflow', () => {
     expect((uiObject.capture as Record<string, unknown>)).toEqual({
       securelyRecorded: true,
     });
-    expect(criteria).toHaveLength(2);
-    expect(criteria[0]).toEqual({
-      key: 'title',
+    expect(Object.keys(criteria)).toEqual(['title', 'role']);
+    expect(criteria.title).toEqual({
+      enabled: true,
       value: {
-        enabled: true,
-        value: { type: 'STRING', string: 'Calculator' },
+        type: 'STRING',
+        string: 'Calculator',
       },
     });
-    expect(criteria[1]).toEqual({
-      key: 'role',
+    expect(criteria.role).toEqual({
+      enabled: false,
       value: {
-        enabled: false,
-        value: { type: 'STRING', string: '' },
+        type: 'STRING',
+        string: '',
       },
     });
     expect(normalized.variables[0]).not.toHaveProperty('key');

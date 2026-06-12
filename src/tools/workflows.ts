@@ -30,6 +30,14 @@ type WorkflowDeps = {
     previewBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
     fixBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
     normalizeBotJson: (botJson: Record<string, unknown>) => Promise<unknown>;
+    applyBestPracticeScaffold: (input: {
+      botJson: Record<string, unknown>;
+      startComment?: string;
+      startLogMessage?: string;
+      endLogMessage?: string;
+      auditLogPath?: string;
+      errorLogPath?: string;
+    }) => Promise<unknown>;
     listAvailablePackages: (options?: {
       filterRequest?: {
         fields?: string[];
@@ -284,6 +292,41 @@ export function registerWorkflowTools(server: McpServer, deps: WorkflowDeps) {
               wrapInTry,
               description,
               dryRun,
+            }),
+            null,
+            2,
+          ),
+        },
+      ],
+    }),
+  );
+
+  server.registerTool(
+    'a360_apply_best_practice_scaffold',
+    {
+      description:
+        'Apply deterministic Comment and Log To File scaffolding to an A360 bot JSON, including required packages and log path variables.',
+      inputSchema: z.object({
+        botJson: z.record(z.string(), z.unknown()),
+        startComment: z.string().optional(),
+        startLogMessage: z.string().optional(),
+        endLogMessage: z.string().optional(),
+        auditLogPath: z.string().optional(),
+        errorLogPath: z.string().optional(),
+      }),
+    },
+    async ({ botJson, startComment, startLogMessage, endLogMessage, auditLogPath, errorLogPath }) => ({
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            await deps.workflowApi.applyBestPracticeScaffold({
+              botJson,
+              startComment,
+              startLogMessage,
+              endLogMessage,
+              auditLogPath,
+              errorLogPath,
             }),
             null,
             2,

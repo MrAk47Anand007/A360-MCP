@@ -61,10 +61,22 @@ function fakeApi(content: Record<string, unknown> = EXISTING_CONTENT) {
 describe('insertRecorderSteps', () => {
   it('appends nodes, adds the Recorder package, and saves via the bundle flow', async () => {
     const api = fakeApi();
+    const variables = [
+      {
+        name: 'pWinACMETESTUIPATHCOMLOGIN',
+        description: '',
+        type: 'WINDOW',
+        readOnly: false,
+        input: false,
+        output: false,
+        defaultValue: { type: 'WINDOW', mode: 'browser' },
+      },
+    ];
 
     const result = await insertRecorderSteps(api, {
       fileId: '42',
       nodes: [RECORDER_NODE],
+      variables,
       recorderPackage: { name: 'Recorder', version: '2.5.0' },
     });
 
@@ -75,7 +87,9 @@ describe('insertRecorderSteps', () => {
     expect(saved.nodes).toHaveLength(2);
     expect(saved.nodes[1].uid).toBe('rec-1');
     expect(saved.packages.map((p: any) => p.name)).toContain('Recorder');
+    expect(saved.variables).toEqual(variables);
     expect(result.insertedUids).toEqual(['rec-1']);
+    expect(result.insertedVariables).toEqual(['pWinACMETESTUIPATHCOMLOGIN']);
   });
 
   it('inserts after a given node uid', async () => {
@@ -183,7 +197,41 @@ describe('patchStepTarget', () => {
     const node = saved.nodes.find((n: any) => n.uid === 'rec-1');
     const attribute = node.attributes.find((a: any) => a.name === 'objectProps');
     const criteria = attribute.value.uiObject.criteria;
-    expect(criteria[0].value.value.string).toBe('Submit');
+    expect(criteria.title.value.string).toBe('Submit');
+  });
+
+  it('merges suggested variables while patching a target', async () => {
+    const content = structuredClone(EXISTING_CONTENT) as Record<string, any>;
+    content.nodes.push(structuredClone(RECORDER_NODE));
+    const api = fakeApi(content);
+
+    const variable = {
+      name: 'pWinACMETESTUIPATHCOMLOGIN',
+      description: '',
+      type: 'WINDOW',
+      readOnly: false,
+      input: false,
+      output: false,
+      defaultValue: { type: 'WINDOW', mode: 'browser' },
+    };
+
+    const result = await patchStepTarget(api, {
+      fileId: '42',
+      nodeUid: 'rec-1',
+      attributeName: 'objectProps',
+      value: {
+        type: 'UIOBJECT',
+        uiObject: {
+          capture: { securelyRecorded: true },
+          criteria: [],
+        },
+      },
+      variables: [variable],
+    });
+
+    const saved = api.updateFileContent.mock.calls[0][1] as Record<string, any>;
+    expect(saved.variables).toEqual([variable]);
+    expect(result.insertedVariables).toEqual(['pWinACMETESTUIPATHCOMLOGIN']);
   });
 
   it('fails when the node uid is missing', async () => {

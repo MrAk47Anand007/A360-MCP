@@ -1,0 +1,694 @@
+{
+  "status": "completed",
+  "steps": [
+    {
+      "input": {
+        "action": "type",
+        "target": "Email input",
+        "text": "anand.kale@xalta.tech",
+        "hints": {
+          "role": "textbox"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "capture": {
+              "securelyRecorded": true
+            },
+            "criteria": {
+              "domPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "body > input#email"
+                }
+              },
+              "tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "input"
+                }
+              },
+              "role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "textbox"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Email:"
+                }
+              },
+              "id": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              },
+              "name": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              }
+            }
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-12",
+          "role": "textbox",
+          "name": "Email:",
+          "text": "",
+          "tag": "input",
+          "domPath": "body > input#email",
+          "attributes": {
+            "id": "email",
+            "name": "email",
+            "type": "email",
+            "class": "form-control "
+          },
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 296.8000183105469,
+            "width": 485,
+            "height": 34
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Email:"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "8c7838c2-2dee-45fc-8440-0003177f3a56",
+        "packageName": "Recorder",
+        "commandName": "Capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "objectProps",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "capture": {
+                  "securelyRecorded": true
+                },
+                "criteria": {
+                  "domPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "body > input#email"
+                    }
+                  },
+                  "tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "input"
+                    }
+                  },
+                  "role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "textbox"
+                    }
+                  },
+                  "title": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Email:"
+                    }
+                  },
+                  "id": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  },
+                  "name": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "action",
+            "value": {
+              "type": "STRING",
+              "string": "SET_TEXT"
+            }
+          },
+          {
+            "name": "actionValue",
+            "value": {
+              "type": "STRING",
+              "string": "anand.kale@xalta.tech"
+            }
+          },
+          {
+            "name": "anchor",
+            "value": {
+              "type": "DICTIONARY",
+              "dictionary": [
+                {
+                  "key": "name",
+                  "value": {
+                    "type": "STRING",
+                    "string": "Email:"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "type",
+        "target": "Password input",
+        "text": "AkAnand@2002",
+        "hints": {
+          "role": "textbox"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "capture": {
+              "securelyRecorded": true
+            },
+            "criteria": {
+              "domPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "body > input#password"
+                }
+              },
+              "tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "input"
+                }
+              },
+              "role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "textbox"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Password:"
+                }
+              },
+              "id": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              },
+              "name": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              }
+            }
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-14",
+          "role": "textbox",
+          "name": "Password:",
+          "text": "",
+          "tag": "input",
+          "domPath": "body > input#password",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "class": "form-control "
+          },
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 370.8000183105469,
+            "width": 485,
+            "height": 34
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Password:"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "2595697d-be65-4d1b-9897-18d513f7fb03",
+        "packageName": "Recorder",
+        "commandName": "Capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "objectProps",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "capture": {
+                  "securelyRecorded": true
+                },
+                "criteria": {
+                  "domPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "body > input#password"
+                    }
+                  },
+                  "tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "input"
+                    }
+                  },
+                  "role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "textbox"
+                    }
+                  },
+                  "title": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Password:"
+                    }
+                  },
+                  "id": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  },
+                  "name": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "action",
+            "value": {
+              "type": "STRING",
+              "string": "SET_TEXT"
+            }
+          },
+          {
+            "name": "actionValue",
+            "value": {
+              "type": "STRING",
+              "string": "AkAnand@2002"
+            }
+          },
+          {
+            "name": "anchor",
+            "value": {
+              "type": "DICTIONARY",
+              "dictionary": [
+                {
+                  "key": "name",
+                  "value": {
+                    "type": "STRING",
+                    "string": "Password:"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "click",
+        "target": "Login button",
+        "hints": {
+          "role": "button",
+          "exactText": "Login"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "capture": {
+              "securelyRecorded": true
+            },
+            "criteria": {
+              "domPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "body > div > div:nth-of-type(2) > div > div > div > form > button"
+                }
+              },
+              "tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "button"
+                }
+              },
+              "role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "button"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Login"
+                }
+              }
+            }
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-17",
+          "role": "button",
+          "name": "Login",
+          "text": "Login",
+          "tag": "button",
+          "domPath": "body > div > div:nth-of-type(2) > div > div > div > form > button",
+          "attributes": {
+            "type": "submit",
+            "class": "btn btn-primary"
+          },
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 461.5249938964844,
+            "width": 59.86249923706055,
+            "height": 33.60000228881836
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Login"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "0927d473-d2e1-4219-84a1-14cf312be9d5",
+        "packageName": "Recorder",
+        "commandName": "Capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "objectProps",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "capture": {
+                  "securelyRecorded": true
+                },
+                "criteria": {
+                  "domPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "body > div > div:nth-of-type(2) > div > div > div > form > button"
+                    }
+                  },
+                  "tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "button"
+                    }
+                  },
+                  "role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "button"
+                    }
+                  },
+                  "title": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Login"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "action",
+            "value": {
+              "type": "STRING",
+              "string": "CLICK"
+            }
+          },
+          {
+            "name": "anchor",
+            "value": {
+              "type": "DICTIONARY",
+              "dictionary": [
+                {
+                  "key": "name",
+                  "value": {
+                    "type": "STRING",
+                    "string": "Login"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "click",
+        "target": "Log Out link",
+        "hints": {
+          "role": "link",
+          "exactText": "Log Out"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "capture": {
+              "securelyRecorded": true
+            },
+            "criteria": {
+              "domPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "body > div#bs-example-navbar-collapse-1 > ul > li:nth-of-type(3) > a"
+                }
+              },
+              "tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "a"
+                }
+              },
+              "role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "link"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Log Out"
+                }
+              }
+            }
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-7",
+          "role": "link",
+          "name": "Log Out",
+          "text": "Log Out",
+          "tag": "a",
+          "domPath": "body > div#bs-example-navbar-collapse-1 > ul > li:nth-of-type(3) > a",
+          "attributes": {
+            "href": "https://acme-test.uipath.com/logout"
+          },
+          "visible": true,
+          "bounds": {
+            "x": 1265.5750732421875,
+            "y": 0,
+            "width": 79.82500457763672,
+            "height": 50
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Log Out"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "a364675f-4318-4d1d-91f5-0c6d2567c9ad",
+        "packageName": "Recorder",
+        "commandName": "Capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "objectProps",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "capture": {
+                  "securelyRecorded": true
+                },
+                "criteria": {
+                  "domPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "body > div#bs-example-navbar-collapse-1 > ul > li:nth-of-type(3) > a"
+                    }
+                  },
+                  "tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "a"
+                    }
+                  },
+                  "role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "link"
+                    }
+                  },
+                  "title": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Log Out"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "action",
+            "value": {
+              "type": "STRING",
+              "string": "CLICK"
+            }
+          },
+          {
+            "name": "anchor",
+            "value": {
+              "type": "DICTIONARY",
+              "dictionary": [
+                {
+                  "key": "name",
+                  "value": {
+                    "type": "STRING",
+                    "string": "Log Out"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

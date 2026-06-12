@@ -24,9 +24,27 @@ function getNodes(content: Record<string, unknown>): BotNode[] {
   return Array.isArray(content.nodes) ? (content.nodes as BotNode[]) : [];
 }
 
+function mergeVariables(
+  content: Record<string, unknown>,
+  incoming: Array<Record<string, unknown>> | undefined,
+) {
+  const variables = Array.isArray(content.variables)
+    ? ([...content.variables] as Array<Record<string, unknown>>)
+    : [];
+  for (const variable of incoming ?? []) {
+    const name = typeof variable.name === 'string' ? variable.name : '';
+    if (!name || variables.some((entry) => entry.name === name)) {
+      continue;
+    }
+    variables.push(variable);
+  }
+  content.variables = variables;
+}
+
 export type InsertRecorderStepsInput = {
   fileId: string;
   nodes: Array<Record<string, unknown>>;
+  variables?: Array<Record<string, unknown>>;
   /** Insert after this node uid; appends to the end when omitted. */
   afterUid?: string;
   /** Required when the bot does not already reference the recorder package. */
@@ -53,6 +71,8 @@ export async function insertRecorderSteps(
   }
   nodes.splice(insertAt, 0, ...input.nodes);
   content.nodes = nodes;
+
+  mergeVariables(content, input.variables);
 
   const packages = Array.isArray(content.packages)
     ? ([...content.packages] as Array<Record<string, unknown>>)
@@ -95,6 +115,9 @@ export async function insertRecorderSteps(
 
   return {
     insertedUids: input.nodes.map((node) => String(node.uid ?? '')),
+    insertedVariables: (input.variables ?? [])
+      .map((variable) => (typeof variable.name === 'string' ? variable.name : ''))
+      .filter(Boolean),
     nodeCount: nodes.length,
     saveResult,
   };
@@ -105,6 +128,7 @@ export type PatchStepTargetInput = {
   nodeUid: string;
   attributeName: string;
   value: Record<string, unknown>;
+  variables?: Array<Record<string, unknown>>;
   hasErrors?: boolean;
   /** Optional hook to run package-aware normalization before saving. */
   normalizeContent?: (content: Record<string, unknown>) => Promise<Record<string, unknown>>;
@@ -135,6 +159,7 @@ export async function patchStepTarget(api: BotInjectionApi, input: PatchStepTarg
   const newNode = { ...node, attributes: newAttributes };
   const newNodes = nodes.map((n) => (n === node ? newNode : n));
   content.nodes = newNodes;
+  mergeVariables(content, input.variables);
 
   const dependencies = (await api.getFileDependencies(input.fileId)) as {
     dependencies?: Array<{ id?: string | number | null }>;
@@ -147,5 +172,11 @@ export async function patchStepTarget(api: BotInjectionApi, input: PatchStepTarg
     hasErrors: input.hasErrors,
   });
 
-  return { patchedUid: input.nodeUid, saveResult };
+  return {
+    patchedUid: input.nodeUid,
+    insertedVariables: (input.variables ?? [])
+      .map((variable) => (typeof variable.name === 'string' ? variable.name : ''))
+      .filter(Boolean),
+    saveResult,
+  };
 }

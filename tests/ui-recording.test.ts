@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { recordWebActions } from '../src/workflows/ui-recording.js';
 import type { CaptureBrowser, ElementFacts } from '../src/capture/types.js';
+import { buildSurroundingContext } from '../src/capture/surrounding-context.js';
 
 function facts(partial: Partial<ElementFacts> & { elementId: string }): ElementFacts {
   return {
@@ -44,7 +45,7 @@ function fakeBrowser(elements: ElementFacts[]): CaptureBrowser & { log: string[]
 const PAGE = [
   facts({ elementId: 'el-1', role: 'textbox', tag: 'input', attributes: { placeholder: 'Email address' } }),
   facts({ elementId: 'el-2', role: 'button', name: 'Login', tag: 'button', text: 'Login' }),
-];
+].map((item, _index, all) => ({ ...item, surroundingContext: buildSurroundingContext(item, all) }));
 
 describe('ui recording session', () => {
   it('executes structured steps and captures payloads per step', async () => {
@@ -67,6 +68,7 @@ describe('ui recording session', () => {
     const first = session.steps[0];
     expect(first.status).toBe('captured');
     expect(first.payload?.uiObject.type).toBe('UIOBJECT');
+    expect(first.payload?.surroundingContext).toBeDefined();
     expect(first.node?.packageName).toBe('Recorder');
     expect(first.pageUrl).toBe('https://example.test/page');
   });

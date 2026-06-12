@@ -75,9 +75,8 @@ function getObjectWithCriteria(object: Record<string, unknown> | null) {
     return object;
   }
 
-  const nextCriteria = Object.entries(criteria).reduce<
-    Array<{ key: string; value: Record<string, unknown> }>
-  >((result, [name, entryValue]) => {
+  const nextCriteria = Object.entries(criteria).reduce<Record<string, Record<string, unknown>>>(
+    (result, [name, entryValue]) => {
     const entry = asObject(entryValue);
     if (!entry) {
       return result;
@@ -95,12 +94,9 @@ function getObjectWithCriteria(object: Record<string, unknown> | null) {
       nextEntry.value = { type: 'STRING', string: '' };
     }
 
-    result.push({
-      key: name,
-      value: nextEntry,
-    });
+    result[name] = nextEntry;
     return result;
-  }, []);
+  }, {});
 
   return {
     ...(object ?? {}),

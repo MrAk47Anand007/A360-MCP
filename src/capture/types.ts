@@ -20,6 +20,20 @@ export type ElementFacts = {
   domPath: string;
   /** Relevant raw attributes: id, name, placeholder, type, href, aria-*, class. */
   attributes: Record<string, string>;
+  /** Page URL at capture time. */
+  pageUrl?: string;
+  /** Document title at capture time. */
+  pageTitle?: string;
+  /** Best-effort associated label text for form controls. */
+  associatedLabel?: string;
+  /** Best-effort help text from aria-describedby, title, or placeholder. */
+  helpText?: string;
+  /** Nearest stable ancestor selector hint. */
+  stableParentSelector?: string;
+  /** Deterministic selector suggestions ranked by reliability. */
+  recommendedSelectors?: Array<{ type: string; selector: string; reason: string }>;
+  /** Lightweight deterministic context used for target revalidation. */
+  surroundingContext?: Record<string, unknown>;
   visible: boolean;
   bounds: ElementBounds;
 };

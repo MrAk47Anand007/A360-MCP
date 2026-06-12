@@ -1,0 +1,3055 @@
+{
+  "status": "completed",
+  "steps": [
+    {
+      "input": {
+        "action": "type",
+        "target": "Email input",
+        "text": "anand.kale@xalta.tech",
+        "hints": {
+          "role": "textbox"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMTgwMjhmMDYtODZlZS00M2M1LTliYTYtZTliMmQyY2JjMDJiIiwiaWQiOiIiLCJuYW1lIjoiZW1haWwiLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjotMX1dfSwicm9sZSI6NSwiaW5kZXgiOjAsImxlZnQiOjI2OCwidG9wIjoyOTcsIndpZHRoIjo0ODUsImhlaWdodCI6MzQsImNsaWNrWCI6MjQzLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2lucHV0W0BpZD0nZW1haWwnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6ImVtYWlsIn0seyJuYW1lIjoiSFRNTCBOYW1lIiwidmFsdWUiOiJlbWFpbCJ9LHsibmFtZSI6IkhUTUwgQWx0IiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRhZyIsInZhbHVlIjoiSU5QVVQifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJmb3JtLWNvbnRyb2wgIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgU291cmNlSW5kZXgiLCJ2YWx1ZSI6IjAifSx7Im5hbWUiOiJIVE1MIEhyZWYiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoiZW1haWwifSx7Im5hbWUiOiJIVE1MIFZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIENsYXNzSWQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkhUTUwgV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMjk3In0seyJuYW1lIjoiSFRNTCBMZWZ0IiwidmFsdWUiOiIyNjgifSx7Im5hbWUiOiJIVE1MIEhhc0ZyYW1lIiwidmFsdWUiOiJmYWxzZSJ9LHsibmFtZSI6IkhUTUwgRnJhbWVTcmMiLCJ2YWx1ZSI6Imh0dHBzOi8vYWNtZS10ZXN0LnVpcGF0aC5jb20vbG9naW4ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiOWQ2ZWZkYTctMTJmNi00NzY1LWIxYmMtZTI1NmY1NzM5MGFhIn0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6ImVtYWlsIn0seyJuYW1lIjoiVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkNsYXNzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJQYXJlbnQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IldpbmRvd1RpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJSb2xlIiwidmFsdWUiOiJUZXh0Qm94In0seyJuYW1lIjoiUGF0aCIsInZhbHVlIjoiLTEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMjk3In0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiMzQifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Nyw1OSw1OCw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+            "controlType": "TEXTBOX",
+            "technologyType": "HTML",
+            "browserType": "CHROME",
+            "criteria": {
+              "HTML Tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "INPUT"
+                }
+              },
+              "UniqueID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "2e039f3f-251f-4272-b5b0-16d9e501b2d0"
+                }
+              },
+              "WindowTitle": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "innerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Description": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "DOMXPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "//input[@id='email']"
+                }
+              },
+              "HTML Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "297"
+                }
+              },
+              "HTML Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Parent": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ID": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              },
+              "Index": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "outerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "form-control "
+                }
+              },
+              "HTML FrameName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML HasFrame": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "false"
+                }
+              },
+              "Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              },
+              "States": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Type": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              },
+              "HTML FramePath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "FrameDOMXPath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML InnerText": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Alt": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Href": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML SourceIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "ItemName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "485"
+                }
+              },
+              "HTML Title": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Path": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "-1"
+                }
+              },
+              "HTML Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "HTML Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML TagIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1"
+                }
+              },
+              "Role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "TextBox"
+                }
+              },
+              "Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "297"
+                }
+              },
+              "DefaultAction": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "ItemValue": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ClassId": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "485"
+                }
+              },
+              "Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Name": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "email"
+                }
+              },
+              "Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FrameSrc": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "https://acme-test.uipath.com/login"
+                }
+              },
+              "IsVisible": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "true"
+                }
+              }
+            },
+            "isElevated": false,
+            "capture": {
+              "securelyRecorded": true
+            }
+          },
+          "uiObjectWindow": {
+            "type": "WINDOW",
+            "expression": "$pWinACSMEPAGES$"
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-12",
+          "role": "textbox",
+          "name": "Email:",
+          "text": "",
+          "tag": "input",
+          "domPath": "body > input#email",
+          "attributes": {
+            "id": "email",
+            "name": "email",
+            "type": "email",
+            "class": "form-control "
+          },
+          "pageUrl": "https://acme-test.uipath.com/login",
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 296.8000183105469,
+            "width": 485,
+            "height": 34
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Email:"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "1c0eab1c-42b8-46dc-88a4-62a25fdad00c",
+        "packageName": "Recorder",
+        "commandName": "capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "uiObject",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMTgwMjhmMDYtODZlZS00M2M1LTliYTYtZTliMmQyY2JjMDJiIiwiaWQiOiIiLCJuYW1lIjoiZW1haWwiLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjotMX1dfSwicm9sZSI6NSwiaW5kZXgiOjAsImxlZnQiOjI2OCwidG9wIjoyOTcsIndpZHRoIjo0ODUsImhlaWdodCI6MzQsImNsaWNrWCI6MjQzLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2lucHV0W0BpZD0nZW1haWwnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6ImVtYWlsIn0seyJuYW1lIjoiSFRNTCBOYW1lIiwidmFsdWUiOiJlbWFpbCJ9LHsibmFtZSI6IkhUTUwgQWx0IiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRhZyIsInZhbHVlIjoiSU5QVVQifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJmb3JtLWNvbnRyb2wgIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgU291cmNlSW5kZXgiLCJ2YWx1ZSI6IjAifSx7Im5hbWUiOiJIVE1MIEhyZWYiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoiZW1haWwifSx7Im5hbWUiOiJIVE1MIFZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIENsYXNzSWQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkhUTUwgV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMjk3In0seyJuYW1lIjoiSFRNTCBMZWZ0IiwidmFsdWUiOiIyNjgifSx7Im5hbWUiOiJIVE1MIEhhc0ZyYW1lIiwidmFsdWUiOiJmYWxzZSJ9LHsibmFtZSI6IkhUTUwgRnJhbWVTcmMiLCJ2YWx1ZSI6Imh0dHBzOi8vYWNtZS10ZXN0LnVpcGF0aC5jb20vbG9naW4ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiOWQ2ZWZkYTctMTJmNi00NzY1LWIxYmMtZTI1NmY1NzM5MGFhIn0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6ImVtYWlsIn0seyJuYW1lIjoiVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkNsYXNzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJQYXJlbnQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IldpbmRvd1RpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJSb2xlIiwidmFsdWUiOiJUZXh0Qm94In0seyJuYW1lIjoiUGF0aCIsInZhbHVlIjoiLTEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMjk3In0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiMzQifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Nyw1OSw1OCw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+                "controlType": "TEXTBOX",
+                "technologyType": "HTML",
+                "browserType": "CHROME",
+                "criteria": {
+                  "HTML Tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "INPUT"
+                    }
+                  },
+                  "UniqueID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "2e039f3f-251f-4272-b5b0-16d9e501b2d0"
+                    }
+                  },
+                  "WindowTitle": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "innerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Description": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "DOMXPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "//input[@id='email']"
+                    }
+                  },
+                  "HTML Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "297"
+                    }
+                  },
+                  "HTML Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Parent": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ID": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  },
+                  "Index": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "outerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "form-control "
+                    }
+                  },
+                  "HTML FrameName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML HasFrame": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "false"
+                    }
+                  },
+                  "Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  },
+                  "States": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Type": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  },
+                  "HTML FramePath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "FrameDOMXPath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML InnerText": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Alt": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Href": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML SourceIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "ItemName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "485"
+                    }
+                  },
+                  "HTML Title": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Path": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "-1"
+                    }
+                  },
+                  "HTML Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "HTML Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML TagIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1"
+                    }
+                  },
+                  "Role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "TextBox"
+                    }
+                  },
+                  "Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "297"
+                    }
+                  },
+                  "DefaultAction": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "ItemValue": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ClassId": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "485"
+                    }
+                  },
+                  "Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Name": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "email"
+                    }
+                  },
+                  "Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FrameSrc": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "https://acme-test.uipath.com/login"
+                    }
+                  },
+                  "IsVisible": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "true"
+                    }
+                  }
+                },
+                "isElevated": false,
+                "capture": {
+                  "securelyRecorded": true
+                }
+              },
+              "uiObjectWindow": {
+                "type": "WINDOW",
+                "expression": "$pWinACSMEPAGES$"
+              }
+            }
+          },
+          {
+            "name": "textboxAction",
+            "value": {
+              "type": "STRING",
+              "string": "SETTEXT"
+            }
+          },
+          {
+            "name": "runInBackground",
+            "value": {
+              "type": "BOOLEAN",
+              "boolean": false
+            }
+          },
+          {
+            "name": "typeOfInput",
+            "value": {
+              "type": "STRING",
+              "string": "VALUE"
+            }
+          },
+          {
+            "name": "value",
+            "value": {
+              "type": "STRING",
+              "string": "anand.kale@xalta.tech"
+            }
+          },
+          {
+            "name": "delay",
+            "value": {
+              "type": "NUMBER",
+              "number": "5"
+            }
+          },
+          {
+            "name": "advancedWait",
+            "value": {
+              "type": "STRING",
+              "string": "BASIC"
+            }
+          },
+          {
+            "name": "wait",
+            "value": {
+              "type": "NUMBER",
+              "number": "15"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "type",
+        "target": "Password input",
+        "text": "AkAnand@2002",
+        "hints": {
+          "role": "textbox"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiYzNmMTI4OWQtYTBkMS00NWZhLWJmMTEtN2M5ZjQwN2FkZjdjIiwiaWQiOiIiLCJuYW1lIjoicGFzc3dvcmQiLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjotMX1dfSwicm9sZSI6NSwiaW5kZXgiOjAsImxlZnQiOjI2OCwidG9wIjozNzEsIndpZHRoIjo0ODUsImhlaWdodCI6MzQsImNsaWNrWCI6MjQzLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IlByb3RlY3RlZCIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2lucHV0W0BpZD0ncGFzc3dvcmQnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6InBhc3N3b3JkIn0seyJuYW1lIjoiSFRNTCBOYW1lIiwidmFsdWUiOiJwYXNzd29yZCJ9LHsibmFtZSI6IkhUTUwgQWx0IiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRhZyIsInZhbHVlIjoiSU5QVVQifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJmb3JtLWNvbnRyb2wgIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgU291cmNlSW5kZXgiLCJ2YWx1ZSI6IjAifSx7Im5hbWUiOiJIVE1MIEhyZWYiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoicGFzc3dvcmQifSx7Im5hbWUiOiJIVE1MIFZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIENsYXNzSWQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkhUTUwgV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMzcxIn0seyJuYW1lIjoiSFRNTCBMZWZ0IiwidmFsdWUiOiIyNjgifSx7Im5hbWUiOiJIVE1MIEhhc0ZyYW1lIiwidmFsdWUiOiJmYWxzZSJ9LHsibmFtZSI6IkhUTUwgRnJhbWVTcmMiLCJ2YWx1ZSI6Imh0dHBzOi8vYWNtZS10ZXN0LnVpcGF0aC5jb20vbG9naW4ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiMjVkMzIzMTEtOWRlYi00NjkzLWFjM2UtNGEzM2ZhZjQ4MGY2In0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6InBhc3N3b3JkIn0seyJuYW1lIjoiVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkNsYXNzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJQYXJlbnQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IldpbmRvd1RpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJSb2xlIiwidmFsdWUiOiJUZXh0Qm94In0seyJuYW1lIjoiUGF0aCIsInZhbHVlIjoiLTEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMzcxIn0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiMzQifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Nyw1OSw1OCw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+            "controlType": "PASSWORD_TEXT",
+            "technologyType": "HTML",
+            "browserType": "CHROME",
+            "criteria": {
+              "HTML Tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "INPUT"
+                }
+              },
+              "UniqueID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "405e94d9-b1f4-4bf1-8c33-43689adc769c"
+                }
+              },
+              "WindowTitle": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "innerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Description": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "DOMXPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "//input[@id='password']"
+                }
+              },
+              "HTML Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "371"
+                }
+              },
+              "HTML Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Parent": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ID": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              },
+              "Index": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "outerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "form-control "
+                }
+              },
+              "HTML FrameName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML HasFrame": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "false"
+                }
+              },
+              "Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              },
+              "States": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "Protected"
+                }
+              },
+              "HTML Type": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              },
+              "HTML FramePath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "FrameDOMXPath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML InnerText": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Alt": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Href": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML SourceIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "ItemName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "485"
+                }
+              },
+              "HTML Title": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Path": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "-1"
+                }
+              },
+              "HTML Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "HTML Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML TagIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1"
+                }
+              },
+              "Role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "TextBox"
+                }
+              },
+              "Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "371"
+                }
+              },
+              "DefaultAction": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "ItemValue": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ClassId": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "485"
+                }
+              },
+              "Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Name": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "password"
+                }
+              },
+              "Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FrameSrc": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "https://acme-test.uipath.com/login"
+                }
+              },
+              "IsVisible": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "true"
+                }
+              }
+            },
+            "isElevated": false,
+            "capture": {
+              "securelyRecorded": true
+            }
+          },
+          "uiObjectWindow": {
+            "type": "WINDOW",
+            "expression": "$pWinACSMEPAGES$"
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-14",
+          "role": "textbox",
+          "name": "Password:",
+          "text": "",
+          "tag": "input",
+          "domPath": "body > input#password",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "class": "form-control "
+          },
+          "pageUrl": "https://acme-test.uipath.com/login",
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 370.8000183105469,
+            "width": 485,
+            "height": 34
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Password:"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "983adf62-8e6d-49a9-b819-0a9cfceb3edf",
+        "packageName": "Recorder",
+        "commandName": "capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "uiObject",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiYzNmMTI4OWQtYTBkMS00NWZhLWJmMTEtN2M5ZjQwN2FkZjdjIiwiaWQiOiIiLCJuYW1lIjoicGFzc3dvcmQiLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjotMX1dfSwicm9sZSI6NSwiaW5kZXgiOjAsImxlZnQiOjI2OCwidG9wIjozNzEsIndpZHRoIjo0ODUsImhlaWdodCI6MzQsImNsaWNrWCI6MjQzLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IlByb3RlY3RlZCIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2lucHV0W0BpZD0ncGFzc3dvcmQnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6InBhc3N3b3JkIn0seyJuYW1lIjoiSFRNTCBOYW1lIiwidmFsdWUiOiJwYXNzd29yZCJ9LHsibmFtZSI6IkhUTUwgQWx0IiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRhZyIsInZhbHVlIjoiSU5QVVQifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJmb3JtLWNvbnRyb2wgIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgU291cmNlSW5kZXgiLCJ2YWx1ZSI6IjAifSx7Im5hbWUiOiJIVE1MIEhyZWYiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoicGFzc3dvcmQifSx7Im5hbWUiOiJIVE1MIFZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIENsYXNzSWQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkhUTUwgV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMzcxIn0seyJuYW1lIjoiSFRNTCBMZWZ0IiwidmFsdWUiOiIyNjgifSx7Im5hbWUiOiJIVE1MIEhhc0ZyYW1lIiwidmFsdWUiOiJmYWxzZSJ9LHsibmFtZSI6IkhUTUwgRnJhbWVTcmMiLCJ2YWx1ZSI6Imh0dHBzOi8vYWNtZS10ZXN0LnVpcGF0aC5jb20vbG9naW4ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiMjVkMzIzMTEtOWRlYi00NjkzLWFjM2UtNGEzM2ZhZjQ4MGY2In0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6InBhc3N3b3JkIn0seyJuYW1lIjoiVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkNsYXNzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJQYXJlbnQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IldpbmRvd1RpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJSb2xlIiwidmFsdWUiOiJUZXh0Qm94In0seyJuYW1lIjoiUGF0aCIsInZhbHVlIjoiLTEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMzcxIn0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjQ4NSJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiMzQifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Nyw1OSw1OCw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+                "controlType": "PASSWORD_TEXT",
+                "technologyType": "HTML",
+                "browserType": "CHROME",
+                "criteria": {
+                  "HTML Tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "INPUT"
+                    }
+                  },
+                  "UniqueID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "405e94d9-b1f4-4bf1-8c33-43689adc769c"
+                    }
+                  },
+                  "WindowTitle": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "innerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Description": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "DOMXPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "//input[@id='password']"
+                    }
+                  },
+                  "HTML Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "371"
+                    }
+                  },
+                  "HTML Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Parent": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ID": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  },
+                  "Index": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "outerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "form-control "
+                    }
+                  },
+                  "HTML FrameName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML HasFrame": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "false"
+                    }
+                  },
+                  "Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  },
+                  "States": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Protected"
+                    }
+                  },
+                  "HTML Type": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  },
+                  "HTML FramePath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "FrameDOMXPath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML InnerText": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Alt": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Href": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML SourceIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "ItemName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "485"
+                    }
+                  },
+                  "HTML Title": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Path": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "-1"
+                    }
+                  },
+                  "HTML Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "HTML Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML TagIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1"
+                    }
+                  },
+                  "Role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "TextBox"
+                    }
+                  },
+                  "Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "371"
+                    }
+                  },
+                  "DefaultAction": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "ItemValue": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ClassId": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "485"
+                    }
+                  },
+                  "Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Name": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "password"
+                    }
+                  },
+                  "Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FrameSrc": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "https://acme-test.uipath.com/login"
+                    }
+                  },
+                  "IsVisible": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "true"
+                    }
+                  }
+                },
+                "isElevated": false,
+                "capture": {
+                  "securelyRecorded": true
+                }
+              },
+              "uiObjectWindow": {
+                "type": "WINDOW",
+                "expression": "$pWinACSMEPAGES$"
+              }
+            }
+          },
+          {
+            "name": "passwordtextAction",
+            "value": {
+              "type": "STRING",
+              "string": "SETTEXT"
+            }
+          },
+          {
+            "name": "runInBackground",
+            "value": {
+              "type": "BOOLEAN",
+              "boolean": false
+            }
+          },
+          {
+            "name": "valueCV",
+            "value": {
+              "type": "STRING",
+              "string": "AkAnand@2002"
+            }
+          },
+          {
+            "name": "delay",
+            "value": {
+              "type": "NUMBER",
+              "number": "5"
+            }
+          },
+          {
+            "name": "advancedWait",
+            "value": {
+              "type": "STRING",
+              "string": "BASIC"
+            }
+          },
+          {
+            "name": "wait",
+            "value": {
+              "type": "NUMBER",
+              "number": "15"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "click",
+        "target": "Login button",
+        "hints": {
+          "role": "button",
+          "exactText": "Login"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/login",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMTAzNmU5ZGYtZTc0Ny00OTUwLTlhMWItOTc5ZjQwYmE4Nzg4IiwiaWQiOiIiLCJuYW1lIjoiTG9naW4iLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjoxfSx7ImluZGV4IjoyfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfV19LCJyb2xlIjoxLCJpbmRleCI6MCwibGVmdCI6MjY4LCJ0b3AiOjQ2Miwid2lkdGgiOjYwLCJoZWlnaHQiOjM0LCJjbGlja1giOjMwLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2J1dHRvbltub3JtYWxpemUtc3BhY2UodGV4dCgpKT0nTG9naW4nXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBBbHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGFnIiwidmFsdWUiOiJCVVRUT04ifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJidG4gYnRuLXByaW1hcnkifSx7Im5hbWUiOiJIVE1MIElubmVyVGV4dCIsInZhbHVlIjoiTG9naW4ifSx7Im5hbWUiOiJIVE1MIFNvdXJjZUluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiSFRNTCBIcmVmIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFR5cGUiLCJ2YWx1ZSI6InN1Ym1pdCJ9LHsibmFtZSI6IkhUTUwgVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgQ2xhc3NJZCIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBUaXRsZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBIZWlnaHQiLCJ2YWx1ZSI6IjM0In0seyJuYW1lIjoiSFRNTCBXaWR0aCIsInZhbHVlIjoiNjAifSx7Im5hbWUiOiJIVE1MIFRhZ0luZGV4IiwidmFsdWUiOiIxIn0seyJuYW1lIjoiSFRNTCBUb3AiLCJ2YWx1ZSI6IjQ2MiJ9LHsibmFtZSI6IkhUTUwgTGVmdCIsInZhbHVlIjoiMjY4In0seyJuYW1lIjoiSFRNTCBIYXNGcmFtZSIsInZhbHVlIjoiZmFsc2UifSx7Im5hbWUiOiJIVE1MIEZyYW1lU3JjIiwidmFsdWUiOiJodHRwczovL2FjbWUtdGVzdC51aXBhdGguY29tL2xvZ2luIn0seyJuYW1lIjoiSFRNTCBGcmFtZU5hbWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgRnJhbWVQYXRoIiwidmFsdWUiOiIifSx7Im5hbWUiOiJGcmFtZURPTVhQYXRoIiwidmFsdWUiOiIifSx7Im5hbWUiOiJpbm5lckhUTUwiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Im91dGVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoiSXNWaXNpYmxlIiwidmFsdWUiOiJ0cnVlIn1dLCJhdHRyaWJ1dGVzIjpbeyJuYW1lIjoiVW5pcXVlSUQiLCJ2YWx1ZSI6IjQzMTZiY2VjLWQ3NWQtNGIwNC1iNGNmLTZkM2JjZWExNThmYiJ9LHsibmFtZSI6IklEIiwidmFsdWUiOiIifSx7Im5hbWUiOiJOYW1lIiwidmFsdWUiOiJMb2dpbiJ9LHsibmFtZSI6IlZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJDbGFzcyIsInZhbHVlIjoiIn0seyJuYW1lIjoiUGFyZW50IiwidmFsdWUiOiIifSx7Im5hbWUiOiJXaW5kb3dUaXRsZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiUm9sZSIsInZhbHVlIjoiUHVzaEJ1dHRvbiJ9LHsibmFtZSI6IlBhdGgiLCJ2YWx1ZSI6IjF8MnwxfDF8MXwxfDEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiNDYyIn0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjYwIn0seyJuYW1lIjoiSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkRlc2NyaXB0aW9uIiwidmFsdWUiOiIifSx7Im5hbWUiOiJTdGF0ZXMiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkRlZmF1bHRBY3Rpb24iLCJ2YWx1ZSI6IiJ9XSwiaXNMaW5rZWQiOmZhbHNlfSwib2JqUGFyZW50IjpudWxsLCJvYmpJdGVtIjpudWxsLCJjaGlsZHJlbiI6W10sIml0ZW1zIjpbXSwic2VhcmNoQ3JpdGVyaWEiOls3LDYxLDY3LDgwXSwiZXJyb3IiOm51bGwsImJyb3dzZXJGcmFtZXdvcmsiOiJ1bmRlZmluZWQiLCJjYXB0dXJlVmVyc2lvbiI6MjkwMH0=",
+            "controlType": "BUTTON",
+            "technologyType": "HTML",
+            "browserType": "CHROME",
+            "criteria": {
+              "HTML Tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "BUTTON"
+                }
+              },
+              "UniqueID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "378c0c89-3981-4654-b9bb-650eab7744db"
+                }
+              },
+              "WindowTitle": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "innerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Description": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "DOMXPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "//button[normalize-space(text())='Login']"
+                }
+              },
+              "HTML Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "462"
+                }
+              },
+              "HTML Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "268"
+                }
+              },
+              "Parent": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Index": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "outerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "btn btn-primary"
+                }
+              },
+              "HTML FrameName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML HasFrame": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "false"
+                }
+              },
+              "Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "States": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Type": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "submit"
+                }
+              },
+              "HTML FramePath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "FrameDOMXPath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML InnerText": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Login"
+                }
+              },
+              "HTML Alt": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Href": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML SourceIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "ItemName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "60"
+                }
+              },
+              "HTML Title": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Path": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1|2|1|1|1|1|1"
+                }
+              },
+              "HTML Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "34"
+                }
+              },
+              "HTML Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML TagIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1"
+                }
+              },
+              "Role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "PushButton"
+                }
+              },
+              "Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "462"
+                }
+              },
+              "DefaultAction": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "ItemValue": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ClassId": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "60"
+                }
+              },
+              "Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FrameSrc": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "https://acme-test.uipath.com/login"
+                }
+              },
+              "IsVisible": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "true"
+                }
+              }
+            },
+            "isElevated": false,
+            "capture": {
+              "securelyRecorded": true
+            }
+          },
+          "uiObjectWindow": {
+            "type": "WINDOW",
+            "expression": "$pWinACSMEPAGES$"
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-17",
+          "role": "button",
+          "name": "Login",
+          "text": "Login",
+          "tag": "button",
+          "domPath": "body > div > div:nth-of-type(2) > div > div > div > form > button",
+          "attributes": {
+            "type": "submit",
+            "class": "btn btn-primary"
+          },
+          "pageUrl": "https://acme-test.uipath.com/login",
+          "visible": true,
+          "bounds": {
+            "x": 268,
+            "y": 461.5249938964844,
+            "width": 59.86249923706055,
+            "height": 33.60000228881836
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Login"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "1ba6ed07-f917-40b3-bb1d-6c32a0447f5f",
+        "packageName": "Recorder",
+        "commandName": "capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "uiObject",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMTAzNmU5ZGYtZTc0Ny00OTUwLTlhMWItOTc5ZjQwYmE4Nzg4IiwiaWQiOiIiLCJuYW1lIjoiTG9naW4iLCJ2YWx1ZSI6IiIsImNsYXNzIjoiIiwicGFyZW50IjoiIiwid2luZG93VGl0bGUiOiIiLCJwYXRoIjp7Im9ialBhdGgiOlt7ImluZGV4IjoxfSx7ImluZGV4IjoyfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfSx7ImluZGV4IjoxfV19LCJyb2xlIjoxLCJpbmRleCI6MCwibGVmdCI6MjY4LCJ0b3AiOjQ2Miwid2lkdGgiOjYwLCJoZWlnaHQiOjM0LCJjbGlja1giOjMwLCJjbGlja1kiOjE3LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2J1dHRvbltub3JtYWxpemUtc3BhY2UodGV4dCgpKT0nTG9naW4nXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBBbHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGFnIiwidmFsdWUiOiJCVVRUT04ifSx7Im5hbWUiOiJIVE1MIENsYXNzIiwidmFsdWUiOiJidG4gYnRuLXByaW1hcnkifSx7Im5hbWUiOiJIVE1MIElubmVyVGV4dCIsInZhbHVlIjoiTG9naW4ifSx7Im5hbWUiOiJIVE1MIFNvdXJjZUluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiSFRNTCBIcmVmIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFR5cGUiLCJ2YWx1ZSI6InN1Ym1pdCJ9LHsibmFtZSI6IkhUTUwgVmFsdWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgQ2xhc3NJZCIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBUaXRsZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBIZWlnaHQiLCJ2YWx1ZSI6IjM0In0seyJuYW1lIjoiSFRNTCBXaWR0aCIsInZhbHVlIjoiNjAifSx7Im5hbWUiOiJIVE1MIFRhZ0luZGV4IiwidmFsdWUiOiIxIn0seyJuYW1lIjoiSFRNTCBUb3AiLCJ2YWx1ZSI6IjQ2MiJ9LHsibmFtZSI6IkhUTUwgTGVmdCIsInZhbHVlIjoiMjY4In0seyJuYW1lIjoiSFRNTCBIYXNGcmFtZSIsInZhbHVlIjoiZmFsc2UifSx7Im5hbWUiOiJIVE1MIEZyYW1lU3JjIiwidmFsdWUiOiJodHRwczovL2FjbWUtdGVzdC51aXBhdGguY29tL2xvZ2luIn0seyJuYW1lIjoiSFRNTCBGcmFtZU5hbWUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgRnJhbWVQYXRoIiwidmFsdWUiOiIifSx7Im5hbWUiOiJGcmFtZURPTVhQYXRoIiwidmFsdWUiOiIifSx7Im5hbWUiOiJpbm5lckhUTUwiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Im91dGVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoiSXNWaXNpYmxlIiwidmFsdWUiOiJ0cnVlIn1dLCJhdHRyaWJ1dGVzIjpbeyJuYW1lIjoiVW5pcXVlSUQiLCJ2YWx1ZSI6IjQzMTZiY2VjLWQ3NWQtNGIwNC1iNGNmLTZkM2JjZWExNThmYiJ9LHsibmFtZSI6IklEIiwidmFsdWUiOiIifSx7Im5hbWUiOiJOYW1lIiwidmFsdWUiOiJMb2dpbiJ9LHsibmFtZSI6IlZhbHVlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJDbGFzcyIsInZhbHVlIjoiIn0seyJuYW1lIjoiUGFyZW50IiwidmFsdWUiOiIifSx7Im5hbWUiOiJXaW5kb3dUaXRsZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiUm9sZSIsInZhbHVlIjoiUHVzaEJ1dHRvbiJ9LHsibmFtZSI6IlBhdGgiLCJ2YWx1ZSI6IjF8MnwxfDF8MXwxfDEifSx7Im5hbWUiOiJJbmRleCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkxlZnQiLCJ2YWx1ZSI6IjI2OCJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiNDYyIn0seyJuYW1lIjoiV2lkdGgiLCJ2YWx1ZSI6IjYwIn0seyJuYW1lIjoiSGVpZ2h0IiwidmFsdWUiOiIzNCJ9LHsibmFtZSI6IkRlc2NyaXB0aW9uIiwidmFsdWUiOiIifSx7Im5hbWUiOiJTdGF0ZXMiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkRlZmF1bHRBY3Rpb24iLCJ2YWx1ZSI6IiJ9XSwiaXNMaW5rZWQiOmZhbHNlfSwib2JqUGFyZW50IjpudWxsLCJvYmpJdGVtIjpudWxsLCJjaGlsZHJlbiI6W10sIml0ZW1zIjpbXSwic2VhcmNoQ3JpdGVyaWEiOls3LDYxLDY3LDgwXSwiZXJyb3IiOm51bGwsImJyb3dzZXJGcmFtZXdvcmsiOiJ1bmRlZmluZWQiLCJjYXB0dXJlVmVyc2lvbiI6MjkwMH0=",
+                "controlType": "BUTTON",
+                "technologyType": "HTML",
+                "browserType": "CHROME",
+                "criteria": {
+                  "HTML Tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "BUTTON"
+                    }
+                  },
+                  "UniqueID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "378c0c89-3981-4654-b9bb-650eab7744db"
+                    }
+                  },
+                  "WindowTitle": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "innerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Description": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "DOMXPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "//button[normalize-space(text())='Login']"
+                    }
+                  },
+                  "HTML Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "462"
+                    }
+                  },
+                  "HTML Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "268"
+                    }
+                  },
+                  "Parent": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Index": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "outerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "btn btn-primary"
+                    }
+                  },
+                  "HTML FrameName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML HasFrame": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "false"
+                    }
+                  },
+                  "Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "States": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Type": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "submit"
+                    }
+                  },
+                  "HTML FramePath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "FrameDOMXPath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML InnerText": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Login"
+                    }
+                  },
+                  "HTML Alt": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Href": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML SourceIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "ItemName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "60"
+                    }
+                  },
+                  "HTML Title": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Path": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1|2|1|1|1|1|1"
+                    }
+                  },
+                  "HTML Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "34"
+                    }
+                  },
+                  "HTML Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML TagIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1"
+                    }
+                  },
+                  "Role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "PushButton"
+                    }
+                  },
+                  "Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "462"
+                    }
+                  },
+                  "DefaultAction": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "ItemValue": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ClassId": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "60"
+                    }
+                  },
+                  "Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FrameSrc": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "https://acme-test.uipath.com/login"
+                    }
+                  },
+                  "IsVisible": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "true"
+                    }
+                  }
+                },
+                "isElevated": false,
+                "capture": {
+                  "securelyRecorded": true
+                }
+              },
+              "uiObjectWindow": {
+                "type": "WINDOW",
+                "expression": "$pWinACSMEPAGES$"
+              }
+            }
+          },
+          {
+            "name": "buttonAction",
+            "value": {
+              "type": "STRING",
+              "string": "CLICK"
+            }
+          },
+          {
+            "name": "runInBackground",
+            "value": {
+              "type": "BOOLEAN",
+              "boolean": false
+            }
+          },
+          {
+            "name": "advancedWait",
+            "value": {
+              "type": "STRING",
+              "string": "BASIC"
+            }
+          },
+          {
+            "name": "wait",
+            "value": {
+              "type": "NUMBER",
+              "number": "15"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "action": "click",
+        "target": "Log Out link",
+        "hints": {
+          "role": "link",
+          "exactText": "Log Out"
+        }
+      },
+      "status": "captured",
+      "pageUrl": "https://acme-test.uipath.com/",
+      "payload": {
+        "uiObject": {
+          "type": "UIOBJECT",
+          "uiObject": {
+            "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMzUzZDI5OTMtMTlhOS00MjgyLWI5YzctNGFjMTg5Y2E0ZTMxIiwiaWQiOiIiLCJuYW1lIjoiTG9nIE91dCIsInZhbHVlIjoiIiwiY2xhc3MiOiIiLCJwYXJlbnQiOiIiLCJ3aW5kb3dUaXRsZSI6IiIsInBhdGgiOnsib2JqUGF0aCI6W3siaW5kZXgiOi0xfSx7ImluZGV4IjoxfSx7ImluZGV4IjozfSx7ImluZGV4IjoxfV19LCJyb2xlIjozMSwiaW5kZXgiOjAsImxlZnQiOjEyNjYsInRvcCI6MCwid2lkdGgiOjgwLCJoZWlnaHQiOjUwLCJjbGlja1giOjQwLCJjbGlja1kiOjI1LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2Fbbm9ybWFsaXplLXNwYWNlKHRleHQoKSk9J0xvZyBPdXQnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBBbHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGFnIiwidmFsdWUiOiJBIn0seyJuYW1lIjoiSFRNTCBDbGFzcyIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IkxvZyBPdXQifSx7Im5hbWUiOiJIVE1MIFNvdXJjZUluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiSFRNTCBIcmVmIiwidmFsdWUiOiJodHRwczovL2FjbWUtdGVzdC51aXBhdGguY29tL2xvZ291dCJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBWYWx1ZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBDbGFzc0lkIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIEhlaWdodCIsInZhbHVlIjoiNTAifSx7Im5hbWUiOiJIVE1MIFdpZHRoIiwidmFsdWUiOiI4MCJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkhUTUwgTGVmdCIsInZhbHVlIjoiMTI2NiJ9LHsibmFtZSI6IkhUTUwgSGFzRnJhbWUiLCJ2YWx1ZSI6ImZhbHNlIn0seyJuYW1lIjoiSFRNTCBGcmFtZVNyYyIsInZhbHVlIjoiaHR0cHM6Ly9hY21lLXRlc3QudWlwYXRoLmNvbS8ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiMDQzMzRkYzktMjIwZC00NWJiLWJlNzItMzEwZWRhM2FkMzg4In0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6IkxvZyBPdXQifSx7Im5hbWUiOiJWYWx1ZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiQ2xhc3MiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IlBhcmVudCIsInZhbHVlIjoiIn0seyJuYW1lIjoiV2luZG93VGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IlJvbGUiLCJ2YWx1ZSI6IkxpbmsifSx7Im5hbWUiOiJQYXRoIiwidmFsdWUiOiItMXwxfDN8MSJ9LHsibmFtZSI6IkluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiTGVmdCIsInZhbHVlIjoiMTI2NiJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IldpZHRoIiwidmFsdWUiOiI4MCJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiNTAifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Myw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+            "controlType": "LINK",
+            "technologyType": "HTML",
+            "browserType": "CHROME",
+            "criteria": {
+              "HTML Tag": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "A"
+                }
+              },
+              "UniqueID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "e86f4100-81fd-4a9e-8195-e4da2cba2548"
+                }
+              },
+              "WindowTitle": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "innerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1266"
+                }
+              },
+              "Description": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "DOMXPath": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "//a[normalize-space(text())='Log Out']"
+                }
+              },
+              "HTML Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "HTML Left": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1266"
+                }
+              },
+              "Parent": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Index": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "outerHTML": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FrameName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML HasFrame": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "false"
+                }
+              },
+              "Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "States": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Type": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FramePath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "FrameDOMXPath": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML InnerText": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Log Out"
+                }
+              },
+              "HTML Alt": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Href": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "https://acme-test.uipath.com/logout"
+                }
+              },
+              "HTML SourceIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "ItemName": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "50"
+                }
+              },
+              "ID": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "80"
+                }
+              },
+              "HTML Title": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Path": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "-1|1|3|1"
+                }
+              },
+              "HTML Height": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "50"
+                }
+              },
+              "HTML Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML TagIndex": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "1"
+                }
+              },
+              "Role": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "Link"
+                }
+              },
+              "Top": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "0"
+                }
+              },
+              "DefaultAction": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "ItemValue": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML ClassId": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Width": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "80"
+                }
+              },
+              "Value": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML Name": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "Class": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": ""
+                }
+              },
+              "HTML FrameSrc": {
+                "enabled": true,
+                "value": {
+                  "type": "STRING",
+                  "string": "https://acme-test.uipath.com/"
+                }
+              },
+              "IsVisible": {
+                "enabled": false,
+                "value": {
+                  "type": "STRING",
+                  "string": "true"
+                }
+              }
+            },
+            "isElevated": false,
+            "capture": {
+              "securelyRecorded": true
+            }
+          },
+          "uiObjectWindow": {
+            "type": "WINDOW",
+            "expression": "$pWinACSMEPAGES$"
+          }
+        },
+        "sourceFacts": {
+          "elementId": "el-7",
+          "role": "link",
+          "name": "Log Out",
+          "text": "Log Out",
+          "tag": "a",
+          "domPath": "body > div#bs-example-navbar-collapse-1 > ul > li:nth-of-type(3) > a",
+          "attributes": {
+            "href": "https://acme-test.uipath.com/logout"
+          },
+          "pageUrl": "https://acme-test.uipath.com/",
+          "visible": true,
+          "bounds": {
+            "x": 1265.5750732421875,
+            "y": 0,
+            "width": 79.82500457763672,
+            "height": 50
+          }
+        },
+        "anchor": {
+          "type": "DICTIONARY",
+          "dictionary": [
+            {
+              "key": "name",
+              "value": {
+                "type": "STRING",
+                "string": "Log Out"
+              }
+            }
+          ]
+        }
+      },
+      "node": {
+        "uid": "9c99d6d3-9f86-46ca-83af-88c5b671ec40",
+        "packageName": "Recorder",
+        "commandName": "capture",
+        "disabled": false,
+        "attributes": [
+          {
+            "name": "uiObject",
+            "value": {
+              "type": "UIOBJECT",
+              "uiObject": {
+                "blob": "eyJvYmpOb2RlIjp7InVuaXF1ZUlEIjoiMzUzZDI5OTMtMTlhOS00MjgyLWI5YzctNGFjMTg5Y2E0ZTMxIiwiaWQiOiIiLCJuYW1lIjoiTG9nIE91dCIsInZhbHVlIjoiIiwiY2xhc3MiOiIiLCJwYXJlbnQiOiIiLCJ3aW5kb3dUaXRsZSI6IiIsInBhdGgiOnsib2JqUGF0aCI6W3siaW5kZXgiOi0xfSx7ImluZGV4IjoxfSx7ImluZGV4IjozfSx7ImluZGV4IjoxfV19LCJyb2xlIjozMSwiaW5kZXgiOjAsImxlZnQiOjEyNjYsInRvcCI6MCwid2lkdGgiOjgwLCJoZWlnaHQiOjUwLCJjbGlja1giOjQwLCJjbGlja1kiOjI1LCJkZXNjcmlwdGlvbiI6IiIsInN0YXRlcyI6IiIsImRlZmF1bHRBY3Rpb24iOiIiLCJ0ZWNobm9sb2d5Ijp7InRlY2hUeXBlIjo2LCJwbGF0Zm9ybVR5cGUiOjEyLCJhcHBsaWNhdGlvblR5cGUiOjMsInByb2Nlc3NJRCI6IlRBLUNCUy1DSFJPTUUtQUdFTlQiLCJ3aW5IYW5kbGUiOiIiLCJvY3JFbmdpbmUiOm51bGwsImlzQWR2YW5jZWRDYXB0dXJlIjpmYWxzZSwiaXNTaWx2ZXJsaWdodFRlY2hub2xvZ3kiOmZhbHNlfSwiYWN0aW9ucyI6bnVsbCwicHJvcGVydGllcyI6W3sibmFtZSI6IkRPTVhQYXRoIiwidmFsdWUiOiIvL2Fbbm9ybWFsaXplLXNwYWNlKHRleHQoKSk9J0xvZyBPdXQnXSJ9LHsibmFtZSI6IkhUTUwgSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBBbHQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkhUTUwgVGFnIiwidmFsdWUiOiJBIn0seyJuYW1lIjoiSFRNTCBDbGFzcyIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBJbm5lclRleHQiLCJ2YWx1ZSI6IkxvZyBPdXQifSx7Im5hbWUiOiJIVE1MIFNvdXJjZUluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiSFRNTCBIcmVmIiwidmFsdWUiOiJodHRwczovL2FjbWUtdGVzdC51aXBhdGguY29tL2xvZ291dCJ9LHsibmFtZSI6IkhUTUwgVHlwZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBWYWx1ZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBDbGFzc0lkIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIFRpdGxlIiwidmFsdWUiOiIifSx7Im5hbWUiOiJIVE1MIEhlaWdodCIsInZhbHVlIjoiNTAifSx7Im5hbWUiOiJIVE1MIFdpZHRoIiwidmFsdWUiOiI4MCJ9LHsibmFtZSI6IkhUTUwgVGFnSW5kZXgiLCJ2YWx1ZSI6IjEifSx7Im5hbWUiOiJIVE1MIFRvcCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IkhUTUwgTGVmdCIsInZhbHVlIjoiMTI2NiJ9LHsibmFtZSI6IkhUTUwgSGFzRnJhbWUiLCJ2YWx1ZSI6ImZhbHNlIn0seyJuYW1lIjoiSFRNTCBGcmFtZVNyYyIsInZhbHVlIjoiaHR0cHM6Ly9hY21lLXRlc3QudWlwYXRoLmNvbS8ifSx7Im5hbWUiOiJIVE1MIEZyYW1lTmFtZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiSFRNTCBGcmFtZVBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IkZyYW1lRE9NWFBhdGgiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6ImlubmVySFRNTCIsInZhbHVlIjoiIn0seyJuYW1lIjoib3V0ZXJIVE1MIiwidmFsdWUiOiIifSx7Im5hbWUiOiJJc1Zpc2libGUiLCJ2YWx1ZSI6InRydWUifV0sImF0dHJpYnV0ZXMiOlt7Im5hbWUiOiJVbmlxdWVJRCIsInZhbHVlIjoiMDQzMzRkYzktMjIwZC00NWJiLWJlNzItMzEwZWRhM2FkMzg4In0seyJuYW1lIjoiSUQiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6Ik5hbWUiLCJ2YWx1ZSI6IkxvZyBPdXQifSx7Im5hbWUiOiJWYWx1ZSIsInZhbHVlIjoiIn0seyJuYW1lIjoiQ2xhc3MiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IlBhcmVudCIsInZhbHVlIjoiIn0seyJuYW1lIjoiV2luZG93VGl0bGUiLCJ2YWx1ZSI6IiJ9LHsibmFtZSI6IlJvbGUiLCJ2YWx1ZSI6IkxpbmsifSx7Im5hbWUiOiJQYXRoIiwidmFsdWUiOiItMXwxfDN8MSJ9LHsibmFtZSI6IkluZGV4IiwidmFsdWUiOiIwIn0seyJuYW1lIjoiTGVmdCIsInZhbHVlIjoiMTI2NiJ9LHsibmFtZSI6IlRvcCIsInZhbHVlIjoiMCJ9LHsibmFtZSI6IldpZHRoIiwidmFsdWUiOiI4MCJ9LHsibmFtZSI6IkhlaWdodCIsInZhbHVlIjoiNTAifSx7Im5hbWUiOiJEZXNjcmlwdGlvbiIsInZhbHVlIjoiIn0seyJuYW1lIjoiU3RhdGVzIiwidmFsdWUiOiIifSx7Im5hbWUiOiJEZWZhdWx0QWN0aW9uIiwidmFsdWUiOiIifV0sImlzTGlua2VkIjpmYWxzZX0sIm9ialBhcmVudCI6bnVsbCwib2JqSXRlbSI6bnVsbCwiY2hpbGRyZW4iOltdLCJpdGVtcyI6W10sInNlYXJjaENyaXRlcmlhIjpbNyw2MSw2Myw4MF0sImVycm9yIjpudWxsLCJicm93c2VyRnJhbWV3b3JrIjoidW5kZWZpbmVkIiwiY2FwdHVyZVZlcnNpb24iOjI5MDB9",
+                "controlType": "LINK",
+                "technologyType": "HTML",
+                "browserType": "CHROME",
+                "criteria": {
+                  "HTML Tag": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "A"
+                    }
+                  },
+                  "UniqueID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "e86f4100-81fd-4a9e-8195-e4da2cba2548"
+                    }
+                  },
+                  "WindowTitle": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "innerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1266"
+                    }
+                  },
+                  "Description": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "DOMXPath": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "//a[normalize-space(text())='Log Out']"
+                    }
+                  },
+                  "HTML Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "HTML Left": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1266"
+                    }
+                  },
+                  "Parent": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Index": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "outerHTML": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FrameName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML HasFrame": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "false"
+                    }
+                  },
+                  "Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "States": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Type": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FramePath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "FrameDOMXPath": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML InnerText": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Log Out"
+                    }
+                  },
+                  "HTML Alt": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Href": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "https://acme-test.uipath.com/logout"
+                    }
+                  },
+                  "HTML SourceIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "ItemName": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "50"
+                    }
+                  },
+                  "ID": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "80"
+                    }
+                  },
+                  "HTML Title": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Path": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "-1|1|3|1"
+                    }
+                  },
+                  "HTML Height": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "50"
+                    }
+                  },
+                  "HTML Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML TagIndex": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "1"
+                    }
+                  },
+                  "Role": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "Link"
+                    }
+                  },
+                  "Top": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "0"
+                    }
+                  },
+                  "DefaultAction": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "ItemValue": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML ClassId": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Width": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "80"
+                    }
+                  },
+                  "Value": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML Name": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "Class": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": ""
+                    }
+                  },
+                  "HTML FrameSrc": {
+                    "enabled": true,
+                    "value": {
+                      "type": "STRING",
+                      "string": "https://acme-test.uipath.com/"
+                    }
+                  },
+                  "IsVisible": {
+                    "enabled": false,
+                    "value": {
+                      "type": "STRING",
+                      "string": "true"
+                    }
+                  }
+                },
+                "isElevated": false,
+                "capture": {
+                  "securelyRecorded": true
+                }
+              },
+              "uiObjectWindow": {
+                "type": "WINDOW",
+                "expression": "$pWinACSMEPAGES$"
+              }
+            }
+          },
+          {
+            "name": "linkAction",
+            "value": {
+              "type": "STRING",
+              "string": "CLICK"
+            }
+          },
+          {
+            "name": "runInBackground",
+            "value": {
+              "type": "BOOLEAN",
+              "boolean": false
+            }
+          },
+          {
+            "name": "advancedWait",
+            "value": {
+              "type": "STRING",
+              "string": "BASIC"
+            }
+          },
+          {
+            "name": "wait",
+            "value": {
+              "type": "NUMBER",
+              "number": "15"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

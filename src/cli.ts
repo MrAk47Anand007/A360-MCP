@@ -69,37 +69,47 @@ export async function runInitCommand(options?: {
 
 export async function runLoginCommand(options?: {
   configPath?: string;
+  prompt?: PromptFn;
 }) {
+  const prompt = createPrompt(options?.prompt);
   const configPath = options?.configPath ?? buildConfig({}).configPath;
   const persisted = await readPersistedConfig(configPath);
   const config = buildConfig(persisted);
-  const username = process.env.A360_USERNAME ?? persisted.A360_USERNAME;
-
-  if (!username && config.authMode !== 'token') {
-    throw new Error('A360_USERNAME is required for password or apikey login.');
-  }
+  const resolvedUsername =
+    config.authMode === 'token'
+      ? undefined
+      : (process.env.A360_USERNAME ?? persisted.A360_USERNAME ?? '').trim() ||
+        (await prompt('Username', persisted.A360_USERNAME));
 
   let token = process.env.A360_ACCESS_TOKEN ?? persisted.A360_ACCESS_TOKEN;
   if (!token) {
     if (config.authMode === 'apikey') {
-      const apiKey = process.env.A360_API_KEY;
-      if (!apiKey || !username) {
+      const apiKey =
+        process.env.A360_API_KEY ?? (await prompt('API key'));
+      if (!apiKey || !resolvedUsername) {
         throw new Error('A360_API_KEY and A360_USERNAME are required for apikey login.');
       }
-      token = await loginWithApiKey(config.baseUrl, username, apiKey);
+      token = await loginWithApiKey(config.baseUrl, resolvedUsername, apiKey);
     } else if (config.authMode === 'password') {
-      const password = process.env.A360_PASSWORD;
-      if (!password || !username) {
+      const password =
+        process.env.A360_PASSWORD ?? (await prompt('Password'));
+      if (!password || !resolvedUsername) {
         throw new Error('A360_PASSWORD and A360_USERNAME are required for password login.');
       }
-      token = await loginWithPassword(config.baseUrl, username, password);
+      token = await loginWithPassword(config.baseUrl, resolvedUsername, password);
     } else {
-      throw new Error('A360_ACCESS_TOKEN is required for token auth mode.');
+      token = await prompt('Access token');
+      if (!token) {
+        throw new Error('A360_ACCESS_TOKEN is required for token auth mode.');
+      }
     }
   }
 
   const storage = createSecureStorage();
-  const saved = await storage.saveToken(persisted, token);
+  const saved = await storage.saveToken(
+    resolvedUsername ? { ...persisted, A360_USERNAME: resolvedUsername } : persisted,
+    token,
+  );
   await writePersistedConfig(configPath, saved);
   console.log('A360 login successful.');
 }

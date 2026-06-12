@@ -21,10 +21,14 @@ describe('server module', () => {
     expect(typeof deps.workflowApi.getPackageCommandSchema).toBe('function');
     expect(typeof deps.workflowApi.saveBotBundle).toBe('function');
     expect(typeof deps.workflowApi.normalizeBotJson).toBe('function');
+    expect(typeof deps.workflowApi.applyBestPracticeScaffold).toBe('function');
     expect(typeof deps.captureApi.recordWebActions).toBe('function');
     expect(typeof deps.captureApi.captureUiTarget).toBe('function');
+    expect(typeof deps.captureApi.validateUiTargetBinding).toBe('function');
+    expect(typeof deps.captureApi.repairUiTargetBinding).toBe('function');
     expect(typeof deps.captureApi.insertRecorderSteps).toBe('function');
     expect(typeof deps.captureApi.patchStepTarget).toBe('function');
+    expect(typeof deps.captureApi.repairAndPatchUiTarget).toBe('function');
   });
 
   it('registers all expected tools including capture tools', () => {
@@ -41,8 +45,12 @@ describe('server module', () => {
     const expectedCaptureTools = [
       'a360_record_web_actions',
       'a360_capture_ui_target',
+      'a360_validate_ui_target_binding',
+      'a360_repair_ui_target_binding',
       'a360_insert_recorder_step',
       'a360_patch_step_target',
+      'a360_repair_and_patch_ui_target',
+      'a360_apply_best_practice_scaffold',
     ];
     for (const name of expectedCaptureTools) {
       expect(registeredNames, `expected tool "${name}" to be registered`).toContain(name);
